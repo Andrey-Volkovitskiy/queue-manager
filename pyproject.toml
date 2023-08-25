@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "queue-manager"
+version = "0.1.0"
+description = "The pet project to practice developing a multi-user web application from scratch."
+authors = ["Andrey <volk000@gmail.com>"]
+readme = "README.md"
+packages = [{include = "queue_manager"}]
+repository = "https://github.com/Andrey-Volkovitskiy/queue-manager"
+
+[tool.poetry.dependencies]
+python = "^3.8.1"
+Django = "^4.2.4"
+python-dotenv = "^1.0.0"
+dj-database-url = "^2.1.0"
+gunicorn = "^21.2.0"
+psycopg2-binary = "^2.9.7"
+django-bootstrap4 = "^23.2"
+django-filter = "^23.2"
+rollbar = "^0.16.3"
+
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.0"
+pytest-cov = "^4.1.0"
+flake8 = "^6.1.0"
+pytest-django = "^4.5.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
