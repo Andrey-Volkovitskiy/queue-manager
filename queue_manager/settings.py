@@ -60,7 +60,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'queue_manager.rollbar_middleware.CustomRollbarNotifierMiddleware',
+    'queue_manager.rollbar_middleware.CustomRollbarNotifierMiddleware',
 ]
 
 ROOT_URLCONF = 'queue_manager.urls'
@@ -145,9 +145,9 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ROLLBAR = {
-#     'access_token': os.getenv('ROLLBAR_TOKEN'),
-#     'environment': 'development' if DEBUG else 'production',
-#     'code_version': '1.0',
-#     'root': str(BASE_DIR),
-# }
+ROLLBAR = {
+    'access_token': os.getenv('ROLLBAR_TOKEN'),
+    'environment': 'development' if DEBUG else 'production',
+    'code_version': '1.0',
+    'root': str(BASE_DIR),
+}
