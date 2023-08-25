@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "queue-manager"
 version = "0.1.0"
-description = "The pet project to practice developing a multi-user web application from scratch."
+description = "A pet project to practice developing a multi-user web application from scratch."
 authors = ["Andrey <volk000@gmail.com>"]
 readme = "README.md"
 packages = [{include = "queue_manager"}]
