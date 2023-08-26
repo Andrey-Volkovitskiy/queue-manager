@@ -1,5 +1,4 @@
 from django.shortcuts import render
-from django.http import HttpResponse
 
 
 def index(request):
@@ -8,7 +7,7 @@ def index(request):
     })
 
 
-def test_error(request):
+def intendent_error(request):
+    '''Service page to check error tracking at Rollbar.com'''
     a = None
-    a.hello()  # Creating an error with an invalid line of code
-    return HttpResponse("Rollbar error tracking test.")
+    a.call_intendent_error()
