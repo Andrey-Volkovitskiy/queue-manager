@@ -20,3 +20,6 @@ test:
 
 cov:
 	poetry run python3 -m pytest --cov=queue_manager/
+
+lint:
+	poetry run flake8 queue_manager
