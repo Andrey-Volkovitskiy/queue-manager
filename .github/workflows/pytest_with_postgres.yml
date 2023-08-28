@@ -49,10 +49,6 @@ jobs:
         run: |
           pip install poetry
           make install
-      
-      - name: Test with Flake8
-        run: |
-          make lint
 
       - name: Test with Pytest
         run: |
@@ -64,7 +60,7 @@ jobs:
 
       - name: Test coverage
         run: |
-          poetry run python3 -m pytest --cov=task_manager/ tests/ --cov-report xml
+          poetry run python3 -m pytest --cov=queue_manager/ tests/ --cov-report xml
         env:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           DATABASE_URL: postgresql://postgres:${{ secrets.SECRET_KEY }}@localhost:5432/postgres

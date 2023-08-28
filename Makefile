@@ -11,3 +11,12 @@ start:
 
 db-container:
 	docker compose up -d
+
+install:
+	poetry install
+
+test:
+	poetry run python3 -m pytest -ra -s -vvv tests/
+
+cov:
+	poetry run python3 -m pytest --cov=queue_manager/
