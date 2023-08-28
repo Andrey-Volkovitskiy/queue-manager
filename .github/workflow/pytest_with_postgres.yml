@@ -1,0 +1,89 @@
+name: Pytest (with postgres)
+on: push
+
+jobs:
+  runner-job:
+    runs-on: ubuntu-latest
+
+    # Service containers to run with `runner-job`
+    services:
+      # Label used to access the service container
+      postgres:
+        # Docker Hub image
+        image: postgres:latest
+        # Provide the password for postgres
+        env:
+          POSTGRES_PASSWORD: ${{ secrets.SECRET_KEY }}
+        # Set health checks to wait until postgres has started
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          # Maps tcp port 5432 on service container to the host
+          - 5432:5432
+
+    steps:
+      - name: Notify start deploy to Rollbar
+        uses: rollbar/github-deploy-action@2.1.1
+        id: rollbar_pre_deploy
+        with:
+          environment: 'production'
+          version: ${{ github.sha }}
+          status: 'started'
+        env:
+          ROLLBAR_ACCESS_TOKEN: ${{ secrets.ROLLBAR_ACCESS_TOKEN }}
+          ROLLBAR_USERNAME: ${{ github.actor }}
+
+
+      - name: Check out repository code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11.1"
+
+      - name: Install dependencies
+        run: |
+          pip install poetry
+          make install
+      
+      - name: Test with Flake8
+        run: |
+          make lint
+
+      - name: Test with Pytest
+        run: |
+          make test
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DATABASE_URL: postgresql://postgres:${{ secrets.SECRET_KEY }}@localhost:5432/postgres
+          PROJECT_ENV: GitHub_Workflow_Tests
+
+      - name: Test coverage
+        run: |
+          poetry run python3 -m pytest --cov=task_manager/ tests/ --cov-report xml
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          DATABASE_URL: postgresql://postgres:${{ secrets.SECRET_KEY }}@localhost:5432/postgres
+          PROJECT_ENV: GitHub_Workflow_Tests
+
+      - name: Publish code coverage
+        uses: paambaati/codeclimate-action@v3.2.0
+        env:
+          CC_TEST_REPORTER_ID: c3ed617db6a00bc88834ce14d56bb94bce112c406a71e75e2584354ea2a0bf1e
+
+
+      - name: Notify finish deploy to Rollbar
+        uses: rollbar/github-deploy-action@2.1.1
+        id: rollbar_post_deploy
+        with:
+          environment: 'production'
+          version: ${{ github.sha }}
+          status: 'succeeded'
+        env:
+          ROLLBAR_ACCESS_TOKEN: ${{ secrets.ROLLBAR_ACCESS_TOKEN }}
+          ROLLBAR_USERNAME: ${{ github.actor }}
+          DEPLOY_ID: ${{ steps.rollbar_pre_deploy.outputs.deploy_id }}

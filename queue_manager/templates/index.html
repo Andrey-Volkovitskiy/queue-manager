@@ -6,5 +6,79 @@
 {% endblock %}
 
 {% block content %}
-<h1>Hello, {{who}}!</h1>
+  <div class="pricing-header p-3 pb-md-4 mx-auto text-center">
+    <h1 class="display-4 fw-normal text-body-emphasis">Try the app</h1>
+    <p class="fs-5 text-body-secondary">Get a ticket as a client and try to serve it as an operator. Or manage the queue as a supervisor.</p>
+    <p class="fs-6 text-body-secondary">(For convenience, open different roles in different browser tabs)</p>
+  </div>
+
+
+  <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-header py-3">
+          <h4 class="my-0 fw-normal">Client</h4>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled mt-3 mb-4">
+            <li>Chooses a reason of a visit</li>
+            <li>Gets a ticket</li>
+            <li>Watches the screen until the ticket is called</li>
+          </ul>
+          <button type="button" class="w-100 btn btn-lg btn-outline-primary">Go as Client</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-header py-3">
+          <h4 class="my-0 fw-normal">Operator</h4>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled mt-3 mb-4">
+            <li>Logins to serve tasks</li>
+            <li>Receives tickets in order & according to task priority</li>
+            <li>Can redirect a ticket to another operator</li>
+            <li>Can serve clients who missed the turn</li>
+          </ul>
+          <button type="button" class="w-100 btn btn-lg btn-outline-primary">Go as Operator</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-header py-3">
+          <h4 class="my-0 fw-normal">Supervisor</h4>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled mt-3 mb-4">
+            <li>Starts / ends a working day</li>
+            <li>Creates new operators and tasks</li>
+            <li>Monitors all queues</li>
+          </ul>
+          <button type="button" class="w-100 btn btn-lg btn-outline-primary">Go as Supervisor</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="row row-cols-1 row-cols-md-1 mb-3 mt-5 text-center">
+    <div class="col">
+      <div class="card mb-4 rounded-3 shadow-sm">
+        <div class="card-header py-3">
+          <h4 class="my-0 fw-light">Add more fun</h4>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled fw-light mt-3 mb-4">
+            <li>To explore how the queue works and tickets are distributed, you can:</li>
+          </ul>
+          <button type="button" class="btn btn-outline-secondary px-5 mb-5">Add 10 tickets</button>
+          <button type="button" class="btn btn-outline-secondary px-5 mb-5">Add 2 virtual operators</button>
+        </div>
+      </div>
+    </div>
+
 {% endblock %}
