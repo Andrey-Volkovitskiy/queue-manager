@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django_bootstrap5',
     'django_filters',
     'queue_manager',
+    'queue_manager.task',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  Tasks
+{% endblock %}
+
+{% block content %}
+  <h1 class="my-4">Tasks</h1>
+  <a class="btn btn-outline-primary me-2" href="{% url 'task-create' %}">Create new task</a>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Letter code</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Created at</th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for task in object_list %}
+        <tr>
+          <td>{{ task.letter_code }}</td>
+          <td>{{ task.name }}</td>
+          <td>{{ task.description }}</td>
+          <td>{{ task.created_at }}</td>
+          <td>
+            <a href="{% url 'task-update' task.id %}">Edit</a>
+            <br>
+            <a href="{% url 'task-delete' task.id %}">Delete</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
