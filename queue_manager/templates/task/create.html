@@ -3,11 +3,11 @@
 {% load django_bootstrap5 %}
 
 {% block title %}
-  Create new task
+  Create new {{ item_name }}
 {% endblock %}
 
 {% block content %}
-  <h1 class="my-4">Create new task</h1>
+  <h1 class="my-4">Create new {{ item_name }}</h1>
   <form method="post" class="form">
     {% csrf_token %}
     {% bootstrap_form form %}

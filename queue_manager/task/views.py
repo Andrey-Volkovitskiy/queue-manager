@@ -14,6 +14,11 @@ class ItemListView(ListView):
     template_name = f"{ITEM_NAME}/list.html"
     ordering = ['letter_code']
 
+    def get_context_data(self, **kwargs):
+        context = super(ItemListView, self).get_context_data(**kwargs)
+        context['item_name'] = ITEM_NAME
+        return context
+
 
 class ItemCreateView(
         SuccessMessageMixin,
@@ -22,6 +27,11 @@ class ItemCreateView(
     template_name = f"{ITEM_NAME}/create.html"
     success_url = reverse_lazy(f"{ITEM_NAME}-list")
     success_message = f"The {ITEM_NAME} was successfully created"
+
+    def get_context_data(self, **kwargs):
+        context = super(ItemCreateView, self).get_context_data(**kwargs)
+        context['item_name'] = ITEM_NAME
+        return context
 
 
 class ItemUpdateView(

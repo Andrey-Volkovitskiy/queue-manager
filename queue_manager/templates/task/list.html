@@ -3,12 +3,12 @@
 {% load django_bootstrap5 %}
 
 {% block title %}
-  Tasks
+  {{ item_name|capfirst }}s
 {% endblock %}
 
 {% block content %}
-  <h1 class="my-4">Tasks</h1>
-  <a class="btn btn-outline-primary me-2" href="{% url 'task-create' %}">Create new task</a>
+  <h1 class="my-4">{{ item_name|capfirst }}s</h1>
+  <a class="btn btn-outline-primary me-2" href="{% url 'task-create' %}">Create new {{ item_name }}</a>
   <table class="table table-striped">
     <thead>
       <tr>
@@ -21,16 +21,16 @@
     </thead>
 
     <tbody>
-      {% for task in object_list %}
+      {% for object in object_list %}
         <tr>
-          <td>{{ task.letter_code }}</td>
-          <td>{{ task.name }}</td>
-          <td>{{ task.description }}</td>
-          <td>{{ task.created_at }}</td>
+          <td>{{ object.letter_code }}</td>
+          <td>{{ object.name }}</td>
+          <td>{{ object.description }}</td>
+          <td>{{ object.created_at }}</td>
           <td>
-            <a href="{% url 'task-update' task.id %}">Edit</a>
+              <a href="{% url item_name|add:'-update' object.id %}">Edit</a>
             <br>
-            <a href="{% url 'task-delete' task.id %}">Delete</a>
+            <a href="{% url item_name|add:'-delete' object.id %}">Delete</a>
           </td>
         </tr>
       {% endfor %}
