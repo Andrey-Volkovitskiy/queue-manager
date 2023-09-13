@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  Delete {{ item_name }}
+{% endblock %}
+
+{% block content %}
+  <h1 class="my-4">Delete {{ item_name }}</h1>
+  <form method="post" class="form">
+    {% csrf_token %}
+    <p>Are you sure you want to delete "{{ object.name }}"?</p>
+    {% bootstrap_form form %}
+        <button type="submit" class="btn btn-primary">
+          Yes, delete
+        </button>
+  </form>
+{% endblock %}
