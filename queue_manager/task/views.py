@@ -3,24 +3,31 @@ from django.views.generic import (ListView,
                                   CreateView,
                                   UpdateView,
                                   DeleteView)
+from django.views.generic.base import ContextMixin
 from queue_manager.task.models import Task as MODEL
 from queue_manager.task.models import ITEM_NAME
 from queue_manager.task.forms import TaskForm as FORM
 from django.urls import reverse_lazy
 
 
-class ItemListView(ListView):
-    model = MODEL
-    template_name = f"{ITEM_NAME}/list.html"
-    ordering = ['letter_code']
+class ContextMixinWithItemName(ContextMixin):
 
     def get_context_data(self, **kwargs):
-        context = super(ItemListView, self).get_context_data(**kwargs)
+        context = super().get_context_data(**kwargs)
         context['item_name'] = ITEM_NAME
         return context
 
 
+class ItemListView(
+        ContextMixinWithItemName,
+        ListView):
+    model = MODEL
+    template_name = f"{ITEM_NAME}/list.html"
+    ordering = ['letter_code']
+
+
 class ItemCreateView(
+        ContextMixinWithItemName,
         SuccessMessageMixin,
         CreateView):
     form_class = FORM
@@ -35,6 +42,7 @@ class ItemCreateView(
 
 
 class ItemUpdateView(
+        ContextMixinWithItemName,
         SuccessMessageMixin,
         UpdateView):
     model = MODEL
@@ -45,6 +53,7 @@ class ItemUpdateView(
 
 
 class ItemDeleteView(
+        ContextMixinWithItemName,
         SuccessMessageMixin,
         DeleteView):
     model = MODEL
