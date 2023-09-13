@@ -2,6 +2,9 @@ from django.db import models
 from django.core.validators import RegexValidator
 
 
+ITEM_NAME = 'task'
+
+
 only_letters = RegexValidator(
     r'^[a-zA-Z]*$',
     'Only English letters are allowed.')

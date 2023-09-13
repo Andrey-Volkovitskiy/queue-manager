@@ -3,41 +3,42 @@ from django.views.generic import (ListView,
                                   CreateView,
                                   UpdateView,
                                   DeleteView)
-from queue_manager.task.models import Task
-from queue_manager.task.forms import TaskForm
+from queue_manager.task.models import Task as MODEL
+from queue_manager.task.models import ITEM_NAME
+from queue_manager.task.forms import TaskForm as FORM
 from django.urls import reverse_lazy
 
 
-class TaskListView(ListView):
-    model = Task
-    template_name = "task/list.html"
-    ordering = ['id']
+class ItemListView(ListView):
+    model = MODEL
+    template_name = f"{ITEM_NAME}/list.html"
+    ordering = ['letter_code']
 
 
-class TaskCreateView(
+class ItemCreateView(
         SuccessMessageMixin,
         CreateView):
-    form_class = TaskForm
-    template_name = "task/create.html"
-    success_url = reverse_lazy("task-list")
-    success_message = "The task was successfully created"
+    form_class = FORM
+    template_name = f"{ITEM_NAME}/create.html"
+    success_url = reverse_lazy(f"{ITEM_NAME}-list")
+    success_message = f"The {ITEM_NAME} was successfully created"
 
 
-class TaskUpdateView(
+class ItemUpdateView(
         SuccessMessageMixin,
         UpdateView):
-    model = Task
-    form_class = TaskForm
-    template_name = "task/update.html"
-    success_url = reverse_lazy("task-list")
-    success_message = "The task was successfully updated"
+    model = MODEL
+    form_class = FORM
+    template_name = f"{ITEM_NAME}/update.html"
+    success_url = reverse_lazy(f"{ITEM_NAME}-list")
+    success_message = f"The {ITEM_NAME} was successfully updated"
 
 
-class TaskDeleteView(
+class ItemDeleteView(
         SuccessMessageMixin,
         DeleteView):
-    model = Task
+    model = MODEL
     fields = []
-    template_name = "task/delete.html"
-    success_url = reverse_lazy("task-list")
-    success_message = "The task was successfully deleted"
+    template_name = f"{ITEM_NAME}/delete.html"
+    success_url = reverse_lazy(f"{ITEM_NAME}-list")
+    success_message = f"The {ITEM_NAME} was successfully deleted"
