@@ -13,7 +13,9 @@ only_letters = RegexValidator(
 class CapitalizedCharField(models.CharField):
     def get_prep_value(self, value):
         value = super().get_prep_value(value)
-        return value if value is None else value.capitalize()
+        if isinstance(value, str) and len(value) > 0:
+            return value[0:1].upper() + value[1:]
+        return value
 
 
 class Task(models.Model):
