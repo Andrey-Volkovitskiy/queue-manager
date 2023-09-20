@@ -26,3 +26,6 @@ cov:
 
 lint:
 	poetry run flake8 queue_manager
+
+shell:
+	$(MANAGE) shell

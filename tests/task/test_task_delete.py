@@ -10,8 +10,8 @@ SUCCESS_URL = package_conftest.ITEM_LIST_URL
 
 
 @pytest.mark.django_db
-def test_basic_content(client):
-    # client.force_login(base_users[0])
+def test_basic_content(client, get_supervisors):
+    client.force_login(get_supervisors[0])
     INITIAL_ITEM = deepcopy(TEST_ITEMS[0])
     pre_response = client.post(
         package_conftest.ITEM_CREATE_URL,
@@ -32,9 +32,9 @@ def test_basic_content(client):
 
 
 @pytest.mark.django_db
-def test_successfuly_delete(client):
+def test_successfuly_delete(client, get_supervisors):
     count_default_items_in_db = PackageModel.objects.all().count()
-    # client.force_login(base_users[0])
+    client.force_login(get_supervisors[0])
     INITIAL_ITEM = deepcopy(TEST_ITEMS[0])
     pre_response = client.post(
         package_conftest.ITEM_CREATE_URL,
@@ -62,16 +62,23 @@ def test_successfuly_delete(client):
     assert PackageModel.objects.all().count() == count_default_items_in_db
 
 
-# @pytest.mark.django_db
-# def test_with_anonymous_user(client):
-#     TESTED_URL = conftest.get_tested_url_for_max_id(
-#         TESTED_URL_PATTERN, PackageModel)
-#     response = client.get(TESTED_URL, follow=True)
-#     content = response.content.decode()
-#     redirect_url_with_query, status_code = response.redirect_chain[0]
-#     assert status_code == 302
-#     assert redirect_url_with_query.split('?')[0] == conftest.LOGIN_URL
-#     assert "Вы не авторизованы! Пожалуйста, выполните вход." in content
+@pytest.mark.django_db
+def test_with_anonymous_user(client):
+    TESTED_URL = conftest.get_tested_url_for_max_id(
+        TESTED_URL_PATTERN, PackageModel)
+    response = client.get(TESTED_URL, follow=True)
+    redirect_url_with_query, status_code = response.redirect_chain[0]
+    assert status_code == 302
+    assert redirect_url_with_query.split('?')[0] == conftest.LOGIN_URL
+
+
+@pytest.mark.django_db
+def test_with_incorrect_user(client, get_operators):
+    client.force_login(get_operators[0])
+    TESTED_URL = conftest.get_tested_url_for_max_id(
+        TESTED_URL_PATTERN, PackageModel)
+    response = client.get(TESTED_URL)
+    assert response.status_code == 403
 
 
 # TODO Test deletion with related ticket / session
