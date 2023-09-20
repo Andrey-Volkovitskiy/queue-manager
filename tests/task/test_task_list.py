@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup
 TESTED_URL = package_conftest.ITEM_LIST_URL
 
 
-# TODO Add supervisor permissions check
 # TODO Only active tasks are displayed
 @pytest.mark.django_db
 def test_basic_content(client, get_supervisors):

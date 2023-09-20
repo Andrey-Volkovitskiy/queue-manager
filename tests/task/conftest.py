@@ -24,6 +24,7 @@ def default_db_setup():
 def get_supervisors():
     return User.objects.filter(groups=GROUP_ID['supervisors']).order_by('id')
 
+
 @pytest.fixture
 def get_operators():
     return User.objects.filter(groups=GROUP_ID['operators']).order_by('id')
