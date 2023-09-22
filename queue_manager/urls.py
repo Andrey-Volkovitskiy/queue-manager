@@ -21,6 +21,7 @@ from . import views
 urlpatterns = [
     path('', views.index, name='home'),
     path('task/', include('queue_manager.task.urls')),
+    path('session/', include('queue_manager.session.urls')),
     path('login/', views.SiteLoginView.as_view(), name='login'),
     path('logout/', views.SiteLogoutView.as_view(), name='logout'),
     path('error/', views.intendent_error),  # Rollbarr debug page

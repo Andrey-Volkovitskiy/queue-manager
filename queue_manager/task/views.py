@@ -4,19 +4,11 @@ from django.views.generic import (ListView,
                                   CreateView,
                                   UpdateView,
                                   DeleteView)
-from django.views.generic.base import ContextMixin
 from queue_manager.task.models import Task as MODEL
 from queue_manager.task.models import ITEM_NAME
 from queue_manager.task.forms import TaskForm as FORM
+from queue_manager.mixins import ContextMixinWithItemName
 from django.urls import reverse_lazy
-
-
-class ContextMixinWithItemName(ContextMixin):
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['item_name'] = ITEM_NAME
-        return context
 
 
 class ItemListView(
@@ -24,6 +16,7 @@ class ItemListView(
         ContextMixinWithItemName,
         ListView):
     model = MODEL
+    item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/list.html"
     ordering = ['letter_code']
     permission_required = f'{ITEM_NAME}.view_{ITEM_NAME}'
@@ -35,15 +28,11 @@ class ItemCreateView(
         SuccessMessageMixin,
         CreateView):
     form_class = FORM
+    item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/create.html"
     success_url = reverse_lazy(f"{ITEM_NAME}-list")
     success_message = f"The {ITEM_NAME} was successfully created"
     permission_required = f'{ITEM_NAME}.add_{ITEM_NAME}'
-
-    def get_context_data(self, **kwargs):
-        context = super(ItemCreateView, self).get_context_data(**kwargs)
-        context['item_name'] = ITEM_NAME
-        return context
 
 
 class ItemUpdateView(
@@ -53,6 +42,7 @@ class ItemUpdateView(
         UpdateView):
     model = MODEL
     form_class = FORM
+    item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/update.html"
     success_url = reverse_lazy(f"{ITEM_NAME}-list")
     success_message = f"The {ITEM_NAME} was successfully updated"
@@ -66,6 +56,7 @@ class ItemDeleteView(
         DeleteView):
     model = MODEL
     fields = []
+    item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/delete.html"
     success_url = reverse_lazy(f"{ITEM_NAME}-list")
     success_message = f"The {ITEM_NAME} was successfully deleted"
