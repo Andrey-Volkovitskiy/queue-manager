@@ -51,6 +51,10 @@ class SessionManager(models.Manager):
         next_char = chr(ord(last_char_of_last_letters) + 1)
         return self._get_today_date_str() + last_letters[:-1] + next_char
 
+    def get_current_session(self):
+        '''Returns active session on None (if there is no active session)'''
+        return self.filter(is_active=True).first()
+
 
 class Session(models.Model):
     code = models.CharField(

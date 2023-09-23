@@ -103,3 +103,33 @@ def test_new_session_code_with_today_big_code_in_db(
         started_by=get_supervisors[0])
     new_session = Session.objects.create(started_by=get_supervisors[0])
     assert new_session.code == get_todays_date_str() + "ZZA"
+
+
+@pytest.mark.django_db
+def test_get_current_session_with_active_session_in_db(
+            default_db_setup, get_supervisors):
+    TODAY_ID = get_todays_date_str() + "A"
+    active_session = Session.objects.create(
+        code=TODAY_ID,
+        started_by=get_supervisors[0],
+        is_active=True)
+    current_session = Session.objects.get_current_session()
+    assert current_session == active_session
+
+
+@pytest.mark.django_db
+def test_get_current_session_with_empty_db():
+    current_session = Session.objects.get_current_session()
+    assert current_session is None
+
+
+@pytest.mark.django_db
+def test_get_current_session_with_only_nonactive_sessions_in_db(
+            default_db_setup, get_supervisors):
+    TODAY_ID = get_todays_date_str() + "A"
+    Session.objects.create(
+        code=TODAY_ID,
+        started_by=get_supervisors[0],
+        is_active=False)
+    current_session = Session.objects.get_current_session()
+    assert current_session is None
