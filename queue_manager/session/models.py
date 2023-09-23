@@ -30,9 +30,26 @@ class SessionManager(models.Manager):
             return date_str == self._get_today_date_str()
 
     def _get_new_session_code(self):
+        '''Returns code for new session
+        - if there is no todays sessions in db returns "<current date>A"
+        - if previous code in db is "<current date>A" returns "<current date>B"
+        - if prev. code in db is "<current date>Z" returns "<current date>ZA"
+        '''
         last_session_code = self._get_last_session_code()
         if not self._is_todays_code(last_session_code):
             return self._get_today_date_str() + 'A'
+        _, last_letters = self._split_code_to_date_and_letter(
+                                                    last_session_code)
+
+        if last_letters == '':
+            return self._get_today_date_str() + 'A'
+
+        last_char_of_last_letters = last_letters[-1].upper()
+        if last_char_of_last_letters == 'Z':
+            return self._get_today_date_str() + last_letters + 'A'
+
+        next_char = chr(ord(last_char_of_last_letters) + 1)
+        return self._get_today_date_str() + last_letters[:-1] + next_char
 
 
 class Session(models.Model):

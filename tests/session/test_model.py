@@ -46,20 +46,60 @@ def test_get_new_session_code_with_empty_db():
 @pytest.mark.django_db
 def test_get_new_session_code_with_old_code_in_db(
             default_db_setup, get_supervisors):
-    OLD_ID = '2023-09-20A'
+    OLD_CODE = '2023-09-20A'
     Session.objects.create(
-        code=OLD_ID,
+        code=OLD_CODE,
         started_by=get_supervisors[0])
     id = Session.objects._get_new_session_code()
     assert id == get_todays_date_str() + "A"
 
 
 @pytest.mark.django_db
+def test_new_session_code_with_empty_db(
+            default_db_setup, get_supervisors):
+    new_session = Session.objects.create(started_by=get_supervisors[0])
+    assert new_session.code == get_todays_date_str() + "A"
+
+
+@pytest.mark.django_db
 def test_new_session_code_with_old_code_in_db(
             default_db_setup, get_supervisors):
-    OLD_ID = '2023-09-20A'
+    OLD_CODE = '2023-09-20A'
     Session.objects.create(
-        code=OLD_ID,
+        code=OLD_CODE,
         started_by=get_supervisors[0])
     new_session = Session.objects.create(started_by=get_supervisors[0])
     assert new_session.code == get_todays_date_str() + "A"
+
+
+@pytest.mark.django_db
+def test_new_session_code_with_today_code_without_letters(
+            default_db_setup, get_supervisors):
+    TODAY_ID = get_todays_date_str()
+    Session.objects.create(
+        code=TODAY_ID,
+        started_by=get_supervisors[0])
+    new_session = Session.objects.create(started_by=get_supervisors[0])
+    assert new_session.code == get_todays_date_str() + "A"
+
+
+@pytest.mark.django_db
+def test_new_session_code_with_today_code_in_db(
+            default_db_setup, get_supervisors):
+    TODAY_ID = get_todays_date_str() + "A"
+    Session.objects.create(
+        code=TODAY_ID,
+        started_by=get_supervisors[0])
+    new_session = Session.objects.create(started_by=get_supervisors[0])
+    assert new_session.code == get_todays_date_str() + "B"
+
+
+@pytest.mark.django_db
+def test_new_session_code_with_today_big_code_in_db(
+            default_db_setup, get_supervisors):
+    TODAY_ID = get_todays_date_str() + "ZZ"
+    Session.objects.create(
+        code=TODAY_ID,
+        started_by=get_supervisors[0])
+    new_session = Session.objects.create(started_by=get_supervisors[0])
+    assert new_session.code == get_todays_date_str() + "ZZA"
