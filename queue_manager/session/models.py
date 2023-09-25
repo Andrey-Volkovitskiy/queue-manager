@@ -6,6 +6,20 @@ ITEM_NAME = 'session'
 
 
 class SessionManager(models.Manager):
+
+    class SessionErrors(Exception):
+        pass
+
+    class ActiveSessionAlreadyExistsError(SessionErrors):
+        '''Raised when attempt is made to create a new active session
+        while another active session already exists in the DB'''
+        pass
+
+    class NoActiveSessionsError(SessionErrors):
+        '''Raised when attempt is made to finish an active session
+        while there is no active session in the DB'''
+        pass
+
     def _get_last_session_code(self):
         last_session = self.last()
         if last_session:
@@ -55,11 +69,6 @@ class SessionManager(models.Manager):
         '''Returns active session on None (if there is no active session)'''
         return self.filter(is_active=True).first()
 
-    class ActiveSessionAlreadyExistsError(Exception):
-        '''Raised when attempt is made to create a new active session while
-        another active session already exists in the DB'''
-        pass
-
     def start_new_session(self, started_by):
         '''Starts new avtive session (Must be used instead of create).
 
@@ -72,9 +81,28 @@ class SessionManager(models.Manager):
         if self.get_current_session():
             raise self.ActiveSessionAlreadyExistsError
         return self.create(
+            code=Session.objects._get_new_session_code(),
             is_active=True,
             started_by=started_by
         )
+
+    def finish_active_session(self, finished_by):
+        '''Finishes an active session.
+
+        Arguments:
+            finished_by - User who finished this session
+
+        Returns:
+            Finished Session instance (or raise exception)
+        '''
+        current_session = self.get_current_session()
+        if not current_session:
+            raise self.NoActiveSessionsError
+        current_session.is_active = False
+        current_session.finished_by = finished_by
+        current_session.finished_at = datetime.now(timezone.utc)
+        current_session.save()
+        return current_session
 
 
 class Session(models.Model):
@@ -109,8 +137,3 @@ class Session(models.Model):
         verbose_name='Finished by'
     )
     objects = SessionManager()
-
-    def save(self, *args, **kwargs):
-        if self.code == '':
-            self.code = Session.objects._get_new_session_code()
-        return super(Session, self).save(*args, **kwargs)
