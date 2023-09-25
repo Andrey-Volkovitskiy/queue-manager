@@ -55,6 +55,27 @@ class SessionManager(models.Manager):
         '''Returns active session on None (if there is no active session)'''
         return self.filter(is_active=True).first()
 
+    class ActiveSessionAlreadyExistsError(Exception):
+        '''Raised when attempt is made to create a new active session while
+        another active session already exists in the DB'''
+        pass
+
+    def start_new_session(self, started_by):
+        '''Starts new avtive session (Must be used instead of create).
+
+        Arguments:
+            staarted_by - User who started this session
+
+        Returns:
+            New Session instance (or raise exception)
+        '''
+        if self.get_current_session():
+            raise self.ActiveSessionAlreadyExistsError
+        return self.create(
+            is_active=True,
+            started_by=started_by
+        )
+
 
 class Session(models.Model):
     code = models.CharField(
