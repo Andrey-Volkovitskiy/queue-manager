@@ -4,8 +4,8 @@ from queue_manager.session import views
 
 
 urlpatterns = [
-    # path('', views.SessionListView.as_view(),
-    #      name='session-list'),
+    path('', views.ItemListView.as_view(),
+         name='session-list'),
     # path('<int:pk>/', views.SessionShowView.as_view(),
     #      name='session-show'),
     path('start/', views.SessionStartView.as_view(),

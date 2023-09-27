@@ -3,6 +3,7 @@ from queue_manager.session.models import Session
 from datetime import datetime, timezone
 
 
+@pytest.mark.django_db
 def test_split_code_to_date_and_letter_with_std_id():
     date_str, letters = Session.objects._split_code_to_date_and_letter(
         '2023-09-22A')
@@ -10,6 +11,7 @@ def test_split_code_to_date_and_letter_with_std_id():
     assert letters == 'A'
 
 
+@pytest.mark.django_db
 def test_split_code_to_date_and_letter_with_long_id():
     date_str, letters = Session.objects._split_code_to_date_and_letter(
         '2023-09-22ABCDEF')
@@ -17,6 +19,7 @@ def test_split_code_to_date_and_letter_with_long_id():
     assert letters == 'ABCDEF'
 
 
+@pytest.mark.django_db
 def test_split_code_to_date_and_letter_with_to_short_id():
     date_str, letters = Session.objects._split_code_to_date_and_letter(
         '2023-09-2')
@@ -24,6 +27,7 @@ def test_split_code_to_date_and_letter_with_to_short_id():
     assert letters == ''
 
 
+@pytest.mark.django_db
 def test_split_code_to_date_and_letter_without_letters():
     date_str, letters = Session.objects._split_code_to_date_and_letter(
         '2023-09-22')
@@ -31,6 +35,7 @@ def test_split_code_to_date_and_letter_without_letters():
     assert letters == ''
 
 
+@pytest.mark.django_db
 def get_todays_date_str():
     date_utc = datetime.now(timezone.utc)
     date_local = date_utc.astimezone()
@@ -64,8 +69,7 @@ def test_new_session_code_with_empty_db(
 
 
 @pytest.mark.django_db
-def test_new_session_code_with_old_CODE_in_db(
-            default_db_setup, get_supervisors):
+def test_new_session_code_with_old_CODE_in_db(get_supervisors):
     OLD_CODE = '2023-09-20A'
     Session.objects.create(
         code=OLD_CODE,
@@ -77,8 +81,7 @@ def test_new_session_code_with_old_CODE_in_db(
 
 
 @pytest.mark.django_db
-def test_new_session_code_with_today_code_without_letters(
-            default_db_setup, get_supervisors):
+def test_new_session_code_with_today_code_without_letters(get_supervisors):
     TODAY_CODE = get_todays_date_str()
     Session.objects.create(
         code=TODAY_CODE,
@@ -90,8 +93,7 @@ def test_new_session_code_with_today_code_without_letters(
 
 
 @pytest.mark.django_db
-def test_new_session_code_with_today_code_in_db(
-            default_db_setup, get_supervisors):
+def test_new_session_code_with_today_code_in_db(get_supervisors):
     TODAY_CODE = get_todays_date_str() + "A"
     Session.objects.create(
         code=TODAY_CODE,
@@ -103,8 +105,7 @@ def test_new_session_code_with_today_code_in_db(
 
 
 @pytest.mark.django_db
-def test_new_session_code_with_today_big_code_in_db(
-            default_db_setup, get_supervisors):
+def test_new_session_code_with_today_big_code_in_db(get_supervisors):
     TODAY_CODE = get_todays_date_str() + "ZZ"
     Session.objects.create(
         code=TODAY_CODE,
@@ -116,8 +117,7 @@ def test_new_session_code_with_today_big_code_in_db(
 
 
 @pytest.mark.django_db
-def test_get_current_session_with_active_session_in_db(
-            default_db_setup, get_supervisors):
+def test_get_current_session_with_active_session_in_db(get_supervisors):
     TODAY_CODE = get_todays_date_str() + "A"
     active_session = Session.objects.create(
         code=TODAY_CODE,
@@ -135,7 +135,7 @@ def test_get_current_session_with_empty_db():
 
 @pytest.mark.django_db
 def test_get_current_session_with_only_nonactive_sessions_in_db(
-            default_db_setup, get_supervisors):
+        get_supervisors):
     TODAY_CODE = get_todays_date_str() + "A"
     Session.objects.create(
         code=TODAY_CODE,
@@ -146,8 +146,7 @@ def test_get_current_session_with_only_nonactive_sessions_in_db(
 
 
 @pytest.mark.django_db
-def test_start_new_session_success(
-            default_db_setup, get_supervisors):
+def test_start_new_session_success(get_supervisors):
     TODAY_CODE = get_todays_date_str() + "A"
     Session.objects.create(
         code=TODAY_CODE,
@@ -164,8 +163,7 @@ def test_start_new_session_success(
 
 
 @pytest.mark.django_db
-def test_start_new_session_with_existing_active_session_in_db(
-            default_db_setup, get_supervisors):
+def test_start_new_session_with_existing_active_session_in_db(get_supervisors):
     TODAY_CODE = get_todays_date_str() + "A"
     Session.objects.create(
         code=TODAY_CODE,
@@ -177,8 +175,7 @@ def test_start_new_session_with_existing_active_session_in_db(
 
 
 @pytest.mark.django_db
-def test_finish_active_session_success(
-            default_db_setup, get_supervisors):
+def test_finish_active_session_success(get_supervisors):
     TODAY_CODE = get_todays_date_str() + "A"
     Session.objects.create(
         code=TODAY_CODE,
@@ -197,7 +194,7 @@ def test_finish_active_session_success(
 
 @pytest.mark.django_db
 def test_finish_active_session_without_existing_active_session_in_db(
-            default_db_setup, get_supervisors):
+            get_supervisors):
     TODAY_CODE = get_todays_date_str() + "A"
     Session.objects.create(
         code=TODAY_CODE,

@@ -51,13 +51,18 @@ PERMISSIONS_FOR_SUPERVISOR = (
     'change_task',
     'view_task',
     'delete_task',
+    'add_session',
+    'change_session',
+    'view_session',
 )
 
 
 def get_permission_ids():
     permission_ids = []
     for permission_code in PERMISSIONS_FOR_SUPERVISOR:
-        permission_ids.append(Permission.objects.get(codename=permission_code))
+        permission_ids.append(
+            Permission.objects.filter(codename=permission_code).order_by(
+                'content_type_id').last())
     return permission_ids
 
 
