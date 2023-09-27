@@ -8,8 +8,8 @@ urlpatterns = [
          name='session-list'),
     # path('<int:pk>/', views.SessionShowView.as_view(),
     #      name='session-show'),
-    path('start/', views.SessionStartView.as_view(),
+    path('start/', views.ItemStartView.as_view(),
          name='session-start'),
-    # path('<int:pk>/finish/', views.SessionFinishView.as_view(),
-    #      name='session-finish'),
+    path('finish/', views.ItemFinishView.as_view(),
+         name='session-finish'),
 ]

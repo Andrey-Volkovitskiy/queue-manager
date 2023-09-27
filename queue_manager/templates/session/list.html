@@ -9,12 +9,18 @@
 {% block content %}
   <h1 class="my-4">{{ item_name|capfirst }}s</h1>
 
-  <form method="post" class="form" action="{% url 'session-start' %}">
-    {% csrf_token %}
-        <button type="submit" class="btn btn-primary">
-          Start new {{ item_name }}
-        </button>
-  </form>
+  {% if active_session_exists %}
+    <a href="{% url 'session-finish' %}" class="btn btn-outline-primary">
+      Finish current {{ item_name }}
+    </a>
+  {% else %}
+    <form method="post" class="form" action="{% url 'session-start' %}">
+      {% csrf_token %}
+          <button type="submit" class="btn btn-primary">
+            Start new {{ item_name }}
+          </button>
+    </form>
+  {% endif %}
 
   <table class="table table-striped">
     <thead>
@@ -32,22 +38,22 @@
     <tbody>
       {% for object in object_list %}
         <tr>
-          <td class="{% if object.is_active %}bg-primary{% endif %}">{{ object.code }}</td>
-          <td class="{% if object.is_active %}bg-primary{% endif %}">
+          <td class="{% if object.is_active %}bg-primary text-white{% endif %}">{{ object.code }}</td>
+          <td class="{% if object.is_active %}bg-primary text-white{% endif %}">
             {% if object.is_active %}
               Yes
             {% else %}
               No
             {% endif %}
           </td>
-          <td class="{% if object.is_active %}bg-primary{% endif %}">{{ object.started_at }}</td>
-          <td class="{% if object.is_active %}bg-primary{% endif %}">{{ object.started_by }}</td>
-          <td class="{% if object.is_active %}bg-primary{% endif %}">
+          <td class="{% if object.is_active %}bg-primary text-white{% endif %}">{{ object.started_at }}</td>
+          <td class="{% if object.is_active %}bg-primary text-white{% endif %}">{{ object.started_by }}</td>
+          <td class="{% if object.is_active %}bg-primary text-white{% endif %}">
             {% if object.finished_at %}
               {{ object.finished_at }}
             {% endif %}
           </td>
-          <td class="{% if object.is_active %}bg-primary{% endif %}">
+          <td class="{% if object.is_active %}bg-primary text-white{% endif %}">
             {% if object.finished_by %}
               {{ object.finished_by }}
             {% endif %}

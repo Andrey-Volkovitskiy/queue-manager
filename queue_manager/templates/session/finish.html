@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  {{ item_name|capfirst }}s
+{% endblock %}
+
+{% block content %}
+  <h1 class="my-4">Finish {{ item_name }}</h1>
+  <form method="post" class="form">
+    {% csrf_token %}
+    <p>Are you sure you want to finish {{ item_name }} "{{ session_code }}"?</p>
+        <button type="submit" class="btn btn-primary">
+          Yes, finish
+        </button>
+  </form>
+{% endblock %}
