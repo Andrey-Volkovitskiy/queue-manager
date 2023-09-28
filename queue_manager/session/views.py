@@ -69,7 +69,7 @@ class ItemFinishView(
                 messages.SUCCESS,
                 f"The {ITEM_NAME} was successfully finished"
             )
-        except MODEL.objects.ActiveSessionAlreadyExistsError:
+        except MODEL.objects.NoActiveSessionsError:
             messages.add_message(
                 self.request,
                 messages.ERROR,
@@ -78,7 +78,21 @@ class ItemFinishView(
             )
         return redirect(self.success_url)
 
+    def get(self, request, *args, **kwargs):
+        if MODEL.objects.get_current_session():
+            return super().get(request, *args, **kwargs)
+        else:
+            messages.add_message(
+                self.request,
+                messages.ERROR,
+                (f"The {ITEM_NAME} can't be finished" +
+                 " because there is no active session")
+            )
+            return redirect(self.success_url)
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['session_code'] = self.model.objects.get_current_session().code
+        curr_session = self.model.objects.get_current_session()
+        curr_session_code = curr_session.code if curr_session else None
+        context['session_code'] = curr_session_code
         return context

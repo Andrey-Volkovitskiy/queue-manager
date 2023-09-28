@@ -14,7 +14,7 @@ ERROR_MESSAGE = ("The session can't be started" +
 
 
 @pytest.mark.django_db
-def test_stert_new_session_success(client, get_supervisors):
+def test_start_new_session_success(client, get_supervisors):
     client.force_login(get_supervisors[0])
     item_creation_time = datetime.now(timezone.utc)
     response = client.post(TESTED_URL, None, follow=True)
@@ -34,7 +34,7 @@ def test_stert_new_session_success(client, get_supervisors):
 
 
 @pytest.mark.django_db
-def test_stert_new_session_with_active_session_in_db(client, get_supervisors):
+def test_start_new_session_with_active_session_in_db(client, get_supervisors):
     client.force_login(get_supervisors[0])
     response = client.post(TESTED_URL, None, follow=True)
     item_creation_time = datetime.now(timezone.utc)
