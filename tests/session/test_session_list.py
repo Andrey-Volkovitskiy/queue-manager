@@ -7,7 +7,6 @@ from bs4 import BeautifulSoup
 TESTED_URL = package_conftest.ITEM_LIST_URL
 
 
-# TODO Finish current session button
 @pytest.mark.django_db
 def test_basic_content(client, get_supervisors):
     client.force_login(get_supervisors[0])
@@ -44,7 +43,10 @@ def test_all_items_are_displayed_without_active(client, get_supervisors):
         finished_by = (f'{item.finished_by.first_name}' +
                        f' {item.finished_by.last_name}')
         assert finished_by in content
-        assert "bg-primary" not in content
+
+    assert "bg-primary" not in content
+    assert "Start new session" in content
+    assert "Finish current session" not in content
 
     # No redundant items are displayed
     soup = BeautifulSoup(response.content, 'html.parser')
@@ -57,14 +59,15 @@ def test_all_items_are_displayed_without_active(client, get_supervisors):
 def test_all_items_are_displayed_with_active(client, get_supervisors):
     client.force_login(get_supervisors[0])
     response = client.post(package_conftest.ITEM_START_URL, None, follow=True)
-    response_content = response.content.decode()
-    assert package_conftest.START_OK_MESSAGE in response_content
+    assert package_conftest.START_OK_MESSAGE in response.content.decode()
 
     response = client.get(TESTED_URL)
     content = response.content.decode()
     assert 'Yes' in content
     assert "None" not in content
     assert "bg-primary" in content
+    assert "Finish current session" in content
+    assert "Start new session" not in content
 
 
 @pytest.mark.django_db
