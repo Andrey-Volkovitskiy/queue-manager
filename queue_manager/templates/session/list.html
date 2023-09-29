@@ -26,7 +26,7 @@
     <thead>
       <tr>
         <th>Code</th>
-        <th>Is active</th>
+        <!-- <th>Is active</th> -->
         <th>Started at</th>
         <th>Started by</th>
         <th>Finished at</th>
@@ -39,17 +39,19 @@
       {% for object in object_list %}
         <tr>
           <td class="{% if object.is_active %}bg-primary text-white{% endif %}">{{ object.code }}</td>
-          <td class="{% if object.is_active %}bg-primary text-white{% endif %}">
+          <!-- <td class="{% if object.is_active %}bg-primary text-white{% endif %}">
             {% if object.is_active %}
               Yes
             {% else %}
               No
             {% endif %}
-          </td>
+          </td> -->
           <td class="{% if object.is_active %}bg-primary text-white{% endif %}">{{ object.started_at }}</td>
           <td class="{% if object.is_active %}bg-primary text-white{% endif %}">{{ object.started_by }}</td>
           <td class="{% if object.is_active %}bg-primary text-white{% endif %}">
-            {% if object.finished_at %}
+            {% if object.is_active %}
+              = CURRENT SESSION =
+            {% else %}
               {{ object.finished_at }}
             {% endif %}
           </td>

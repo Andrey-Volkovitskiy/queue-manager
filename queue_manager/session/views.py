@@ -92,7 +92,5 @@ class ItemFinishView(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        curr_session = self.model.objects.get_current_session()
-        curr_session_code = curr_session.code if curr_session else None
-        context['session_code'] = curr_session_code
+        context['current_session'] = self.model.objects.get_current_session()
         return context

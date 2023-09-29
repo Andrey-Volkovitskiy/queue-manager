@@ -23,9 +23,12 @@ def test_finish_session_success(client, get_supervisors):
     assert "Sessions" in content
     assert "Finish session" in content
     assert "Yes, finish" in content
-    assert "Are you sure you want to finish session" in content
-    active_sesson_code = PackageModel.objects.last().code
-    assert active_sesson_code in content
+    assert "No, don't finish" in content
+    assert "Are you sure you want to finish current session" in content
+    active_session = PackageModel.objects.last()
+    assert active_session.code in content
+    assert active_session.started_by.username in content
+    assert active_session.started_at.strftime("%-H:%M") in content
 
     item_prefinish_time = datetime.now(timezone.utc)
     response = client.post(TESTED_URL, None, follow=True)
@@ -34,7 +37,7 @@ def test_finish_session_success(client, get_supervisors):
     ]
     response_content = response.content.decode()
     assert escape(SUCCESS_MESSAGE) in response_content
-    last_session = PackageModel.objects.get(code=active_sesson_code)
+    last_session = PackageModel.objects.get(code=active_session.code)
     assert last_session.is_active is False
     assert last_session.finished_at >= item_prefinish_time
     assert last_session.finished_by == get_supervisors[0]

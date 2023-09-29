@@ -10,9 +10,16 @@
   <h1 class="my-4">Finish {{ item_name }}</h1>
   <form method="post" class="form">
     {% csrf_token %}
-    <p>Are you sure you want to finish {{ item_name }} "{{ session_code }}"?</p>
-        <button type="submit" class="btn btn-primary">
-          Yes, finish
-        </button>
+    <p>
+      <strong>
+        Are you sure you want to finish current session "{{ current_session.code }}"?
+      </strong>
+    </p>
+    <ul>
+      <li>Started at: {{ current_session.started_at }}</li>
+      <li>Started by: {{ current_session.started_by }}</li>
+    </ul>
+    <input type=submit value="Yes, finish" class="btn btn-danger">
+    <input type=button value="No, don't finish" onClick="javascript:history.go(-1);" class="btn btn-outline-secondary">
   </form>
 {% endblock %}
