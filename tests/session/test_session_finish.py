@@ -27,7 +27,7 @@ def test_finish_session_success(client, get_supervisors):
     assert "Are you sure you want to finish current session" in content
     active_session = PackageModel.objects.last()
     assert active_session.code in content
-    assert active_session.started_by.username in content
+    assert active_session.started_by.get_full_name() in content
     assert active_session.started_at.strftime("%-H:%M") in content
 
     item_prefinish_time = datetime.now(timezone.utc)
