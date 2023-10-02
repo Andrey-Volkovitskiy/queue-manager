@@ -39,13 +39,6 @@
       {% for object in object_list %}
         <tr>
           <td class="{% if object.is_active %}bg-primary text-white{% endif %}">{{ object.code }}</td>
-          <!-- <td class="{% if object.is_active %}bg-primary text-white{% endif %}">
-            {% if object.is_active %}
-              Yes
-            {% else %}
-              No
-            {% endif %}
-          </td> -->
           <td class="{% if object.is_active %}bg-primary text-white{% endif %}">{{ object.started_at }}</td>
           <td class="{% if object.is_active %}bg-primary text-white{% endif %}">{{ object.started_by }}</td>
           <td class="{% if object.is_active %}bg-primary text-white{% endif %}">

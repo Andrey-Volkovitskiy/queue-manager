@@ -43,10 +43,11 @@ SUPERVISORS = (
 
 
 PERMISSIONS_FOR_SUPERVISOR = (
-    'add_user',
-    'change_user',
-    'view_user',
-    'delete_user',
+    'view_supervisor',
+    'add_operator',
+    'change_operator',
+    'view_operator',
+    'delete_operator',
     'add_task',
     'change_task',
     'view_task',

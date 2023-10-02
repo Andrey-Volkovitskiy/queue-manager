@@ -63,7 +63,7 @@ def test_all_items_are_displayed_with_active(client, get_supervisors):
 
     response = client.get(TESTED_URL)
     content = response.content.decode()
-    assert 'Yes' in content
+    assert 'CURRENT SESSION' in content
     assert "None" not in content
     assert "bg-primary" in content
     assert "Finish current session" in content
