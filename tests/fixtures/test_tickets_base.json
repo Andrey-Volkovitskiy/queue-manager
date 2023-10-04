@@ -1,0 +1,41 @@
+[
+    {
+        "model": "ticket.ticket",
+        "pk": 1,
+        "fields": {
+            "code": "A001",
+            "task": 1,
+            "session": 2
+        }
+    },
+
+    {
+        "model": "ticket.ticket",
+        "pk": 2,
+        "fields": {
+            "code": "A002",
+            "task": 1,
+            "session": 2
+        }
+    },
+
+    {
+        "model": "ticket.ticket",
+        "pk": 3,
+        "fields": {
+            "code": "B001",
+            "task": 2,
+            "session": 2
+        }
+    },
+
+    {
+        "model": "ticket.ticket",
+        "pk": 4,
+        "fields": {
+            "code": "C001",
+            "task": 3,
+            "session": 3
+        }
+    }
+    ]

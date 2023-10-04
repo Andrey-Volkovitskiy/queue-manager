@@ -1,0 +1,41 @@
+[
+    {
+        "model": "session.session",
+        "pk": 4,
+        "fields": {
+            "code": "2023-09-20A",
+            "is_active": 1,
+            "started_at": "2023-09-20T09:01:50.998Z",
+            "started_by": 4
+        }
+    },
+    {
+        "model": "ticket.ticket",
+        "pk": 5,
+        "fields": {
+            "code": "B001",
+            "task": 2,
+            "session": 4
+        }
+    },
+
+    {
+        "model": "ticket.ticket",
+        "pk": 6,
+        "fields": {
+            "code": "B002",
+            "task": 2,
+            "session": 4
+        }
+    },
+
+    {
+        "model": "ticket.ticket",
+        "pk": 7,
+        "fields": {
+            "code": "C001",
+            "task": 3,
+            "session": 4
+        }
+    }
+]

@@ -41,8 +41,11 @@ SUPERVISORS = (
     },
 )
 
+PERMISSIONS_FOR_OPERATORS = (
+    'view_ticket',
+)
 
-PERMISSIONS_FOR_SUPERVISOR = (
+PERMISSIONS_FOR_SUPERVISORS = (
     'view_supervisor',
     'add_operator',
     'change_operator',
@@ -55,12 +58,13 @@ PERMISSIONS_FOR_SUPERVISOR = (
     'add_session',
     'change_session',
     'view_session',
+    'view_ticket',
 )
 
 
-def get_permission_ids():
+def get_permission_ids(code_list):
     permission_ids = []
-    for permission_code in PERMISSIONS_FOR_SUPERVISOR:
+    for permission_code in code_list:
         permission_ids.append(
             Permission.objects.filter(codename=permission_code).order_by(
                 'content_type_id').last())
@@ -89,4 +93,7 @@ def add_base_users():
     for supervisor in SUPERVISORS:
         create_user(user=supervisor, groups=(GROUP_ID['supervisors'], ))
 
-    Group.objects.get(name='supervisors').permissions.set(get_permission_ids())
+    Group.objects.get(name='operators').permissions.set(
+        get_permission_ids(PERMISSIONS_FOR_OPERATORS))
+    Group.objects.get(name='supervisors').permissions.set(
+        get_permission_ids(PERMISSIONS_FOR_SUPERVISORS))

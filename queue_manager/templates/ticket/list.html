@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  {{ item_name|capfirst }}s
+{% endblock %}
+
+{% block content %}
+  <h1 class="my-4">{{ item_name|capfirst }}s</h1>
+  <p class="my-2"><small>(Only tickets from the current session are displayed)</small></p>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Code</th>
+        <!-- TODO Add last status info and the link to view the ticket status history -->
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for object in object_list %}
+        <tr>
+          <td>{{ object.code }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
