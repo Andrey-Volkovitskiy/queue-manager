@@ -23,6 +23,7 @@ urlpatterns = [
     path('task/', include('queue_manager.task.urls')),
     path('session/', include('queue_manager.session.urls')),
     path('ticket/', include('queue_manager.ticket.urls')),
+    path('printer/', include('queue_manager.printer.urls')),
     path('supervisor/', include('queue_manager.user.supervisor_urls')),
     path('login/', views.SiteLoginView.as_view(), name='login'),
     path('logout/', views.SiteLogoutView.as_view(), name='logout'),

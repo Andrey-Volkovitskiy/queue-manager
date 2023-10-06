@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  Print a ticket
+{% endblock %}
+
+{% block content %}
+  <h1 class="my-4">Welcome dear customer!</h1>
+  <form method="post" class="form">
+    {% csrf_token %}
+    <h3 class="my-3">Please select the purpose of your request:</h3>
+
+    {% for task in tasks %}
+      <div class="my-2">
+        <input type=submit value="{{ task.name }}" name="{{ code_prefix }}{{ task.letter_code }}" class="btn btn-outline-primary">
+      </div>
+    {% endfor %}
+  </form>
+
+  Task code: {{ task_code }}
+{% endblock %}

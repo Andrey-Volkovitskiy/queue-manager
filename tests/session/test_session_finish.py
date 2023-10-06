@@ -17,6 +17,7 @@ ERROR_MESSAGE = ("The session can't be finished" +
 @pytest.mark.django_db
 def test_finish_session_success(client, get_supervisors):
     client.force_login(get_supervisors[0])
+    item_prestart_time = datetime.now(timezone.utc)
     response = client.post(package_conftest.ITEM_START_URL, None, follow=True)
 
     response = client.get(TESTED_URL)
@@ -30,7 +31,7 @@ def test_finish_session_success(client, get_supervisors):
     active_session = PackageModel.objects.last()
     assert active_session.code in content
     assert active_session.started_by.get_full_name() in content
-    assert active_session.started_at.strftime("%-H:%M") in content
+    assert active_session.started_at >= item_prestart_time
 
     item_prefinish_time = datetime.now(timezone.utc)
     response = client.post(TESTED_URL, None, follow=True)

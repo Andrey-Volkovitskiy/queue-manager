@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'queue_manager.task',
     'queue_manager.session',
     'queue_manager.ticket',
+    'queue_manager.printer',
 ]
 
 MIDDLEWARE = [

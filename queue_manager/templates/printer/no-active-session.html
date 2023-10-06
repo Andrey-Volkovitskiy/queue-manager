@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  No active session
+{% endblock %}
+
+{% block content %}
+  <h1 class="my-4">Please wait until service begins</h1>
+  <a href="{% url 'printer-create' %}" class="btn btn-outline-primary">Refresh</a>
+{% endblock %}
