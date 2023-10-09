@@ -9,14 +9,6 @@ NUM_OF_DIGITS_IN_TICKET_CODE = 3
 
 class TicketManager(models.Manager):
 
-    class TicketErrors(Exception):
-        pass
-
-    class NoActiveSessionError(TicketErrors):
-        '''Raised when attempt is made to create a new ticket
-        while there is no active session'''
-        pass
-
     def _get_new_ticket_code(self, session: Session, task: Task):
         last_ticket = Ticket.objects.filter(
             session=session, task=task).order_by('code').last()
@@ -32,7 +24,7 @@ class TicketManager(models.Manager):
         '''Creates a new Ticket instance with properly filed fields'''
         current_session = Session.objects.get_current_session()
         if not current_session:
-            raise self.NoActiveSessionError
+            raise Session.objects.NoActiveSessionsError
         code = self._get_new_ticket_code(current_session, task)
         return self.create(
             code=code,

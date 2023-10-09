@@ -5,7 +5,7 @@ from session import conftest as package_conftest
 from queue_manager.session.models import Session as PackageModel
 from html import escape
 
-TESTED_URL = "/session/finish/"
+TESTED_URL = package_conftest.ITEM_FINISH_URL
 SUCCESS_URL = package_conftest.ITEM_LIST_URL
 SUCCESS_MESSAGE = "The session was successfully finished"
 ERROR_MESSAGE = ("The session can't be finished" +

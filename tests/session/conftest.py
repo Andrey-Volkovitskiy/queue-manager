@@ -8,6 +8,7 @@ ITEM_NAME = "session"
 
 ITEM_LIST_URL = f"/{ITEM_NAME}/"
 ITEM_START_URL = f"/{ITEM_NAME}/start/"
+ITEM_FINISH_URL = f"/{ITEM_NAME}/finish/"
 
 START_OK_MESSAGE = f"The {ITEM_NAME} was successfully started"
 
