@@ -1,6 +1,6 @@
-from django.views.generic import (View, TemplateView)
+from django.views.generic import (View, TemplateView, DetailView)
 from django.shortcuts import redirect, render
-# from queue_manager.ticket.models import Ticket
+from queue_manager.ticket.models import Ticket
 from queue_manager.session.models import Session
 from queue_manager.task.models import Task
 from django.urls import reverse_lazy
@@ -28,8 +28,19 @@ class ItemCreateView(View):
                     and len(key) == len(TASK_CODE_PREFIX) + 1):
                 task_code = key[len(TASK_CODE_PREFIX)]
 
-        return render(
-            request, self.template_name, context={'task_code': task_code})
+        try:
+            ticket = Ticket.objects.create_ticket(
+                task=Task.objects.get(letter_code=task_code))
+            return redirect(reverse_lazy(
+                'printer-detail',
+                kwargs={'pk': ticket.id}))
+        except Session.objects.NoActiveSessionsError:
+            return redirect(reverse_lazy('printer-no-active-session'))
+
+
+class ItemDetailView(DetailView):
+    model = Ticket
+    template_name = "printer/detail.html"
 
 
 class NoActiveSessionView(TemplateView):

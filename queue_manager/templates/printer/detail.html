@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  Ticket issued
+{% endblock %}
+
+{% block content %}
+  <div class="d-flex align-items-center justify-content-center">
+    <div class="col-md-2 border border-3 shadow p-3 mb-5 bg-body rounded p-4">
+      <h1 class="h3 text-center mb-4">Your ticket:</h1>
+      <div class="py-4 border-top border-bottom border-2">
+        <h2 class="h1 text-center">{{ object.code }}</h2>
+        <!-- TODO (there are 5 clients in front of you) -->
+      </div>
+      <div class="my-4 text-center">
+        <small>After 3 seconds, you will be redirected to the screen where you can see current operators assignments.</small>
+      </div>
+    </div>
+  </div>
+{% endblock %}

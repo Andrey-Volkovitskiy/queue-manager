@@ -18,7 +18,7 @@ class TicketManager(models.Manager):
         pass
 
     def _get_new_ticket_code(self, session: Session, task: Task):
-        last_ticket = Task.objects.filter(
+        last_ticket = Ticket.objects.filter(
             session=session, task=task).order_by('code').last()
         if last_ticket is None:
             new_ticket_number = 1
