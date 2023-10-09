@@ -1,13 +1,10 @@
 import pytest
-import conftest
 from printer import conftest as package_conftest
 from session.conftest import ITEM_FINISH_URL as SESSION_FINISH_URL
 from queue_manager.task.models import Task
 from queue_manager.ticket.models import Ticket
 from queue_manager.session.models import Session
-from bs4 import BeautifulSoup
 
-from tests import session
 
 TESTED_URL = package_conftest.ITEM_CREATE_URL
 TASK_CODE_PREFIX = "task_code:"
