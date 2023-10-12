@@ -31,7 +31,7 @@ class TicketManager(models.Manager):
             session=current_session,
             task=task
         )
-        new_ticket.status_set.create_init_status(ticket=new_ticket)
+        new_ticket.status_set.create_initial(ticket=new_ticket)
         return new_ticket
 
 

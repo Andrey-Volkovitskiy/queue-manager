@@ -7,20 +7,91 @@ ITEM_NAME = 'status'
 
 
 class StatusManager(models.Manager):
+    class StatusErrors(Exception):
+        pass
+
+    class StatusFlowViolated(StatusErrors):
+        '''Raised when attempt is made to change the ticket status
+        not according to status change flow'''
+        pass
+
+    class NotEnoughArguments(StatusErrors):
+        '''Raised when attempt is made to add new status
+        without "assigned_to" or "assigned_by" argument'''
+        pass
+
     class Codes():
         '''Possible ticket statuses'''
         UNASSIGNED = 'U'
-        INPROCESSING = 'P'
+        PROCESSING = 'P'
         COMPLETED = 'C'
         REDIRECTED = 'R'
         MISSED = 'M'
 
-    def create_init_status(self, ticket: Ticket):
+    def create_initial(self, ticket: Ticket):
         '''Creates the initial status when creating a ticket'''
-        self.create(
+        return self.create(
             ticket=ticket,
             code=self.Codes.UNASSIGNED
         )
+
+    def create_additional(self, ticket: Ticket, new_code: Codes,  # noqa: C901
+                          assigned_by=None, assigned_to=None):
+        '''Creates a new status for the ticket
+        and implements status flow logic'''
+
+        def _check_args(*args):
+            for arg in args:
+                if arg in None:
+                    raise self.NotEnoughArguments
+
+        def _create_new_status():
+            return self.create(
+                    ticket=ticket,
+                    code=new_code,
+                    assigned_by=assigned_by,
+                    assigned_to=assigned_to
+                )
+
+        last_code = self.filter(ticket=ticket).last().code
+
+        if last_code == self.Codes.UNASSIGNED:
+            if new_code in (self.Codes.PROCESSING, ):
+                _check_args(assigned_to)
+                return _create_new_status()
+            else:
+                self.StatusFlowViolated
+
+        elif last_code == self.Codes.PROCESSING:
+            if new_code in (self.Codes.COMPLETED, self.Codes.MISSED):
+                _check_args(assigned_by)
+                return _create_new_status()
+            else:
+                self.StatusFlowViolated
+
+        elif last_code == self.Codes.COMPLETED:
+            if new_code in (self.Codes.REDIRECTED, ):
+                _check_args(assigned_by, assigned_to)
+                return _create_new_status()
+            else:
+                self.StatusFlowViolated
+
+        elif last_code == self.Codes.REDIRECTED:
+            if new_code in (self.Codes.PROCESSING, ):
+                _check_args(assigned_to)
+                return _create_new_status()
+            else:
+                self.StatusFlowViolated
+
+        elif last_code == self.Codes.MISSED:
+            if new_code in (self.Codes.REDIRECTED, ):
+                _check_args(assigned_by, assigned_to)
+                return _create_new_status()
+            else:
+                self.StatusFlowViolated
+
+        else:
+            self.StatusFlowViolated
 
 
 class Status(models.Model):
