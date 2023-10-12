@@ -41,7 +41,7 @@ def test_successfuly_created_with_C002_ticket(client):
     assert created_ticket.session == Session.objects.get_current_session()
     assert created_ticket.task == chosen_task
     assert created_ticket.code == EXPECTED_CODE
-    # TODO Add initial status check
+    assert created_ticket.status_set.first().code == 'U'
 
     # Is received page correct?
     assert EXPECTED_CODE in content

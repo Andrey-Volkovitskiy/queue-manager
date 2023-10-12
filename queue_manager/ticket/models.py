@@ -26,11 +26,13 @@ class TicketManager(models.Manager):
         if not current_session:
             raise Session.objects.NoActiveSessionsError
         code = self._get_new_ticket_code(current_session, task)
-        return self.create(
+        new_ticket = self.create(
             code=code,
             session=current_session,
             task=task
         )
+        new_ticket.status_set.create_init_status(ticket=new_ticket)
+        return new_ticket
 
 
 class Ticket(models.Model):

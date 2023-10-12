@@ -1,0 +1,54 @@
+from django.db import models
+from queue_manager.ticket.models import Ticket
+from django.contrib.auth.models import User
+
+
+ITEM_NAME = 'status'
+
+
+class StatusManager(models.Manager):
+    class Codes():
+        '''Possible ticket statuses'''
+        UNASSIGNED = 'U'
+        INPROCESSING = 'P'
+        COMPLETED = 'C'
+        REDIRECTED = 'R'
+        MISSED = 'M'
+
+    def create_init_status(self, ticket: Ticket):
+        '''Creates the initial status when creating a ticket'''
+        self.create(
+            ticket=ticket,
+            code=self.Codes.UNASSIGNED
+        )
+
+
+class Status(models.Model):
+    ticket = models.ForeignKey(
+        Ticket,
+        on_delete=models.PROTECT,
+        verbose_name='Ticket'
+    )
+    code = models.CharField(
+        max_length=1,
+        verbose_name='Status code'
+    )
+    assigned_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Assigned at'
+    )
+    assigned_by = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        verbose_name='Assigned by',
+        related_name='assigned_by',
+        null=True,
+    )
+    assigned_to = models.ForeignKey(
+        User,
+        on_delete=models.PROTECT,
+        verbose_name='Assigned to',
+        related_name='assigned_to',
+        null=True,
+    )
+    objects = StatusManager()
