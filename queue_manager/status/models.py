@@ -42,7 +42,7 @@ class StatusManager(models.Manager):
 
         def _check_args(*args):
             for arg in args:
-                if arg in None:
+                if arg is None:
                     raise self.NotEnoughArguments
 
         def _create_new_status():
@@ -57,41 +57,41 @@ class StatusManager(models.Manager):
 
         if last_code == self.Codes.UNASSIGNED:
             if new_code in (self.Codes.PROCESSING, ):
-                _check_args(assigned_to)
+                _check_args((assigned_to, ))
                 return _create_new_status()
             else:
-                self.StatusFlowViolated
+                raise self.StatusFlowViolated
 
         elif last_code == self.Codes.PROCESSING:
             if new_code in (self.Codes.COMPLETED, self.Codes.MISSED):
-                _check_args(assigned_by)
+                _check_args((assigned_by, ))
                 return _create_new_status()
             else:
-                self.StatusFlowViolated
+                raise self.StatusFlowViolated
 
         elif last_code == self.Codes.COMPLETED:
             if new_code in (self.Codes.REDIRECTED, ):
                 _check_args(assigned_by, assigned_to)
                 return _create_new_status()
             else:
-                self.StatusFlowViolated
+                raise self.StatusFlowViolated
 
         elif last_code == self.Codes.REDIRECTED:
             if new_code in (self.Codes.PROCESSING, ):
-                _check_args(assigned_to)
+                _check_args((assigned_to, ))
                 return _create_new_status()
             else:
-                self.StatusFlowViolated
+                raise self.StatusFlowViolated
 
         elif last_code == self.Codes.MISSED:
             if new_code in (self.Codes.REDIRECTED, ):
                 _check_args(assigned_by, assigned_to)
                 return _create_new_status()
             else:
-                self.StatusFlowViolated
+                raise self.StatusFlowViolated
 
         else:
-            self.StatusFlowViolated
+            raise self.StatusFlowViolated
 
 
 class Status(models.Model):
