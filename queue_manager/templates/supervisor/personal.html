@@ -9,6 +9,10 @@
 {% block content %}
   <h1 class="my-4">Supervisor dashboard</h1>
 
+  <a href="{% url 'operator-list' %}" class="btn btn-outline-primary">
+    Manage operators
+  </a>
+
   <a href="{% url 'task-list' %}" class="btn btn-outline-primary">
     Manage tasks
   </a>

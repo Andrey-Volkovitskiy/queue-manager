@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  {{ item_name|capfirst }}s
+{% endblock %}
+
+{% block content %}
+  <h1 class="my-4">{{ item_name|capfirst }}s</h1>
+  <a class="btn btn-outline-primary me-2" href="{% url 'operator-create' %}">Create new {{ item_name }}</a>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Full name</th>
+        <th>Username</th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for object in object_list %}
+        <tr>
+          <td>{{ object.get_full_name }}</td>
+          <td>{{ object.username }}</td>
+          <td>
+              <a href="{% url item_name|add:'-update' object.id %}">Edit</a>
+            <br>
+            <a href="{% url item_name|add:'-delete' object.id %}">Delete</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
