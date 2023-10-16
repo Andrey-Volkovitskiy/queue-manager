@@ -1,6 +1,6 @@
 import pytest
-import conftest
-from session import conftest as package_conftest
+from tests import conftest
+from . import conftest as package_conftest
 from queue_manager.session.models import Session as PackageModel
 from bs4 import BeautifulSoup
 

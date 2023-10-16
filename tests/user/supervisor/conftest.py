@@ -3,9 +3,9 @@ from tests.fixtures.test_users_base import add_base_users
 
 ITEM_LIST_HEADER_ROWS = 1
 
-ITEM_NAME = "user"
+ITEM_NAME = "supervisor"
 
-ITEM_LIST_URL = f"/{ITEM_NAME}/"
+ITEM_ENTER_URL = f"/{ITEM_NAME}/"
 
 
 @pytest.fixture(autouse=True)

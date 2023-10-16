@@ -1,6 +1,6 @@
 import pytest
 from django.core.management import call_command
-from fixtures.test_users_base import add_base_users
+from tests.fixtures.test_users_base import add_base_users
 
 ITEM_LIST_HEADER_ROWS = 1
 

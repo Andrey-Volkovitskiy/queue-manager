@@ -1,6 +1,6 @@
 import pytest
 from django.contrib.auth.models import User
-from fixtures.test_users_base import GROUP_ID
+from tests.fixtures.test_users_base import GROUP_ID
 
 HOME_URL = "/"
 LOGIN_URL = "/login/"

@@ -1,12 +1,27 @@
-from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.views.generic import (TemplateView)
-from queue_manager.session.models import Session as MODEL
+from django.views.generic import (TemplateView, DetailView, View)
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
+from queue_manager.mixins import PersonalPagePermissions
+from queue_manager.user.models import Supervisor as MODEL
 
 
-class SupervisorHomeView(
-        PermissionRequiredMixin,
-        TemplateView):
+class SupervisorEnterView(View):
+    def get(self, request, *args, **kwargs):
+        user_id = self.request.user.id
+        is_supervisor = MODEL.objects.filter(id=user_id).exists()
+        if is_supervisor:
+            return redirect(reverse_lazy(
+                'supervisor-personal',
+                kwargs={'pk': user_id}))
+        return redirect(reverse_lazy('supervisor-no-permission'))
+
+
+class SupervisorPersonalView(
+        PersonalPagePermissions,
+        DetailView):
     model = MODEL
-    ITEM_NAME = 'supervisor'
-    template_name = f"{ITEM_NAME}/home.html"
-    permission_required = (f'{ITEM_NAME}.view_{ITEM_NAME}', )
+    template_name = "supervisor/personal.html"
+
+
+class SupervisorNoPermissionView(TemplateView):
+    template_name = 'supervisor/no_permission.html'

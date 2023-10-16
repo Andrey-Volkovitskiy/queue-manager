@@ -39,6 +39,13 @@ SUPERVISORS = (
         "last_name": "Super_surname_A",
         "password": "super_password_A"
     },
+    {
+        "id": 5,
+        "username": "supervisor_B",
+        "first_name": "Super_name_B",
+        "last_name": "Super_surname_B",
+        "password": "super_password_B"
+    },
 )
 
 PERMISSIONS_FOR_OPERATORS = (
@@ -46,7 +53,6 @@ PERMISSIONS_FOR_OPERATORS = (
 )
 
 PERMISSIONS_FOR_SUPERVISORS = (
-    'view_supervisor',
     'add_operator',
     'change_operator',
     'view_operator',

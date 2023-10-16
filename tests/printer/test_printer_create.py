@@ -1,6 +1,6 @@
 import pytest
-from printer import conftest as package_conftest
-from session.conftest import ITEM_FINISH_URL as SESSION_FINISH_URL
+from . import conftest as package_conftest
+from tests.session.conftest import ITEM_FINISH_URL as SESSION_FINISH_URL
 from queue_manager.task.models import Task
 from queue_manager.ticket.models import Ticket
 from queue_manager.session.models import Session

@@ -1,5 +1,5 @@
 import pytest
-import conftest
+from tests import conftest
 
 
 TESTED_URL = conftest.HOME_URL

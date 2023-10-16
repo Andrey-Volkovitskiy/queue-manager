@@ -1,9 +1,9 @@
 import pytest
-import conftest
-from task import conftest as package_conftest
+from tests import conftest
+from . import conftest as package_conftest
 from queue_manager.task.models import Task as PackageModel
 from copy import deepcopy
-from fixtures.test_tasks_additional import TEST_ITEMS
+from tests.fixtures.test_tasks_additional import TEST_ITEMS
 from datetime import datetime, timezone
 
 TESTED_URL = package_conftest.ITEM_CREATE_URL
