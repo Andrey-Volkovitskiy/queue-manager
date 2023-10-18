@@ -5,7 +5,7 @@ from django.views.generic import (ListView,
                                   UpdateView,
                                   DeleteView)
 from queue_manager.user.models import Operator as MODEL
-from queue_manager.user.forms import OperatorForm as FORM
+from queue_manager.user import forms
 from queue_manager.mixins import ContextMixinWithItemName
 from django.urls import reverse_lazy
 
@@ -28,7 +28,7 @@ class ItemCreateView(
         ContextMixinWithItemName,
         SuccessMessageMixin,
         CreateView):
-    form_class = FORM
+    form_class = forms.OperatorCreateForm
     item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/create.html"
     success_url = reverse_lazy(f"{ITEM_NAME}-list")
@@ -42,9 +42,23 @@ class ItemUpdateView(
         SuccessMessageMixin,
         UpdateView):
     model = MODEL
-    form_class = FORM
+    form_class = forms.OperatorUpdateForm
     item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/update.html"
+    success_url = reverse_lazy(f"{ITEM_NAME}-list")
+    success_message = f"The {ITEM_NAME} was successfully updated"
+    permission_required = f'user.change_{ITEM_NAME}'
+
+
+class UpdatePassView(
+        PermissionRequiredMixin,
+        ContextMixinWithItemName,
+        SuccessMessageMixin,
+        UpdateView):
+    model = MODEL
+    form_class = forms.OperatorChangePasswordForm
+    item_name = ITEM_NAME
+    template_name = f"{ITEM_NAME}/pass_change.html"
     success_url = reverse_lazy(f"{ITEM_NAME}-list")
     success_message = f"The {ITEM_NAME} was successfully updated"
     permission_required = f'user.change_{ITEM_NAME}'

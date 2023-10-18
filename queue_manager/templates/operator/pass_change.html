@@ -3,11 +3,11 @@
 {% load django_bootstrap5 %}
 
 {% block title %}
-  Edit {{ item_name }}
+  Change password for {{ object.get_full_name }}
 {% endblock %}
 
 {% block content %}
-  <h1 class="my-4">Edit {{ item_name }}</h1>
+  <h1 class="my-4">Change password for {{ object.get_full_name }}</h1>
 
   <form method="post" class="form">
     {% csrf_token %}
@@ -15,7 +15,5 @@
         <button type="submit" class="btn btn-primary">
           Save
         </button>
-        
-        <a class="btn btn-outline-secondary me-2" href="{% url item_name|add:'-pass-change' object.id %}">Change password</a>
   </form>
 {% endblock %}

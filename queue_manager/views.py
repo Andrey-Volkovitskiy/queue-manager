@@ -2,12 +2,17 @@ from django.shortcuts import render
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth import logout
 
 
 class SiteLoginView(SuccessMessageMixin, LoginView):
     redirect_authenticated_user = True
     template_name = "login.html"
     success_message = "You are logged in"
+
+    def dispatch(self, request, *args, **kwargs):
+        logout(request)
+        return super().dispatch(request, *args, **kwargs)
 
 
 class SiteLogoutView(LogoutView):
