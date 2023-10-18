@@ -1,5 +1,4 @@
-from django.db import models
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User, Group, UserManager
 
 
 def user_fullname_patch(self):
@@ -9,7 +8,7 @@ def user_fullname_patch(self):
 User.__str__ = user_fullname_patch
 
 
-class SupervisorManager(models.Manager):
+class SupervisorManager(UserManager):
     def get_queryset(self):
         return super().get_queryset().filter(
             groups=(Group.objects.get(name='supervisors')))
@@ -22,7 +21,7 @@ class Supervisor(User):
     objects = SupervisorManager()
 
 
-class OperatorManager(models.Manager):
+class OperatorManager(UserManager):
     def get_queryset(self):
         return super().get_queryset().filter(
             groups=(Group.objects.get(name='operators')))
@@ -33,3 +32,9 @@ class Operator(User):
         proxy = True
 
     objects = OperatorManager()
+
+    def save(self, *args, **kwargs):
+        just_created = self.id is None
+        super().save(*args, **kwargs)
+        if just_created:
+            self.groups.add(Group.objects.get(name='operators'))

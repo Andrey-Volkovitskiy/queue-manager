@@ -1,13 +1,14 @@
 from queue_manager.user.models import Operator
-from django import forms
+from django.contrib.auth.forms import UserCreationForm
 
 
-class OperatorForm(forms.ModelForm):
+class OperatorForm(UserCreationForm):
     class Meta:
         model = Operator
         fields = [
             'username',
-            'password',
+            'password1',
+            'password2',
             'first_name',
             'last_name',
             ]

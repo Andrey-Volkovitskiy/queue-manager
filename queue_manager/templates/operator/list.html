@@ -8,7 +8,7 @@
 
 {% block content %}
   <h1 class="my-4">{{ item_name|capfirst }}s</h1>
-  <a class="btn btn-outline-primary me-2" href="{% url 'operator-create' %}">Create new {{ item_name }}</a>
+  <a class="btn btn-outline-primary me-2" href="{% url item_name|add:'-create' %}">Create new {{ item_name }}</a>
   <table class="table table-striped">
     <thead>
       <tr>
@@ -25,8 +25,6 @@
           <td>{{ object.username }}</td>
           <td>
               <a href="{% url item_name|add:'-update' object.id %}">Edit</a>
-            <br>
-            <a href="{% url item_name|add:'-delete' object.id %}">Delete</a>
           </td>
         </tr>
       {% endfor %}
