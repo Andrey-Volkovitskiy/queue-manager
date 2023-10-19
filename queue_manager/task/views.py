@@ -47,6 +47,8 @@ class ItemUpdateView(
     success_url = reverse_lazy(f"{ITEM_NAME}-list")
     success_message = f"The {ITEM_NAME} was successfully updated"
     permission_required = f'{ITEM_NAME}.change_{ITEM_NAME}'
+    # TODO Task letter code can't be modified or deleted while
+    # there is an active session
 
 
 class ItemDeleteView(

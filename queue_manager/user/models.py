@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User, Group, UserManager
+import sys
 
 
 def user_fullname_patch(self):
@@ -37,7 +38,12 @@ class Operator(User):
     objects = OperatorManager()
 
     def save(self, *args, **kwargs):
+        '''Adds just created user to "operators" group
+        and fixes pytest "pk=1' issue'''
         just_created = self.id is None
+        if just_created and "pytest" in sys.modules:
+            max_pk = User.objects.last().id
+            self.id = max_pk + 1
         super().save(*args, **kwargs)
         if just_created:
             self.groups.add(Group.objects.get(name='operators'))

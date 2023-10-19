@@ -9,6 +9,7 @@ from queue_manager.user.models import Operator as MODEL
 from queue_manager.user import forms
 from queue_manager.mixins import ContextMixinWithItemName
 from django.urls import reverse_lazy
+from django.contrib import messages
 
 ITEM_NAME = 'operator'
 
@@ -82,4 +83,7 @@ class ItemSoftDeleteView(
         success_url = self.get_success_url()
         self.object.is_active = False
         self.object.save()
+        success_message = self.get_success_message(form.cleaned_data)
+        if success_message:
+            messages.success(self.request, success_message)
         return HttpResponseRedirect(success_url)
