@@ -6,12 +6,14 @@ def user_fullname_patch(self):
 
 
 User.__str__ = user_fullname_patch
+User.name = User.username
 
 
 class SupervisorManager(UserManager):
     def get_queryset(self):
         return super().get_queryset().filter(
-            groups=(Group.objects.get(name='supervisors')))
+            groups=(Group.objects.get(name='supervisors')),
+            is_active=True)
 
 
 class Supervisor(User):
@@ -24,7 +26,8 @@ class Supervisor(User):
 class OperatorManager(UserManager):
     def get_queryset(self):
         return super().get_queryset().filter(
-            groups=(Group.objects.get(name='operators')))
+            groups=(Group.objects.get(name='operators')),
+            is_active=True)
 
 
 class Operator(User):

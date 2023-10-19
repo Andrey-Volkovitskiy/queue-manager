@@ -4,6 +4,7 @@ from django.views.generic import (ListView,
                                   CreateView,
                                   UpdateView,
                                   DeleteView)
+from django.http import HttpResponseRedirect
 from queue_manager.user.models import Operator as MODEL
 from queue_manager.user import forms
 from queue_manager.mixins import ContextMixinWithItemName
@@ -64,7 +65,7 @@ class UpdatePassView(
     permission_required = f'user.change_{ITEM_NAME}'
 
 
-class ItemDeleteView(
+class ItemSoftDeleteView(
         PermissionRequiredMixin,
         ContextMixinWithItemName,
         SuccessMessageMixin,
@@ -76,3 +77,9 @@ class ItemDeleteView(
     success_url = reverse_lazy(f"{ITEM_NAME}-list")
     success_message = f"The {ITEM_NAME} was successfully deleted"
     permission_required = f'user.delete_{ITEM_NAME}'
+
+    def form_valid(self, form):
+        success_url = self.get_success_url()
+        self.object.is_active = False
+        self.object.save()
+        return HttpResponseRedirect(success_url)

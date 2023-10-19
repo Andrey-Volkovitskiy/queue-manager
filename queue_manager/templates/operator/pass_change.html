@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block content %}
-  <h1 class="my-4">Change password for {{ object.get_full_name }}</h1>
+  <h1 class="my-4">Change password for "{{ object.username }}"</h1>
 
   <form method="post" class="form">
     {% csrf_token %}
