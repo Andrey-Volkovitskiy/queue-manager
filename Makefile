@@ -7,7 +7,6 @@ makemigrations:
 	$(MANAGE) makemigrations
 
 migrate:
-`
 	$(MANAGE) migrate
 
 start:
