@@ -12,6 +12,9 @@ migrate:
 start:
 	poetry run gunicorn queue_manager.wsgi
 
+railway-start:
+	$(MANAGE) migrate && poetry run gunicorn queue_manager.wsgi
+
 db-container:
 	docker compose up -d
 
