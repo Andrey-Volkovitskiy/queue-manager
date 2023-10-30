@@ -5,7 +5,7 @@ class DefaultDBData:
     }
 
     default_supervisor = {
-        'username': 'default_sepervisor',
+        'username': 'default_supervisor',
         'password': 'default_pass',
         'first_name': 'Default',
         'last_name': 'Supervisor',
