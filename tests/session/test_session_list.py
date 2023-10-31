@@ -2,6 +2,7 @@ import pytest
 from tests import conftest
 from . import conftest as package_conftest
 from queue_manager.session.models import Session as PackageModel
+from queue_manager.user.models import Supervisor
 from bs4 import BeautifulSoup
 
 TESTED_URL = package_conftest.ITEM_LIST_URL
@@ -83,3 +84,13 @@ def test_with_incorrect_user(client, get_operators):
     client.force_login(get_operators[0])
     response = client.get(TESTED_URL)
     assert response.status_code == 403
+
+
+@pytest.mark.django_db
+def test_default_supervisor(client):
+    default_sprvsr = Supervisor.objects.get(username='default_supervisor')
+    client.force_login(default_sprvsr)
+    response = client.get(TESTED_URL)
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert "Start new session" in content
