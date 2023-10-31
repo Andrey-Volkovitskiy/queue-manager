@@ -22,12 +22,12 @@ class SupervisorPersonalView(
     model = MODEL
     template_name = "supervisor/personal.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user_id = self.request.user.id
-        context['permissions'] = MODEL.objects.get(
-            id=user_id).get_all_permissions()
-        return context
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     user_id = self.request.user.id
+    #     context['permissions'] = MODEL.objects.get(
+    #         id=user_id).get_all_permissions()
+    #     return context
 
 
 class SupervisorNoPermissionView(TemplateView):
