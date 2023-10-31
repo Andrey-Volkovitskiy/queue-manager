@@ -21,4 +21,14 @@
       Manage sessions
   </a>
 
+  <div>
+    PERMISSIONS:
+    <ul>
+      {% for perm in permissions %}
+        <li>
+          {{ perm }}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
 {% endblock %}

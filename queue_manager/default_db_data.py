@@ -12,16 +12,16 @@ class DefaultDBData:
     }
 
     permissions_for_supervisors = (
-        'user.add_operator',
-        'user.change_operator',
-        'user.view_operator',
-        'user.delete_operator',
-        'task.add_task',
-        'task.change_task',
-        'task.view_task',
-        'task.delete_task',
+        'add_operator',
+        'change_operator',
+        'view_operator',
+        'delete_operator',
+        'add_task',
+        'change_task',
+        'view_task',
+        'delete_task',
         'session.add_session',
         'session.change_session',
         'session.view_session',
-        'ticket.view_ticket',
+        'view_ticket',
     )
