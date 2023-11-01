@@ -1,5 +1,6 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from queue_manager.user.models import Operator
 
 
 ITEM_NAME = 'task'
@@ -42,4 +43,31 @@ class Task(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Created at'
+    )
+    can_be_served_by = models.ManyToManyField(
+        Operator,
+        through='Service'
+    )
+
+
+class Service(models.Model):
+    '''If service record exists, than the operator have the authoriry
+    to serve the task.
+    If is_servicing flag is true, the operator is currently servicing the task
+    with given priority.
+    1 - lowest priority
+    9 - highest priority'''
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.CASCADE
+    )
+    operator = models.ForeignKey(
+        Operator,
+        on_delete=models.CASCADE
+    )
+    is_servicing = models.BooleanField(
+        default=False
+    )
+    priority_for_operator = models.SmallIntegerField(
+        null=True
     )
