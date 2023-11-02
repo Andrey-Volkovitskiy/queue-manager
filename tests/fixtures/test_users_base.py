@@ -74,7 +74,6 @@ def get_permission_ids(code_list):
 
 def create_user(user, groups):
     User.objects.create(
-            # id=user['id'],
             username=user['username'],
             first_name=user['first_name'],
             last_name=user['last_name'],
@@ -83,11 +82,6 @@ def create_user(user, groups):
 
 
 def add_base_users():
-    # for group_name in GROUP_ID:
-    #     Group.objects.create(
-    #         id=GROUP_ID[group_name],
-    #         name=group_name)
-
     for operator in OPERATORS:
         create_user(user=operator, groups=(
             Group.objects.get(name='operators'), ))

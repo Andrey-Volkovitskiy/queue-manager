@@ -2,6 +2,7 @@ import pytest
 from tests import conftest
 from . import conftest as package_conftest
 from queue_manager.task.models import Task as PackageModel
+from queue_manager.user.models import Operator
 from copy import deepcopy
 from tests.fixtures.test_tasks_additional import TEST_ITEMS
 from datetime import datetime, timezone
@@ -48,6 +49,29 @@ def test_successfuly_created(client, get_supervisors):
     assert db_item.is_active is True
     time_difference = db_item.created_at - item_creation_time
     assert time_difference.total_seconds() < 1
+
+
+@pytest.mark.django_db
+def test_successfuly_created_with_serviced_by(client, get_supervisors):
+    client.force_login(get_supervisors[0])
+    CORRECT_ITEM = deepcopy(TEST_ITEMS[0])
+    serviced_by = (
+        Operator.objects.first(),
+        Operator.objects.last(),
+    )
+    CORRECT_ITEM['can_be_served_by'] = (
+        serviced_by[0].id,
+        serviced_by[1].id,
+    )
+
+    response = client.post(TESTED_URL, CORRECT_ITEM, follow=True)
+    assert response.redirect_chain == [
+        (SUCCESS_URL, 302)
+    ]
+    response_content = response.content.decode()
+    assert package_conftest.CREATE_OK_MESSAGE in response_content
+    assert serviced_by[0].get_full_name() in response_content
+    assert serviced_by[1].get_full_name() in response_content
 
 
 @pytest.mark.django_db

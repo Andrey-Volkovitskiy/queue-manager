@@ -2,6 +2,7 @@ import pytest
 from tests import conftest
 from . import conftest as package_conftest
 from queue_manager.task.models import Task as PackageModel
+from queue_manager.user.models import Operator
 from copy import deepcopy
 from tests.fixtures.test_tasks_additional import TEST_ITEMS
 
@@ -68,6 +69,45 @@ def test_successfuly_updated(client, get_supervisors):
 
     # Is number of items the same as before the update?
     assert PackageModel.objects.all().count() == count_default_items_in_db + 1
+
+
+@pytest.mark.django_db
+def test_successfuly_updated_with_serviced_by(client, get_supervisors):
+    client.force_login(get_supervisors[0])
+    INITIAL_ITEM = deepcopy(TEST_ITEMS[0])
+    init_serviced_by = (
+        Operator.objects.all().order_by('id')[0],
+        Operator.objects.all().order_by('id')[1],
+    )
+    INITIAL_ITEM['can_be_served_by'] = (
+        init_serviced_by[0].id,
+        init_serviced_by[1].id,
+    )
+
+    UPDATED_ITEM = deepcopy(TEST_ITEMS[1])
+    upd_serviced_by = Operator.objects.all().order_by('id')[2]
+    UPDATED_ITEM['can_be_served_by'] = (
+        upd_serviced_by.id,
+    )
+
+    pre_response = client.post(
+        package_conftest.ITEM_CREATE_URL,
+        INITIAL_ITEM,
+        follow=True)
+    assert package_conftest.CREATE_OK_MESSAGE in pre_response.content.decode()
+
+    TESTED_URL = conftest.get_tested_url_for_max_id(
+        TESTED_URL_PATTERN, PackageModel)
+
+    response = client.post(TESTED_URL, UPDATED_ITEM, follow=True)
+    assert response.redirect_chain == [
+        (SUCCESS_URL, 302)
+    ]
+    response_content = response.content.decode()
+    assert "The task was successfully updated" in response_content
+    assert upd_serviced_by.get_full_name() in response_content
+    assert init_serviced_by[0].get_full_name() not in response_content
+    assert init_serviced_by[1].get_full_name() not in response_content
 
 
 @pytest.mark.django_db
