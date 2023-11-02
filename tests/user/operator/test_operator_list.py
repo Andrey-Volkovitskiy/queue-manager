@@ -2,6 +2,7 @@ import pytest
 from tests import conftest
 from . import conftest as package_conftest
 from queue_manager.user.models import Operator as PackageModel
+from queue_manager.task.models import Task
 from bs4 import BeautifulSoup
 
 TESTED_URL = package_conftest.ITEM_LIST_URL
@@ -41,6 +42,24 @@ def test_all_items_are_displayed(client, get_supervisors):
     rows = soup.find_all('tr')
     assert len(rows) == (len(default_items_in_db)
                          + package_conftest.ITEM_LIST_HEADER_ROWS)
+
+
+@pytest.mark.django_db
+def test_with_related_tasks(client, get_supervisors):
+    default_items_in_db = list(PackageModel.objects.all())
+    item_with_tasks = default_items_in_db[0]
+    expected_task = Task.objects.first()
+    unexpected_tasks = Task.objects.all().exclude(id=expected_task.id)
+    item_with_tasks.task_set.set((expected_task, ))
+
+    client.force_login(get_supervisors[0])
+    response = client.get(TESTED_URL)
+    content = response.content.decode()
+
+    assert expected_task.name in content
+    for unexpected_task in unexpected_tasks:
+        assert unexpected_task.name not in content
+    assert '= No one ='
 
 
 @pytest.mark.django_db
