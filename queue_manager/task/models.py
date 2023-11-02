@@ -47,8 +47,11 @@ class Task(models.Model):
     can_be_served_by = models.ManyToManyField(
         Operator,
         through='Service',
-        blank=True
+        blank=True,
     )
+
+    def __str__(self):
+        return f'{self.letter_code} - {self.name}'
 
 
 class Service(models.Model):

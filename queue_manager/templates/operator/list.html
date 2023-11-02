@@ -14,17 +14,25 @@
       <tr>
         <th>Full name</th>
         <th>Username</th>
-        <th></th>
+        <th>Can serve tasks</th>
       </tr>
     </thead>
 
     <tbody>
       {% for object in object_list %}
         <tr>
-          <td>{{ object.get_full_name }}</td>
+          <td><a href="{% url item_name|add:'-update' object.id %}">{{ object.get_full_name }}</a></td>
           <td>{{ object.username }}</td>
           <td>
-              <a href="{% url item_name|add:'-update' object.id %}">Edit</a>
+            {% if object.task_set.all %}
+              <ul class="list-unstyled">
+                {% for task in object.task_set.all|dictsort:"letter_code" %}
+                  <li>{{ task }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <span class="text-danger">= No one =</span>
+            {% endif %}
           </td>
         </tr>
       {% endfor %}

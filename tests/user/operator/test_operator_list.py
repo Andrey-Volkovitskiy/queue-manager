@@ -19,7 +19,7 @@ def test_basic_content(client, get_supervisors):
     assert "Create new operator" in content
     assert "Full name" in content
     assert "Username" in content
-    assert "Edit" in content
+    assert "Can serve tasks" in content
 
 
 @pytest.mark.django_db
