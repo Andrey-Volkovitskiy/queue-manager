@@ -13,7 +13,19 @@ class OperatorCreateForm(UserCreationForm):
             'username',
             'password1',
             'password2',
+            'task_set',
             ]
+
+    task_set = forms.ModelMultipleChoiceField(
+        label="Can serve tasks",
+        widget=forms.CheckboxSelectMultiple(),
+        queryset=Task.objects.all().order_by('letter_code'),
+        required=False)
+
+    def save(self, *args, **kwargs):
+        instance = super().save(*args, **kwargs)
+        instance.task_set.set(self.cleaned_data['task_set'])
+        return instance
 
 
 class OperatorUpdateForm(forms.ModelForm):
