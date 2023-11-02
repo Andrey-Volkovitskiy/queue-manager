@@ -6,6 +6,11 @@ class TaskForm(forms.ModelForm):
     class Meta:
         model = Task
         fields = [
+            'letter_code',
             'name',
             'description',
-            'letter_code']
+            'can_be_served_by',
+        ]
+        widgets = {
+            'can_be_served_by': forms.CheckboxSelectMultiple
+        }

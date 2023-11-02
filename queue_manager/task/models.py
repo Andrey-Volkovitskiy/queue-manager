@@ -46,7 +46,8 @@ class Task(models.Model):
     )
     can_be_served_by = models.ManyToManyField(
         Operator,
-        through='Service'
+        through='Service',
+        blank=True
     )
 
 

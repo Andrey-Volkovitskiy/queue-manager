@@ -20,8 +20,6 @@ def test_basic_content(client, get_supervisors):
     assert "Name" in content
     assert "Description" in content
     assert "Created at" in content
-    assert "Edit" in content
-    assert "Delete" in content
 
 
 @pytest.mark.django_db

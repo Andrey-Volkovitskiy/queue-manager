@@ -16,21 +16,27 @@
         <th>Name</th>
         <th>Description</th>
         <th>Created at</th>
-        <th></th>
+        <th>Can be serviced by</th>
       </tr>
     </thead>
 
     <tbody>
       {% for object in object_list %}
         <tr>
-          <td>{{ object.letter_code }}</td>
+          <td><a href="{% url item_name|add:'-update' object.id %}">{{ object.letter_code }}</a></td>
           <td>{{ object.name }}</td>
           <td>{{ object.description }}</td>
           <td>{{ object.created_at }}</td>
           <td>
-              <a href="{% url item_name|add:'-update' object.id %}">Edit</a>
-            <br>
-            <a href="{% url item_name|add:'-delete' object.id %}">Delete</a>
+            {% if object.can_be_served_by.all %}
+              <ul class="list-unstyled">
+                {% for service_operator in object.can_be_served_by.all %}
+                  <li>{{ service_operator.get_full_name }}</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <span class="text-danger">= No one =</span>
+            {% endif %}
           </td>
         </tr>
       {% endfor %}

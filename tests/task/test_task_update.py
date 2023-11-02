@@ -30,6 +30,7 @@ def test_basic_content(client, get_supervisors):
     assert "Description" in content
     assert "Letter code" in content
     assert "Save" in content
+    assert "Delete task" in content
 
     assert INITIAL_ITEM['name'] in content
     assert INITIAL_ITEM['description'] in content
