@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  Debug page
+{% endblock %}
+
+{% block content %}
+  <h1 class="my-4">Debug page</h1>
+
+  <div>
+    USER PERMISSIONS:
+    <ul>
+      {% for perm in permissions %}
+        <li>
+          {{ perm }}
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endblock %}

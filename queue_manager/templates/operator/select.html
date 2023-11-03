@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  Select dashboard
+{% endblock %}
+
+{% block content %}
+  <h1 class="my-4">Select dashboard</h1>
+  <small class="text-muted">You are logged in as a supervisor, so you can select any operator dashboard to figure out how the queue manager works.</small>
+  <table class="table table-striped mt-4">
+    <thead>
+      <tr>
+        <th>Work as operator</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for object in object_list %}
+        <tr>
+          <td><a href="{% url item_name|add:'-personal' object.id %}">{{ object.get_full_name }}</a></td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

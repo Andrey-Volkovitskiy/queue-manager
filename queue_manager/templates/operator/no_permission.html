@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  No permission
+{% endblock %}
+
+{% block content %}
+  <h1 class="my-4">Sorry, you do not have the permission</h1>
+
+  <p>
+    Please <a href="{% url 'login' %}?next={% url 'operator-enter' %}">login</a> as a operator.
+  </p>
+
+{% endblock %}

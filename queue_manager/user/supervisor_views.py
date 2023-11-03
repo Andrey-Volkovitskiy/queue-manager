@@ -6,6 +6,7 @@ from queue_manager.user.models import Supervisor as MODEL
 
 
 class SupervisorEnterView(View):
+    '''Redirects the supervisor to they Personal dashboard page'''
     def get(self, request, *args, **kwargs):
         user_id = self.request.user.id
         is_supervisor = MODEL.objects.filter(id=user_id).exists()
@@ -21,13 +22,6 @@ class SupervisorPersonalView(
         DetailView):
     model = MODEL
     template_name = "supervisor/personal.html"
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     user_id = self.request.user.id
-    #     context['permissions'] = MODEL.objects.get(
-    #         id=user_id).get_all_permissions()
-    #     return context
 
 
 class SupervisorNoPermissionView(TemplateView):

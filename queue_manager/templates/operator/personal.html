@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  Operator dashboard
+{% endblock %}
+
+{% block content %}
+  <h1 class="my-4">Operator dashboard</h1>
+
+  <p>{{ object.get_full_name }}</p>
+
+  <!-- <div>
+    PERMISSIONS:
+    <ul>
+      {% for perm in permissions %}
+        <li>
+          {{ perm }}
+        </li>
+      {% endfor %}
+    </ul>
+  </div> -->
+{% endblock %}

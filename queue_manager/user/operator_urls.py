@@ -5,6 +5,16 @@ ITEM_NAME = 'operator'
 
 
 urlpatterns = [
+    path('', operator_views.OperatorEnterView.as_view(),
+         name='operator-enter'),
+    path('<int:pk>/', operator_views.OperatorPersonalView.as_view(),
+         name='operator-personal'),
+    path('no_permission/',
+         operator_views.OperatorNoPermissionView.as_view(),
+         name='operator-no-permission'),
+    path('select/',
+         operator_views.OperatorSelectView.as_view(),
+         name='operator-select'),
     path('manage/',
          operator_views.ItemListView.as_view(),
          name=f'{ITEM_NAME}-list'),

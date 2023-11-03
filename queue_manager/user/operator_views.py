@@ -3,15 +3,59 @@ from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.views.generic import (ListView,
                                   CreateView,
                                   UpdateView,
-                                  DeleteView)
+                                  DeleteView,
+                                  DetailView,
+                                  TemplateView,
+                                  View,)
+from django.shortcuts import redirect
 from django.http import HttpResponseRedirect
 from queue_manager.user.models import Operator as MODEL
 from queue_manager.user import forms
-from queue_manager.mixins import ContextMixinWithItemName
+from queue_manager.mixins import (ContextMixinWithItemName,
+                                  PersonalPagePermissions,)
 from django.urls import reverse_lazy
 from django.contrib import messages
 
 ITEM_NAME = 'operator'
+
+
+class OperatorEnterView(View):
+    '''Redirects the operator to they Personal dashboard page.
+    Or gives to a supervisor ability to select desired Operator dashboard.'''
+    def get(self, request, *args, **kwargs):
+        if self.request.user.has_perm('user.pretend_operator'):
+            return redirect(reverse_lazy('operator-select'))
+
+        user_id = self.request.user.id
+        is_operator = MODEL.objects.filter(id=user_id).exists()
+        if is_operator:
+            return redirect(reverse_lazy(
+                'operator-personal',
+                kwargs={'pk': user_id}))
+
+        return redirect(reverse_lazy('operator-no-permission'))
+
+
+class OperatorPersonalView(
+        PersonalPagePermissions,
+        DetailView):
+    model = MODEL
+    template_name = "operator/personal.html"
+
+
+class OperatorNoPermissionView(TemplateView):
+    template_name = 'operator/no_permission.html'
+
+
+class OperatorSelectView(
+        PermissionRequiredMixin,
+        ContextMixinWithItemName,
+        ListView):
+    model = MODEL
+    item_name = ITEM_NAME
+    template_name = f"{ITEM_NAME}/select.html"
+    ordering = ['first_name', 'last_name']
+    permission_required = 'user.pretend_operator'
 
 
 class ItemListView(

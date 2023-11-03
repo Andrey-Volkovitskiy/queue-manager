@@ -34,6 +34,9 @@ class OperatorManager(UserManager):
 class Operator(User):
     class Meta:
         proxy = True
+        permissions = [(
+            "pretend_operator",
+            "Can serve tickets pretending to be any of the operators"), ]
 
     objects = OperatorManager()
 
