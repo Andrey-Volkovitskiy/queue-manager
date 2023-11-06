@@ -52,6 +52,7 @@ PERMISSIONS_FOR_SUPERVISORS = (
     'change_operator',
     'view_operator',
     'delete_operator',
+    'pretend_operator',
     'add_task',
     'change_task',
     'view_task',
