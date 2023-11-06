@@ -1,7 +1,7 @@
 from django.views.generic import (TemplateView, DetailView, View)
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from queue_manager.mixins import PersonalPagePermissions
+from django.contrib.auth.mixins import UserPassesTestMixin
 from queue_manager.user.models import Supervisor as MODEL
 
 
@@ -17,8 +17,19 @@ class SupervisorEnterView(View):
         return redirect(reverse_lazy('supervisor-no-permission'))
 
 
+class PersonalSupervPagePermissions(UserPassesTestMixin):
+    '''Allows only the user to access his personal page'''
+    def test_func(self):
+        subject_user = self.request.user
+        object_user = self.get_object()
+        if subject_user == object_user:
+            return True
+        else:
+            return False
+
+
 class SupervisorPersonalView(
-        PersonalPagePermissions,
+        PersonalSupervPagePermissions,
         DetailView):
     model = MODEL
     template_name = "supervisor/personal.html"

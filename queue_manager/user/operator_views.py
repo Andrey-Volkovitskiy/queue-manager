@@ -11,8 +11,8 @@ from django.shortcuts import redirect
 from django.http import HttpResponseRedirect
 from queue_manager.user.models import Operator as MODEL
 from queue_manager.user import forms
-from queue_manager.mixins import (ContextMixinWithItemName,
-                                  PersonalPagePermissions,)
+from queue_manager.mixins import ContextMixinWithItemName
+from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 
@@ -36,8 +36,21 @@ class OperatorEnterView(View):
         return redirect(reverse_lazy('operator-no-permission'))
 
 
+class PersonalOperPagePermissions(UserPassesTestMixin):
+    '''Allows only the operator to access his personal page.
+    Or user with "pretend_operator" permission can access it.'''
+    def test_func(self):
+        subject_user = self.request.user
+        object_user = self.get_object()
+        if subject_user == object_user or (
+                subject_user.has_perm('user.pretend_operator')):
+            return True
+        else:
+            return False
+
+
 class OperatorPersonalView(
-        PersonalPagePermissions,
+        PersonalOperPagePermissions,
         DetailView):
     model = MODEL
     template_name = "operator/personal.html"
