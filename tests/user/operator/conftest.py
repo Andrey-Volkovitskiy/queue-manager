@@ -11,6 +11,9 @@ ITEM_LIST_URL = f"{ITEM_ENTER_URL}manage/"
 ITEM_CREATE_URL = f"{ITEM_ENTER_URL}manage/create/"
 CREATE_OK_MESSAGE = f"The {ITEM_NAME} was successfully created"
 
+SERVICE_START_POSTFIX_URL = "service_start/"
+SERVICE_STOP_POSTFIX_URL = "service_stop/"
+
 
 @pytest.fixture(autouse=True)
 def default_db_setup():

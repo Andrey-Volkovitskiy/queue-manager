@@ -1,6 +1,5 @@
 import pytest
-from django.contrib.auth.models import User
-from tests.fixtures.test_users_base import GROUP_ID
+from queue_manager.user.models import Operator, Supervisor
 
 HOME_URL = "/"
 LOGIN_URL = "/login/"
@@ -23,9 +22,9 @@ def get_tested_url_for_max_id(url_pattern, Model):
 
 @pytest.fixture
 def get_supervisors():
-    return User.objects.filter(groups=GROUP_ID['supervisors']).order_by('id')
+    return Supervisor.objects.all().order_by('id')
 
 
 @pytest.fixture
 def get_operators():
-    return User.objects.filter(groups=GROUP_ID['operators']).order_by('id')
+    return Operator.objects.all().order_by('id')

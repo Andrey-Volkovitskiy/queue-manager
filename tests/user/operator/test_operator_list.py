@@ -59,7 +59,7 @@ def test_with_related_tasks(client, get_supervisors):
     assert expected_task.name in content
     for unexpected_task in unexpected_tasks:
         assert unexpected_task.name not in content
-    assert '= No one ='
+    assert '= No one =' in content
 
 
 @pytest.mark.django_db

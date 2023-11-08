@@ -73,7 +73,7 @@ class OperatorPersonalView(
                 id=primary_service.id)
             if secondary_services:
                 context['secondary_tasks'] = Task.objects.filter(
-                    service__in=secondary_services)
+                    service__in=secondary_services).order_by('id')
         return context
 
 
