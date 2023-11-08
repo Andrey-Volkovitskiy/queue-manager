@@ -58,9 +58,10 @@ class Service(models.Model):
     '''If service record exists, than the operator have the authoriry
     to serve the task.
     If is_servicing flag is true, the operator is currently servicing the task
-    with given priority.
-    1 - lowest priority
-    9 - highest priority'''
+    with given priority.'''
+    LOWEST_PRIORITY = 1
+    HIGHEST_PRIORITY = 9
+
     task = models.ForeignKey(
         Task,
         on_delete=models.CASCADE

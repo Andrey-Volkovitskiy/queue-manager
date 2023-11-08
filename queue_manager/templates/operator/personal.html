@@ -9,16 +9,20 @@
 {% block content %}
   <h1 class="my-4">Operator dashboard</h1>
 
-  <p>{{ object.get_full_name }}</p>
+  {% if is_servicing %}
+    <div class="text-muted">
+      <span>Serving primary task "{{ primary_task.letter_code }}"</span>
+      {% if secondary_tasks %}
+        <span> and secondary task(s) :
+        {% for sec_task in secondary_tasks %}
+          {{ sec_task.letter_code }}{% if not forloop.last %}, {% endif %}
+        {% endfor %}
+        </span>
+      {% endif %}
+      <a class="btn btn-outline-secondary mx-3" href="{% url 'service-start' object.id %}">Stop service</a>
+    </div>
+  {% else %}
+    <a class="btn btn-primary" href="{% url 'service-start' object.id %}">Start service</a>
+  {% endif %}
 
-  <!-- <div>
-    PERMISSIONS:
-    <ul>
-      {% for perm in permissions %}
-        <li>
-          {{ perm }}
-        </li>
-      {% endfor %}
-    </ul>
-  </div> -->
 {% endblock %}

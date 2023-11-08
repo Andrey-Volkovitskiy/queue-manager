@@ -10,6 +10,7 @@ from django.views.generic import (ListView,
 from django.shortcuts import redirect
 from django.http import HttpResponseRedirect
 from queue_manager.user.models import Operator as MODEL
+from queue_manager.task.models import Service, Task
 from queue_manager.user import forms
 from queue_manager.mixins import ContextMixinWithItemName
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -55,6 +56,25 @@ class OperatorPersonalView(
     model = MODEL
     template_name = "operator/personal.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        available_services = self.get_object().service_set
+        context['is_servicing'] = available_services.filter(
+            is_servicing=True).exists()
+
+        active_services = self.get_object().service_set.filter(
+            is_servicing=True)
+        primary_service = active_services.filter(
+            priority_for_operator=Service.HIGHEST_PRIORITY).last()
+        if primary_service:
+            context['primary_task'] = primary_service.task
+            secondaty_services = active_services.exclude(
+                id=primary_service.id)
+            if secondaty_services:
+                context['secondary_tasks'] = Task.objects.filter(
+                    service__in=secondaty_services)
+        return context
+
 
 class OperatorNoPermissionView(TemplateView):
     template_name = 'operator/no_permission.html'
@@ -69,6 +89,23 @@ class OperatorSelectView(
     template_name = f"{ITEM_NAME}/select.html"
     ordering = ['first_name', 'last_name']
     permission_required = 'user.pretend_operator'
+
+
+class OperatorStartServiceView(
+        PersonalOperPagePermissions,
+        UpdateView):
+    model = MODEL
+    form_class = forms.OperatorStartServiceForm
+    template_name = "operator/service_start.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['available_tasks'] = self.get_object().task_set.all()
+        return context
+
+    def get_success_url(self):
+        return reverse_lazy(
+            'operator-personal', kwargs={'pk': self.kwargs['pk']})
 
 
 class ItemListView(

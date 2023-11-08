@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  Start service tasks
+{% endblock %}
+
+{% block content %}
+  <h1 class="my-4">Start service tasks</h1>
+
+  <form method="post" class="form">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+        <button type="submit" class="btn btn-primary">
+          Start
+        </button>
+  </form>
+
+{% endblock %}
