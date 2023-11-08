@@ -17,7 +17,7 @@ class SupervisorEnterView(View):
         return redirect(reverse_lazy('supervisor-no-permission'))
 
 
-class PersonalSupervPagePermissions(UserPassesTestMixin):
+class SupervPersonalPagePermissions(UserPassesTestMixin):
     '''Allows only the user to access his personal page'''
     def test_func(self):
         subject_user = self.request.user
@@ -29,7 +29,7 @@ class PersonalSupervPagePermissions(UserPassesTestMixin):
 
 
 class SupervisorPersonalView(
-        PersonalSupervPagePermissions,
+        SupervPersonalPagePermissions,
         DetailView):
     model = MODEL
     template_name = "supervisor/personal.html"

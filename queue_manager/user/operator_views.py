@@ -37,12 +37,13 @@ class OperatorEnterView(View):
         return redirect(reverse_lazy('operator-no-permission'))
 
 
-class PersonalOperPagePermissions(UserPassesTestMixin):
+class OperatorPersonalPagePermissions(UserPassesTestMixin):
     '''Allows only the operator to access his personal page.
     Or user with "pretend_operator" permission can access it.'''
     def test_func(self):
         subject_user = self.request.user
-        object_user = self.get_object()
+        object_user_id = int(self.kwargs['pk'])
+        object_user = MODEL.objects.get(id=object_user_id)
         if subject_user == object_user or (
                 subject_user.has_perm('user.pretend_operator')):
             return True
@@ -51,7 +52,7 @@ class PersonalOperPagePermissions(UserPassesTestMixin):
 
 
 class OperatorPersonalView(
-        PersonalOperPagePermissions,
+        OperatorPersonalPagePermissions,
         DetailView):
     model = MODEL
     template_name = "operator/personal.html"
@@ -68,11 +69,11 @@ class OperatorPersonalView(
             priority_for_operator=Service.HIGHEST_PRIORITY).last()
         if primary_service:
             context['primary_task'] = primary_service.task
-            secondaty_services = active_services.exclude(
+            secondary_services = active_services.exclude(
                 id=primary_service.id)
-            if secondaty_services:
+            if secondary_services:
                 context['secondary_tasks'] = Task.objects.filter(
-                    service__in=secondaty_services)
+                    service__in=secondary_services)
         return context
 
 
@@ -92,20 +93,31 @@ class OperatorSelectView(
 
 
 class OperatorStartServiceView(
-        PersonalOperPagePermissions,
+        OperatorPersonalPagePermissions,
         UpdateView):
     model = MODEL
     form_class = forms.OperatorStartServiceForm
     template_name = "operator/service_start.html"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['available_tasks'] = self.get_object().task_set.all()
-        return context
-
     def get_success_url(self):
         return reverse_lazy(
             'operator-personal', kwargs={'pk': self.kwargs['pk']})
+
+
+class OperatorStopServiceView(
+        OperatorPersonalPagePermissions,
+        View):
+    http_method_names = ["post", ]
+
+    def post(self, request, *args, **kwargs):
+        operator_id = self.kwargs['pk']
+        available_services = Service.objects.filter(
+            operator_id=operator_id)
+        is_servicing = available_services.filter(is_servicing=True).exists()
+        if is_servicing:
+            available_services.update(is_servicing=False)
+        return redirect(reverse_lazy(
+            'operator-personal', kwargs={'pk': operator_id}))
 
 
 class ItemListView(
