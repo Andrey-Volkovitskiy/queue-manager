@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User, Group, UserManager
+from queue_manager.status.models import Status
 import sys
 
 
@@ -39,6 +40,28 @@ class Operator(User):
             "Can serve tickets pretending to be any of the operators"), ]
 
     objects = OperatorManager()
+
+    @property
+    def is_servicing(self):
+        return self.service_set.filter(is_servicing=True).exists()
+
+    @property
+    def last_assigned_ticket(self):
+        last_processing_status = self.assigned_to.filter(
+            code=Status.objects.Codes.PROCESSING).last()
+        if last_processing_status:
+            return last_processing_status.ticket
+
+    @property
+    def current_ticket(self):
+        if self.last_assigned_ticket and (
+                self.last_assigned_ticket.status_set.last(
+                ).code == Status.objects.Codes.PROCESSING):
+            return self.last_assigned_ticket
+
+    @property
+    def is_free(self):
+        return False if self.current_ticket else True
 
     def save(self, *args, **kwargs):
         '''Adds just created user to "operators" group

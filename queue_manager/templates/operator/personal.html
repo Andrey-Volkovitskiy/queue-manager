@@ -9,8 +9,9 @@
 {% block content %}
   <h1 class="my-4">Operator dashboard</h1>
 
-  {% if is_servicing %}
-    <div class="text-muted">
+  <!-- Serving -->
+  <div class="text-muted">
+    {% if is_servicing %}
       <span>Serving primary task "{{ primary_task.letter_code }}"</span>
       {% if secondary_tasks %}
         <span> and secondary task(s):
@@ -24,9 +25,23 @@
         {% csrf_token %}
         <input class="btn btn-outline-secondary mx-3" type="submit" value="Stop service">
       </form>
-    </div>
-  {% else %}
-    <a class="btn btn-primary" href="{% url 'service-start' object.id %}">Start service</a>
-  {% endif %}
+    {% else %}
+      <a class="btn btn-primary" href="{% url 'service-start' object.id %}">Start service</a>
+    {% endif %}
+  </div>
 
+  <!-- Current ticket -->
+  <div class="my-4">
+    <p>is_serving: {{ object.is_servicing }}</p>
+    <p>is_free: {{ object.is_free }}</p>
+    <p>last_assigned_ticket: {{ object.last_assigned_ticket }} {{ object.last_assigned_ticket.code }}</p>
+    <p>current_ticket: {{ object.current_ticket }}</p>
+    {% if object.current_ticket %}
+      <p>current_ticket: {{ object.current_ticket.code }}</p>
+      <form method="post" class="d-inline" action="{% url 'ticket-completed' object.current_ticket.id %}">
+        {% csrf_token %}
+        <input class="btn btn-success mx-3" type="submit" value="Mark completed">
+      </form>
+    {% endif %}
+  </div>
 {% endblock %}

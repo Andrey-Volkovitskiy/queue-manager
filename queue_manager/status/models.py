@@ -1,5 +1,4 @@
 from django.db import models
-from queue_manager.ticket.models import Ticket
 from django.contrib.auth.models import User
 
 
@@ -28,14 +27,14 @@ class StatusManager(models.Manager):
         REDIRECTED = 'R'
         MISSED = 'M'
 
-    def create_initial(self, ticket: Ticket):
+    def create_initial(self, ticket):
         '''Creates the initial status when creating a ticket'''
         return self.create(
             ticket=ticket,
             code=self.Codes.UNASSIGNED
         )
 
-    def create_additional(self, ticket: Ticket, new_code: Codes,  # noqa: C901
+    def create_additional(self, ticket, new_code: Codes,  # noqa: C901
                           assigned_by=None, assigned_to=None):
         '''Creates a new status for the ticket
         and implements status flow logic'''
@@ -96,7 +95,7 @@ class StatusManager(models.Manager):
 
 class Status(models.Model):
     ticket = models.ForeignKey(
-        Ticket,
+        'ticket.Ticket',
         on_delete=models.PROTECT,
         verbose_name='Ticket'
     )
