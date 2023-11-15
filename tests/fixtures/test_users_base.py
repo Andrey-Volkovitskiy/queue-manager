@@ -25,7 +25,12 @@ OPERATORS = (
         "last_name": "Surname_C",
         "password": "password_C"
     },
-
+    {
+        "username": "operator_D",
+        "first_name": "Name_D",
+        "last_name": "Surname_D",
+        "password": "password_D"
+    },
 )
 
 SUPERVISORS = (

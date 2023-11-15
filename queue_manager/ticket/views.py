@@ -1,11 +1,29 @@
-from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.mixins import (
+            PermissionRequiredMixin,
+            UserPassesTestMixin)
 from django.views.generic import (View, ListView)
 from queue_manager.ticket.models import Ticket as MODEL
+from queue_manager.status.models import Status
 from queue_manager.ticket.models import ITEM_NAME
 from queue_manager.session.models import Session
 from queue_manager.mixins import ContextMixinWithItemName
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
+
+
+class TicketCompletedViewPermissions(UserPassesTestMixin):
+    '''Allows only the processing operator to mark the ticket as completed.
+    Or user with "pretend_operator" permission can access it.'''
+    def test_func(self):
+        request_user = self.request.user
+        ticket_id = int(self.kwargs['pk'])
+        processing_user = MODEL.objects.get(id=ticket_id).status_set.filter(
+            code=Status.objects.Codes.PROCESSING).last().assigned_to
+        if request_user == processing_user or (
+                request_user.has_perm('user.pretend_operator')):
+            return True
+        else:
+            return False
 
 
 class ItemListView(
@@ -23,8 +41,9 @@ class ItemListView(
 
 
 class TicketCompletedView(
-        View):  # TODO Add permissions
-    http_method_names = ["post", ]
+        TicketCompletedViewPermissions,
+        View):
+    http_method_names = ["post", 'get']
 
     def post(self, request, *args, **kwargs):
         ticket = MODEL.objects.get(id=self.kwargs['pk'])
