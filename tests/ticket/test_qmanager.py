@@ -1,5 +1,4 @@
 import pytest
-from django.db import transaction
 from queue_manager.user.models import Operator, Supervisor
 from queue_manager.ticket.models import QManager
 from queue_manager.session.models import Session
