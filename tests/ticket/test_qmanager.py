@@ -185,7 +185,7 @@ def test_redirect_ticket_success(client, get_supervisors):
         follow=True)
     content = response.content.decode()
     assert response.status_code == 200
-    assert 'The ticket was successfully redirected' in content    
+    assert 'The ticket was successfully redirected' in content
 
     # Was the ticket Redirected?
     next_statuses = Status.objects.filter(
