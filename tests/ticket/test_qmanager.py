@@ -1,4 +1,5 @@
 import pytest
+from django.db import transaction
 from queue_manager.user.models import Operator, Supervisor
 from queue_manager.ticket.models import QManager
 from queue_manager.session.models import Session
@@ -142,3 +143,83 @@ def test_general_ticket_appeared_success(client, get_supervisors):
     ]
     last_status = first_ticket.status_set.last()
     assert last_status.code == Status.objects.Codes.COMPLETED
+
+
+@pytest.mark.django_db
+def test_redirect_ticket_success(client, get_supervisors):
+    client.force_login(get_supervisors[1])
+    taskC = Task.objects.get(letter_code='C')
+    expected_free_operators_ids = setup_db()
+
+    # Assign the tiket to initial operator
+    ticket = Ticket.objects.create_ticket(taskC)
+    first_assignment_status = ticket.status_set.last()
+    initial_operator = first_assignment_status.assigned_to
+    operator_personal_page_url = f'/operator/{initial_operator.id}/'
+    response = client.get(operator_personal_page_url)
+    content = response.content.decode()
+    redirect_url = (f'/ticket/{ticket.id}/redirect/'
+                    f'?redirected_by={initial_operator.id}')
+    assert redirect_url in content
+
+    # Redirect the ticket to another operator
+    # GET
+    response = client.get(redirect_url)
+    content = response.content.decode()
+    assert 'Redirect ticket' in content
+    assert ticket.code in content
+    all_servicing_operators = Operator.objects.filter(
+        service__is_servicing=True).distinct()
+    all_operators_except_initial = all_servicing_operators.exclude(
+        id=initial_operator.id)
+    for redirect_to_option in all_operators_except_initial:
+        assert redirect_to_option.get_full_name() in content
+    assert initial_operator.get_full_name() not in content
+
+    # POST
+    redirected_to_id = (set(expected_free_operators_ids) - set((
+        initial_operator.id, ))).pop()
+    response = client.post(
+        redirect_url,
+        {'redirect_to': redirected_to_id},
+        follow=True)
+    content = response.content.decode()
+    assert response.status_code == 200
+    assert 'The ticket was successfully redirected' in content    
+
+    # Was the ticket Redirected?
+    next_statuses = Status.objects.filter(
+        assigned_at__gt=first_assignment_status.assigned_at).order_by(
+            'assigned_at')
+    redirect_status = next_statuses[0]
+    second_assigment_status = next_statuses[1]
+    assert redirect_status.code == Status.objects.Codes.REDIRECTED
+    assert redirect_status.assigned_by == initial_operator
+    assert redirect_status.assigned_to.id == redirected_to_id
+
+    # Was the ticket Assigned to another operator?
+    assert second_assigment_status.code == Status.objects.Codes.PROCESSING
+    assert second_assigment_status.assigned_to.id == redirected_to_id
+
+
+@pytest.mark.django_db
+def test_mark_ticket_missed_success(client, get_supervisors):
+    client.force_login(get_supervisors[1])
+    taskC = Task.objects.get(letter_code='C')
+    setup_db()
+
+    # Assign the tiket to initial operator
+    ticket = Ticket.objects.create_ticket(taskC)
+    first_assignment_status = ticket.status_set.last()
+    initial_operator = first_assignment_status.assigned_to
+    operator_personal_page_url = f'/operator/{initial_operator.id}/'
+    response = client.get(operator_personal_page_url)
+    content = response.content.decode()
+    assert 'Mark missed' in content
+
+    # Mark missed
+    missed_url = f'/ticket/{ticket.id}/mark_missed/'
+    response = client.post(missed_url, follow=True)
+    last_status = ticket.status_set.last()
+    assert last_status.code == Status.objects.Codes.MISSED
+    assert last_status.assigned_by == initial_operator
