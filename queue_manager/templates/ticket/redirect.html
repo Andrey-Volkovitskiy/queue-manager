@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  Redirect the ticket {{ item_name }}
+{% endblock %}
+
+{% block content %}
+  <h1 class="my-4">Redirect ticket "{{ object.code }}"</h1>
+
+  <form method="post" class="form">
+    {% csrf_token %}
+    {% bootstrap_form form %}
+        <button type="submit" class="btn btn-primary">
+          Redirect
+        </button>
+  </form>
+
+{% endblock %}

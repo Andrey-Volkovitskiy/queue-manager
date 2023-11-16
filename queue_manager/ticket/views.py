@@ -1,29 +1,16 @@
 from django.contrib.auth.mixins import (
             PermissionRequiredMixin,
             UserPassesTestMixin)
-from django.views.generic import (View, ListView)
+from django.views.generic import (View, UpdateView, ListView)
+from django.contrib.messages.views import SuccessMessageMixin
 from queue_manager.ticket.models import Ticket as MODEL
 from queue_manager.status.models import Status
 from queue_manager.ticket.models import ITEM_NAME
 from queue_manager.session.models import Session
 from queue_manager.mixins import ContextMixinWithItemName
+from queue_manager.ticket import forms
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-
-
-class TicketCompletedViewPermissions(UserPassesTestMixin):
-    '''Allows only the processing operator to mark the ticket as completed.
-    Or user with "pretend_operator" permission can access it.'''
-    def test_func(self):
-        request_user = self.request.user
-        ticket_id = int(self.kwargs['pk'])
-        processing_user = MODEL.objects.get(id=ticket_id).status_set.filter(
-            code=Status.objects.Codes.PROCESSING).last().assigned_to
-        if request_user == processing_user or (
-                request_user.has_perm('user.pretend_operator')):
-            return True
-        else:
-            return False
 
 
 class ItemListView(
@@ -40,12 +27,62 @@ class ItemListView(
             session=Session.objects.get_current_session())
 
 
-class TicketCompletedView(
-        TicketCompletedViewPermissions,
+class TicketMarkPermissions(UserPassesTestMixin):
+    '''Allows only the processing operator to mark the ticket as completed.
+    Or user with "pretend_operator" permission can access it.'''
+    def test_func(self):
+        request_user = self.request.user
+        ticket_id = int(self.kwargs['pk'])
+        processing_user = MODEL.objects.get(id=ticket_id).status_set.filter(
+            code=Status.objects.Codes.PROCESSING).last().assigned_to
+        if request_user == processing_user or (
+                request_user.has_perm('user.pretend_operator')):
+            return True
+        else:
+            return False
+
+
+class TicketMarkCompletedView(
+        TicketMarkPermissions,
         View):
-    http_method_names = ["post", 'get']
+    http_method_names = ["post", ]
 
     def post(self, request, *args, **kwargs):
         ticket = MODEL.objects.get(id=self.kwargs['pk'])
         ticket.mark_completed()
         return redirect(reverse_lazy('operator-enter'))  # TODO
+
+
+class TicketMarkMissedView(
+        TicketMarkPermissions,
+        View):
+    http_method_names = ["post", ]
+
+    def post(self, request, *args, **kwargs):
+        ticket = MODEL.objects.get(id=self.kwargs['pk'])
+        ticket.mark_missed()
+        return redirect(reverse_lazy('operator-enter'))  # TODO
+
+
+class TicketRedirectView(
+        TicketMarkPermissions,
+        SuccessMessageMixin,
+        UpdateView):
+    model = MODEL
+    form_class = forms.TicketRedirectForm
+    template_name = f"{ITEM_NAME}/redirect.html"
+    success_message = "The ticket was successfully redirected"
+    success_url = reverse_lazy('operator-enter')  # TODO
+
+    def form_valid(self, form):
+        ticket = self.get_object()
+        redirect_to = form.cleaned_data['redirect_to']
+        ticket.redirect(redirect_to=redirect_to)
+        return super().form_valid(form)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        redirected_by = self.request.GET.get('redirected_by')
+        if redirected_by:
+            kwargs['redirected_by'] = redirected_by
+        return kwargs

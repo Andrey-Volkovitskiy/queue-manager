@@ -109,7 +109,7 @@ def test_additional_status_P_to_M_success():
 
 @pytest.mark.django_db
 def test_additional_status_P_with_wrong_codes():
-    WRONG_CODES = ('U', 'R', 'P')
+    WRONG_CODES = ('U', 'P')
     user = Operator.objects.first()
     task = Task.objects.last()
     ticket = Ticket.objects.create_ticket(task=task)

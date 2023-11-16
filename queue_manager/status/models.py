@@ -62,7 +62,8 @@ class StatusManager(models.Manager):
                 raise self.StatusFlowViolated
 
         elif last_code == self.Codes.PROCESSING:
-            if new_code in (self.Codes.COMPLETED, self.Codes.MISSED):
+            if new_code in (self.Codes.COMPLETED, self.Codes.MISSED,
+                            self.Codes.REDIRECTED):
                 _check_args((assigned_by, ))
                 return _create_new_status()
             else:

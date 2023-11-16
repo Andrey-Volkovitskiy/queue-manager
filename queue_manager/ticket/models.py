@@ -79,13 +79,35 @@ class Ticket(models.Model):
             assigned_by=processing_operator,
         )
 
+    def mark_missed(self):
+        processing_operator = self.status_set.filter(
+            code=Status.objects.Codes.PROCESSING).last().assigned_to
+        Status.objects.create_additional(
+            ticket=self,
+            new_code=Status.objects.Codes.MISSED,
+            assigned_by=processing_operator,
+        )
+
+    def redirect(self, redirect_to: Operator):
+        processing_operator = self.status_set.filter(
+            code=Status.objects.Codes.PROCESSING).last().assigned_to
+        Status.objects.create_additional(
+            ticket=self,
+            new_code=Status.objects.Codes.REDIRECTED,
+            assigned_by=processing_operator,
+            assigned_to=redirect_to
+        )
+        QManager.personal_ticket_appeared(
+            ticket=self,
+            assigned_to=redirect_to
+        )
+
 
 class QManager:
     @classmethod
-    def personal_ticket_appeared(cls, ticket: Ticket):
-        operator = ticket.get_redirected_operator()
-        if operator.is_free():
-            ticket.assign_to_operator(operator)
+    def personal_ticket_appeared(cls, ticket: Ticket, assigned_to: Operator):
+        if assigned_to.is_free:
+            ticket.assign_to_operator(assigned_to)
 
     @classmethod
     def general_ticket_appeared(cls, ticket: Ticket):
@@ -95,7 +117,7 @@ class QManager:
             ticket.assign_to_operator(free_operator)
 
     @classmethod
-    def free_operator_appeared(cls, operator):
+    def free_operator_appeared(cls, operator: Operator):
         personal_ticket = cls._get_next_personal_ticket(operator)
         if personal_ticket:
             return personal_ticket.assign_to_operator(operator)
@@ -106,15 +128,15 @@ class QManager:
             return general_ticket.assign_to_operator(operator)
 
     @classmethod
-    def _get_next_personal_ticket(cls, operator) -> Ticket:
+    def _get_next_personal_ticket(cls, operator: Operator) -> Ticket:
         pass  # TODO
 
     @classmethod
-    def _get_next_primary_ticket(cls, operator) -> Ticket:
+    def _get_next_primary_ticket(cls, operator: Operator) -> Ticket:
         pass  # TODO
 
     @classmethod
-    def _get_next_secondary_ticket(cls, operator) -> Ticket:
+    def _get_next_secondary_ticket(cls, operator: Operator) -> Ticket:
         pass  # TODO
 
     @classmethod

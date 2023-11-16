@@ -38,10 +38,19 @@
     <p>current_ticket: {{ object.current_ticket }}</p>
     {% if object.current_ticket %}
       <p>current_ticket: {{ object.current_ticket.code }}</p>
-      <form method="post" class="d-inline" action="{% url 'ticket-completed' object.current_ticket.id %}">
+
+      <form method="post" class="d-inline" action="{% url 'ticket-mark-completed' object.current_ticket.id %}">
         {% csrf_token %}
         <input class="btn btn-success mx-3" type="submit" value="Mark completed">
       </form>
+
+      <form method="post" class="d-inline" action="{% url 'ticket-mark-missed' object.current_ticket.id %}">
+        {% csrf_token %}
+        <input class="btn btn-outline-secondary mx-3" type="submit" value="Mark missed">
+      </form>
+      
+      <a class="btn btn-outline-secondary mx-3" href="{% url 'ticket-redirect' object.current_ticket.id %}?redirected_by={{object.id}}">Redirect</a>
+      
     {% endif %}
   </div>
 {% endblock %}
