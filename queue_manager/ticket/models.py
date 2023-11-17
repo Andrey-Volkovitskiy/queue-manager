@@ -123,14 +123,14 @@ class QManager:
     def free_operator_appeared(cls, operator: Operator):
         if not operator.is_servicing:
             return
-        # personal_ticket = cls._get_next_personal_ticket(operator)
-        # if personal_ticket:
-        #     return personal_ticket.assign_to_operator(operator)
+        personal_ticket = cls._get_next_personal_ticket(operator)
+        if personal_ticket:
+            return personal_ticket.assign_to_operator(operator)
 
-        # general_ticket = cls._get_next_primary_ticket(operator) or (
-        #     cls._get_next_secondary_ticket(operator))
-        # if general_ticket:
-        #     return general_ticket.assign_to_operator(operator)
+        general_ticket = cls._get_next_primary_ticket(operator) or (
+            cls._get_next_secondary_ticket(operator))
+        if general_ticket:
+            return general_ticket.assign_to_operator(operator)
 
     @classmethod
     def _get_next_personal_ticket(cls, operator: Operator) -> Ticket:
@@ -147,8 +147,8 @@ class QManager:
             status__assigned_to=operator
         ).annotate(last_status_code=last_status_code).filter(
             last_status_code=Status.objects.Codes.REDIRECTED).annotate(
-                last_status_assigned_at=last_status_assigned_at).earliest(
-            'last_status_assigned_at')
+                last_status_assigned_at=last_status_assigned_at).order_by(
+            'last_status_assigned_at').first()
 
     @classmethod
     def _get_next_primary_ticket(
@@ -164,15 +164,19 @@ class QManager:
                 'assigned_at')[:1])
 
         if primary_task_id is None:
-            primary_task_id = Subquery(Service.objects.filter(
-                operator=operator, is_servicing=True, priority_for_operator=9)
-                    .last().task.id)
+            primary_task_id = Subquery(
+                Service.objects.filter(
+                    operator=operator,
+                    is_servicing=True,
+                    priority_for_operator=9
+                ).values('task_id')[:1])
 
-        return Ticket.objects.filter(task__id=primary_task_id).annotate(
-            last_status_code=last_status_code,
-            last_status_assigned_at=last_status_assigned_at).filter(
-                last_status_code=Status.objects.Codes.UNASSIGNED).earliest(
-                    'last_status_assigned_at')
+        return Ticket.objects.filter(task__id=primary_task_id)\
+            .annotate(
+                last_status_code=last_status_code,
+                last_status_assigned_at=last_status_assigned_at)\
+            .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\
+            .order_by('last_status_assigned_at').first()
 
     @classmethod
     def _get_next_secondary_ticket(
@@ -200,7 +204,7 @@ class QManager:
                 last_status_code=last_status_code,
                 last_status_assigned_at=last_status_assigned_at)\
             .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\
-            .earliest('last_status_assigned_at')
+            .order_by('last_status_assigned_at').first()
 
     @classmethod
     def _get_free_operators(cls, task: Task):
