@@ -1,5 +1,6 @@
 from queue_manager.user.models import Operator
 from queue_manager.task.models import Task, Service
+from queue_manager.ticket.models import QManager
 from django.contrib.auth.forms import UserCreationForm, SetPasswordForm
 from django import forms
 
@@ -111,4 +112,7 @@ class OperatorStartServiceForm(forms.ModelForm):
             is_servicing=True,
             priority_for_operator=Service.LOWEST_PRIORITY
         )
+
+        if instance.is_servicing:
+            QManager.free_operator_appeared(operator=instance)
         return instance

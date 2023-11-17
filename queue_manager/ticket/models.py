@@ -78,6 +78,8 @@ class Ticket(models.Model):
             new_code=Status.objects.Codes.COMPLETED,
             assigned_by=processing_operator,
         )
+        if processing_operator.is_servicing:
+            QManager.free_operator_appeared(operator=processing_operator)
 
     def mark_missed(self):
         processing_operator = self.status_set.filter(
@@ -87,6 +89,8 @@ class Ticket(models.Model):
             new_code=Status.objects.Codes.MISSED,
             assigned_by=processing_operator,
         )
+        if processing_operator.is_servicing:
+            QManager.free_operator_appeared(operator=processing_operator)
 
     def redirect(self, redirect_to: Operator):
         processing_operator = self.status_set.filter(
@@ -101,6 +105,8 @@ class Ticket(models.Model):
             ticket=self,
             assigned_to=redirect_to
         )
+        if processing_operator.is_servicing:
+            QManager.free_operator_appeared(operator=processing_operator)
 
 
 class QManager:
@@ -129,7 +135,21 @@ class QManager:
 
     @classmethod
     def _get_next_personal_ticket(cls, operator: Operator) -> Ticket:
-        pass  # TODO
+        last_status_code = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'code')[:1])
+
+        last_status_assigned_at = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'assigned_at')[:1])
+
+        return Ticket.objects.filter(
+            status__code=Status.objects.Codes.REDIRECTED,
+            status__assigned_to=operator
+        ).annotate(last_status_code=last_status_code).filter(
+            last_status_code=Status.objects.Codes.REDIRECTED).annotate(
+                last_status_assigned_at=last_status_assigned_at).earliest(
+            'last_status_assigned_at')
 
     @classmethod
     def _get_next_primary_ticket(cls, operator: Operator) -> Ticket:

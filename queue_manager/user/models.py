@@ -53,7 +53,7 @@ class Operator(User):
             return last_processing_status.ticket
 
     @property
-    def current_ticket(self):
+    def current_ticket(self):  # TODO Optimize request
         if self.last_assigned_ticket and (
                 self.last_assigned_ticket.status_set.last(
                 ).code == Status.objects.Codes.PROCESSING):
