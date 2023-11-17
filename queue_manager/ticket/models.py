@@ -1,6 +1,6 @@
 import random
 from django.db import models
-from queue_manager.task.models import Task
+from queue_manager.task.models import Task, Service
 from queue_manager.session.models import Session
 from queue_manager.status.models import Status
 from django.db.models import OuterRef, Subquery
@@ -151,8 +151,28 @@ class QManager:
             'last_status_assigned_at')
 
     @classmethod
-    def _get_next_primary_ticket(cls, operator: Operator) -> Ticket:
-        pass  # TODO
+    def _get_next_primary_ticket(
+                cls, operator: Operator, primary_task_id=None) -> Ticket:
+        '''primary_task is only used to test this method'''
+
+        last_status_code = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'code')[:1])
+
+        last_status_assigned_at = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'assigned_at')[:1])
+
+        if primary_task_id is None:
+            primary_task_id = Subquery(Service.objects.filter(
+                operator=operator, is_servicing=True, priority_for_operator=9)
+                    .last().task.values('id')[:1])
+
+        return Ticket.objects.filter(task__id=primary_task_id).annotate(
+            last_status_code=last_status_code,
+            last_status_assigned_at=last_status_assigned_at).filter(
+                last_status_code=Status.objects.Codes.UNASSIGNED).earliest(
+                    'last_status_assigned_at')
 
     @classmethod
     def _get_next_secondary_ticket(cls, operator: Operator) -> Ticket:

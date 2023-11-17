@@ -7,7 +7,7 @@ from queue_manager.ticket.models import Ticket
 from queue_manager.status.models import Status
 
 
-def setup_db():
+def _setup_db():
     supervisor = Supervisor.objects.first()
     operators = Operator.objects.all().order_by('id')
     taskA = Task.objects.get(letter_code='A')
@@ -33,7 +33,7 @@ def setup_db():
         )
 
 
-def add_personal_ticket(task, assidned_to):
+def _add_personal_ticket(task, assidned_to):
     redirecting_operator = Operator.objects.last()
     session = Session.objects.get_current_session()
     ticket = Ticket.objects.create(
@@ -60,13 +60,59 @@ def add_personal_ticket(task, assidned_to):
     return ticket
 
 
+def _add_general_ticket(task):
+    session = Session.objects.get_current_session()
+    ticket = Ticket.objects.create(
+        task=task,
+        session=session,
+        code=Ticket.objects._get_new_ticket_code(
+            session=session,
+            task=task
+        ))
+    Status.objects.create_initial(ticket=ticket)
+    return ticket
+
+
+def _add_completed_ticket(task):
+    compliting_operator = Operator.objects.last()
+    session = Session.objects.get_current_session()
+    ticket = Ticket.objects.create(
+        task=task,
+        session=session,
+        code=Ticket.objects._get_new_ticket_code(
+            session=session,
+            task=task
+        ))
+    # Service.objects.filter(
+    #     task=task, operator=compliting_operator).update(
+    #     is_servicing=True,
+    #     priority_for_operator=9,
+    # )
+    Status.objects.create_initial(ticket=ticket)
+    Status.objects.create_additional(
+        ticket=ticket,
+        new_code=Status.objects.Codes.PROCESSING,
+        assigned_to=compliting_operator,)
+    Status.objects.create_additional(
+        ticket=ticket,
+        new_code=Status.objects.Codes.COMPLETED,
+        assigned_by=compliting_operator)
+    # Service.objects.filter(
+    #     task=task, operator=compliting_operator).update(
+    #     is_servicing=False,
+    #     priority_for_operator=None,
+    # )
+    return ticket
+
+
+# _get_next_personal_ticket #######################
 @pytest.mark.django_db
 def test_get_next_personal_ticket_with_one_ticket():
     taskA = Task.objects.get(letter_code='A')
     tested_operator = Operator.objects.first()
-    setup_db()
+    _setup_db()
 
-    expected_ticket = add_personal_ticket(
+    expected_ticket = _add_personal_ticket(
         task=taskA,
         assidned_to=tested_operator
     )
@@ -78,17 +124,17 @@ def test_get_next_personal_ticket_with_one_ticket():
 def test_get_next_personal_ticket_with_three_tickets():
     taskA = Task.objects.get(letter_code='A')
     tested_operator = Operator.objects.first()
-    setup_db()
+    _setup_db()
 
-    ticket1 = add_personal_ticket(
+    ticket1 = _add_personal_ticket(
         task=taskA,
         assidned_to=tested_operator
     )
-    add_personal_ticket(
+    _add_personal_ticket(
         task=taskA,
         assidned_to=tested_operator
     )
-    add_personal_ticket(
+    _add_personal_ticket(
         task=taskA,
         assidned_to=tested_operator
     )
@@ -100,9 +146,9 @@ def test_get_next_personal_ticket_with_three_tickets():
 def test_get_next_personal_ticket_with_old_R_status():
     taskA = Task.objects.get(letter_code='A')
     tested_operator = Operator.objects.first()
-    setup_db()
+    _setup_db()
 
-    ticket1 = add_personal_ticket(
+    ticket1 = _add_personal_ticket(
         task=taskA,
         assidned_to=tested_operator
     )
@@ -115,13 +161,31 @@ def test_get_next_personal_ticket_with_old_R_status():
         new_code=Status.objects.Codes.COMPLETED,
         assigned_to=tested_operator,)
 
-    ticket2 = add_personal_ticket(
+    ticket2 = _add_personal_ticket(
         task=taskA,
         assidned_to=tested_operator
     )
-    add_personal_ticket(
+    _add_personal_ticket(
         task=taskA,
         assidned_to=tested_operator
     )
     next_personal_ticket = QManager._get_next_personal_ticket(tested_operator)
     assert next_personal_ticket == ticket2
+
+
+# _get_next_primary_ticket #######################
+@pytest.mark.django_db
+def test_get_next_primary_ticket():
+    taskA = Task.objects.get(letter_code='A')
+    tested_operator = Operator.objects.first()
+    _setup_db()
+
+    _add_completed_ticket(task=taskA)
+    expected_ticket = _add_general_ticket(task=taskA)
+    _add_general_ticket(task=taskA)
+    _add_general_ticket(task=taskA)
+
+    next_primary_ticket = QManager._get_next_primary_ticket(
+        operator=tested_operator,
+        primary_task_id=taskA.id)
+    assert next_primary_ticket == expected_ticket
