@@ -189,3 +189,26 @@ def test_get_next_primary_ticket():
         operator=tested_operator,
         primary_task_id=taskA.id)
     assert next_primary_ticket == expected_ticket
+
+
+# _get_next_secondary_ticket #######################
+@pytest.mark.django_db
+def test_get_next_secondary_ticket():
+    taskA = Task.objects.get(letter_code='A')
+    taskB = Task.objects.get(letter_code='B')
+    tested_operator = Operator.objects.first()
+    _setup_db()
+
+    _add_completed_ticket(task=taskA)
+    expected_ticket = _add_general_ticket(task=taskB)
+    _add_general_ticket(task=taskA)
+    _add_general_ticket(task=taskB)
+    _add_general_ticket(task=taskA)
+    _add_general_ticket(task=taskB)
+
+    next_secondary_ticket = QManager._get_next_secondary_ticket(
+        operator=tested_operator,
+        secondery_tasks_ids=(
+            taskA.id,
+            taskB.id))
+    assert next_secondary_ticket == expected_ticket
