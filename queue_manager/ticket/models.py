@@ -78,8 +78,7 @@ class Ticket(models.Model):
             new_code=Status.objects.Codes.COMPLETED,
             assigned_by=processing_operator,
         )
-        if processing_operator.is_servicing:
-            QManager.free_operator_appeared(operator=processing_operator)
+        QManager.free_operator_appeared(operator=processing_operator)
 
     def mark_missed(self):
         processing_operator = self.status_set.filter(
@@ -89,8 +88,7 @@ class Ticket(models.Model):
             new_code=Status.objects.Codes.MISSED,
             assigned_by=processing_operator,
         )
-        if processing_operator.is_servicing:
-            QManager.free_operator_appeared(operator=processing_operator)
+        QManager.free_operator_appeared(operator=processing_operator)
 
     def redirect(self, redirect_to: Operator):
         processing_operator = self.status_set.filter(
@@ -105,8 +103,7 @@ class Ticket(models.Model):
             ticket=self,
             assigned_to=redirect_to
         )
-        if processing_operator.is_servicing:
-            QManager.free_operator_appeared(operator=processing_operator)
+        QManager.free_operator_appeared(operator=processing_operator)
 
 
 class QManager:
@@ -124,14 +121,16 @@ class QManager:
 
     @classmethod
     def free_operator_appeared(cls, operator: Operator):
-        personal_ticket = cls._get_next_personal_ticket(operator)
-        if personal_ticket:
-            return personal_ticket.assign_to_operator(operator)
+        if not operator.is_servicing:
+            return
+        # personal_ticket = cls._get_next_personal_ticket(operator)
+        # if personal_ticket:
+        #     return personal_ticket.assign_to_operator(operator)
 
-        general_ticket = cls._get_next_primary_ticket(operator) or (
-            cls._get_next_secondary_ticket(operator))
-        if general_ticket:
-            return general_ticket.assign_to_operator(operator)
+        # general_ticket = cls._get_next_primary_ticket(operator) or (
+        #     cls._get_next_secondary_ticket(operator))
+        # if general_ticket:
+        #     return general_ticket.assign_to_operator(operator)
 
     @classmethod
     def _get_next_personal_ticket(cls, operator: Operator) -> Ticket:

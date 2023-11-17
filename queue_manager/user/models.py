@@ -1,5 +1,4 @@
 from django.contrib.auth.models import User, Group, UserManager
-from queue_manager.status.models import Status
 import sys
 
 
@@ -47,6 +46,7 @@ class Operator(User):
 
     @property
     def last_assigned_ticket(self):
+        from queue_manager.status.models import Status
         last_processing_status = self.assigned_to.filter(
             code=Status.objects.Codes.PROCESSING).last()
         if last_processing_status:
@@ -54,6 +54,7 @@ class Operator(User):
 
     @property
     def current_ticket(self):  # TODO Optimize request
+        from queue_manager.status.models import Status
         if self.last_assigned_ticket and (
                 self.last_assigned_ticket.status_set.last(
                 ).code == Status.objects.Codes.PROCESSING):

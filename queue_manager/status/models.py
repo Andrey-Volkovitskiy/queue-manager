@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from queue_manager.user.models import Operator
 
 
 ITEM_NAME = 'status'
@@ -116,7 +117,7 @@ class Status(models.Model):
         null=True,
     )
     assigned_to = models.ForeignKey(
-        User,
+        Operator,
         on_delete=models.PROTECT,
         verbose_name='Assigned to',
         related_name='assigned_to',
