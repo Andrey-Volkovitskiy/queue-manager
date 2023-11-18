@@ -63,6 +63,9 @@ class Ticket(models.Model):
                 name='unique_code_in_session')
         ]
 
+    def __str__(self):
+        return self.code
+
     def assign_to_operator(self, operator):
         Status.objects.create_additional(
             ticket=self,
