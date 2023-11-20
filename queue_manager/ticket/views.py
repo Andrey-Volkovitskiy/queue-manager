@@ -8,6 +8,7 @@ from queue_manager.status.models import Status
 from queue_manager.ticket.models import ITEM_NAME
 from queue_manager.session.models import Session
 from queue_manager.mixins import ContextMixinWithItemName
+from queue_manager.mixins import TopNavMenuMixin
 from queue_manager.ticket import forms
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
@@ -16,6 +17,7 @@ from django.urls import reverse_lazy
 class ItemListView(
         PermissionRequiredMixin,
         ContextMixinWithItemName,
+        TopNavMenuMixin,
         ListView):
     item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/list.html"
@@ -67,6 +69,7 @@ class TicketMarkMissedView(
 class TicketRedirectView(
         TicketMarkPermissions,
         SuccessMessageMixin,
+        TopNavMenuMixin,
         UpdateView):
     model = MODEL
     form_class = forms.TicketRedirectForm

@@ -5,12 +5,14 @@ from django.urls import reverse_lazy
 from django.shortcuts import redirect
 from queue_manager.session.models import ITEM_NAME
 from queue_manager.mixins import ContextMixinWithItemName
+from queue_manager.mixins import TopNavMenuMixin
 from queue_manager.session.models import Session as MODEL
 
 
 class ItemListView(
         PermissionRequiredMixin,
         ContextMixinWithItemName,
+        TopNavMenuMixin,
         ListView):
     model = MODEL
     item_name = ITEM_NAME
@@ -29,6 +31,7 @@ class ItemListView(
 
 class ItemStartView(
         PermissionRequiredMixin,
+        TopNavMenuMixin,
         View):
     success_url = reverse_lazy(f"{ITEM_NAME}-list")
     permission_required = (f'{ITEM_NAME}.add_{ITEM_NAME}', )
@@ -54,6 +57,7 @@ class ItemStartView(
 class ItemFinishView(
         PermissionRequiredMixin,
         ContextMixinWithItemName,
+        TopNavMenuMixin,
         TemplateView):
     model = MODEL
     item_name = ITEM_NAME

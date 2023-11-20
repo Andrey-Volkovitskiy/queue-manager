@@ -1,5 +1,6 @@
 from django.contrib.messages.views import SuccessMessageMixin
 from django.contrib.auth.mixins import PermissionRequiredMixin
+from queue_manager.mixins import TopNavMenuMixin
 from django.views.generic import (ListView,
                                   CreateView,
                                   UpdateView,
@@ -53,6 +54,7 @@ class OperatorPersonalPagePermissions(UserPassesTestMixin):
 
 class OperatorPersonalView(
         OperatorPersonalPagePermissions,
+        TopNavMenuMixin,
         DetailView):
     model = MODEL
     template_name = "operator/personal.html"
@@ -77,13 +79,14 @@ class OperatorPersonalView(
         return context
 
 
-class OperatorNoPermissionView(TemplateView):
+class OperatorNoPermissionView(TopNavMenuMixin, TemplateView):
     template_name = 'operator/no_permission.html'
 
 
 class OperatorSelectView(
         PermissionRequiredMixin,
         ContextMixinWithItemName,
+        TopNavMenuMixin,
         ListView):
     model = MODEL
     item_name = ITEM_NAME
@@ -94,6 +97,7 @@ class OperatorSelectView(
 
 class OperatorStartServiceView(
         OperatorPersonalPagePermissions,
+        TopNavMenuMixin,
         UpdateView):
     model = MODEL
     form_class = forms.OperatorStartServiceForm
@@ -123,6 +127,7 @@ class OperatorStopServiceView(
 class ItemListView(
         PermissionRequiredMixin,
         ContextMixinWithItemName,
+        TopNavMenuMixin,
         ListView):
     model = MODEL
     item_name = ITEM_NAME
@@ -135,6 +140,7 @@ class ItemCreateView(
         PermissionRequiredMixin,
         ContextMixinWithItemName,
         SuccessMessageMixin,
+        TopNavMenuMixin,
         CreateView):
     form_class = forms.OperatorCreateForm
     item_name = ITEM_NAME
@@ -148,6 +154,7 @@ class ItemUpdateView(
         PermissionRequiredMixin,
         ContextMixinWithItemName,
         SuccessMessageMixin,
+        TopNavMenuMixin,
         UpdateView):
     model = MODEL
     form_class = forms.OperatorUpdateForm
@@ -162,6 +169,7 @@ class UpdatePassView(
         PermissionRequiredMixin,
         ContextMixinWithItemName,
         SuccessMessageMixin,
+        TopNavMenuMixin,
         UpdateView):
     model = MODEL
     form_class = forms.OperatorChangePasswordForm
@@ -176,6 +184,7 @@ class ItemSoftDeleteView(
         PermissionRequiredMixin,
         ContextMixinWithItemName,
         SuccessMessageMixin,
+        TopNavMenuMixin,
         DeleteView):
     model = MODEL
     fields = []

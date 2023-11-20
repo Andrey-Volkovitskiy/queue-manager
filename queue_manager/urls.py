@@ -19,7 +19,7 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
-    path('', views.index, name='home'),
+    path('', views.IndexView.as_view(), name='home'),
     path('task/', include('queue_manager.task.urls')),
     path('session/', include('queue_manager.session.urls')),
     path('ticket/', include('queue_manager.ticket.urls')),

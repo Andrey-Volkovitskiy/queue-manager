@@ -173,7 +173,7 @@ def test_redirect_ticket_success(client, get_supervisors):
         id=initial_operator.id)
     for redirect_to_option in all_operators_except_initial:
         assert redirect_to_option.get_full_name() in content
-    assert initial_operator.get_full_name() not in content
+    assert f'{initial_operator.get_full_name()}</option>' not in content
 
     # POST
     redirected_to_id = (set(expected_free_operators_ids) - set((

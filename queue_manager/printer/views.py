@@ -1,25 +1,28 @@
-from django.views.generic import (View, TemplateView, DetailView)
-from django.shortcuts import redirect, render
+from django.views.generic import (TemplateView, DetailView)
+from django.shortcuts import redirect
 from queue_manager.ticket.models import Ticket
 from queue_manager.session.models import Session
 from queue_manager.task.models import Task
+from queue_manager.mixins import TopNavMenuMixin
 from django.urls import reverse_lazy
 
 TASK_CODE_PREFIX = "task_code:"
 
 
-class ItemCreateView(View):
+class ItemCreateView(TopNavMenuMixin, TemplateView):
     template_name = "printer/create.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['tasks'] = Task.objects\
+            .filter(is_active=True).order_by('letter_code')
+        context['code_prefix'] = TASK_CODE_PREFIX
+        return context
 
     def get(self, request, *args, **kwargs):
         if not Session.objects.get_current_session():
             return redirect(reverse_lazy('printer-no-active-session'))
-        context = {
-            'tasks': Task.objects.filter(
-                is_active=True).order_by('letter_code'),
-            'code_prefix': TASK_CODE_PREFIX
-            }
-        return render(request, self.template_name, context)
+        return super().get(self, request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
         task_code = None
@@ -38,10 +41,10 @@ class ItemCreateView(View):
             return redirect(reverse_lazy('printer-no-active-session'))
 
 
-class ItemDetailView(DetailView):
+class ItemDetailView(TopNavMenuMixin, DetailView):
     model = Ticket
     template_name = "printer/detail.html"
 
 
-class NoActiveSessionView(TemplateView):
+class NoActiveSessionView(TopNavMenuMixin, TemplateView):
     template_name = "printer/no-active-session.html"

@@ -2,6 +2,7 @@ from django.views.generic import (TemplateView, DetailView, View)
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import UserPassesTestMixin
+from queue_manager.mixins import TopNavMenuMixin
 from queue_manager.user.models import Supervisor as MODEL
 
 
@@ -30,10 +31,11 @@ class SupervPersonalPagePermissions(UserPassesTestMixin):
 
 class SupervisorPersonalView(
         SupervPersonalPagePermissions,
+        TopNavMenuMixin,
         DetailView):
     model = MODEL
     template_name = "supervisor/personal.html"
 
 
-class SupervisorNoPermissionView(TemplateView):
+class SupervisorNoPermissionView(TopNavMenuMixin, TemplateView):
     template_name = 'supervisor/no_permission.html'

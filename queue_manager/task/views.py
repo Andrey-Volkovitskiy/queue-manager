@@ -8,12 +8,14 @@ from queue_manager.task.models import Task as MODEL
 from queue_manager.task.models import ITEM_NAME
 from queue_manager.task.forms import TaskForm as FORM
 from queue_manager.mixins import ContextMixinWithItemName
+from queue_manager.mixins import TopNavMenuMixin
 from django.urls import reverse_lazy
 
 
 class ItemListView(
         PermissionRequiredMixin,
         ContextMixinWithItemName,
+        TopNavMenuMixin,
         ListView):
     model = MODEL
     item_name = ITEM_NAME
@@ -26,6 +28,7 @@ class ItemCreateView(
         PermissionRequiredMixin,
         ContextMixinWithItemName,
         SuccessMessageMixin,
+        TopNavMenuMixin,
         CreateView):
     form_class = FORM
     item_name = ITEM_NAME
@@ -39,6 +42,7 @@ class ItemUpdateView(
         PermissionRequiredMixin,
         ContextMixinWithItemName,
         SuccessMessageMixin,
+        TopNavMenuMixin,
         UpdateView):
     model = MODEL
     form_class = FORM
@@ -55,6 +59,7 @@ class ItemDeleteView(
         PermissionRequiredMixin,
         ContextMixinWithItemName,
         SuccessMessageMixin,
+        TopNavMenuMixin,
         DeleteView):
     model = MODEL
     fields = []

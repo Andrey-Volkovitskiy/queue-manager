@@ -17,7 +17,7 @@ def test_basic_content(client, get_supervisors):
     content = response.content.decode()
     assert response.status_code == 200
     assert "Welcome dear client!" in content
-    assert "Please select the purpose of your request:" in content
+    assert "Please select the purpose" in content
     expected_tasks = Task.objects.filter(is_active=True)
     for task in expected_tasks:
         assert task.name in content

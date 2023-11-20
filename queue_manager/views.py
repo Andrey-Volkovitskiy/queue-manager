@@ -1,5 +1,5 @@
-from django.shortcuts import render
 from django.contrib.messages.views import SuccessMessageMixin
+from queue_manager.mixins import TopNavMenuMixin
 from django.views.generic import TemplateView
 from django.contrib import messages
 from django.contrib.auth.views import LoginView, LogoutView
@@ -25,8 +25,8 @@ class SiteLogoutView(LogoutView):
         return response
 
 
-def index(request):
-    return render(request, 'index.html')
+class IndexView(TopNavMenuMixin, TemplateView):
+    template_name = "index.html"
 
 
 def intendent_error(request):

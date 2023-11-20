@@ -25,11 +25,20 @@
             </div>
           </div>
     
-          <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-            <li><a href="#" class="nav-link link-secondary px-2">Home</a></li>
-            <li><span class="nav-link px-2 link-secondary">>></span></li>
-            <li><a href="#" class="nav-link link-secondary px-2">Operator - John Green</a></li>
-          </ul>
+          {% if top_nav_menu %}
+            <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
+              {% if top_nav_menu|length == 1 %}
+                <li><span class="nav-link px-2 link-secondary">>></span></li>
+              {% endif %}
+              
+              {% for menu_item in top_nav_menu %}
+                <li><a href="{{ menu_item.1 }}" class="nav-link link-secondary px-2">{{ menu_item.0 }}</a></li>
+                {% if forloop.first or not forloop.last %}
+                  <li><span class="nav-link px-2 link-secondary">>></span></li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          {% endif %}
     
           <div class="col-md-3 text-end">
             {% if user.is_authenticated %}
