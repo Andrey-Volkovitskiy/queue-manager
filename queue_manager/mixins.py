@@ -14,10 +14,8 @@ class ContextMixinWithItemName(ContextMixin):
 class TopNavMenuMixin(ContextMixin):
     def get_context_data(self, **kwargs):  # noqa C901
         context = super().get_context_data(**kwargs)
-
         menu_items = []
         path = self.request.path
-        print(f'PATH = {path}')
 
         if path != '/':
             menu_items.append(('Home', reverse_lazy('home')))
