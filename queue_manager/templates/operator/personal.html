@@ -34,10 +34,9 @@
   <div class="my-4">
     <p>is_serving: {{ object.is_servicing }}</p>
     <p>is_free: {{ object.is_free }}</p>
-    <p>last_assigned_ticket: {{ object.last_assigned_ticket }} {{ object.last_assigned_ticket.code }}</p>
-    <p>current_ticket: {{ object.current_ticket }}</p>
+    <p>last_assigned_ticket: {{ object.last_assigned_ticket.code }}</p>
+    <p>current_ticket: {{ object.current_ticket.code }}</p>
     {% if object.current_ticket %}
-      <p>current_ticket: {{ object.current_ticket.code }}</p>
 
       <form method="post" class="d-inline" action="{% url 'ticket-mark-completed' object.current_ticket.id %}">
         {% csrf_token %}

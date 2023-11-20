@@ -218,7 +218,7 @@ class QManager:
             Ticket.objects.filter(
                 status__assigned_to=OuterRef(OuterRef('id')),
                 status__code=Status.objects.Codes.PROCESSING
-                ).order_by('-id').values(
+                ).order_by('-status__assigned_at').values(
                 'id')[:1])
 
         last_status_of_last_ticket = Subquery(Status.objects.filter(

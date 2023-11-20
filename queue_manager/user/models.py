@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User, Group, UserManager
+from django.db.models import OuterRef, Subquery
 import sys
 
 
@@ -47,22 +48,39 @@ class Operator(User):
     @property
     def last_assigned_ticket(self):
         from queue_manager.status.models import Status
-        last_processing_status = self.assigned_to.filter(
-            code=Status.objects.Codes.PROCESSING).last()
+        last_processing_status = Status.objects.filter(
+            code=Status.objects.Codes.PROCESSING,
+            assigned_to=self
+            ).last()
         if last_processing_status:
             return last_processing_status.ticket
 
     @property
-    def current_ticket(self):  # TODO Optimize request
+    def current_ticket(self):
         from queue_manager.status.models import Status
-        if self.last_assigned_ticket and (
-                self.last_assigned_ticket.status_set.last(
-                ).code == Status.objects.Codes.PROCESSING):
-            return self.last_assigned_ticket
+        from queue_manager.ticket.models import Ticket
+
+        last_assigned_ticket = Subquery(
+            Ticket.objects.filter(
+                status__assigned_to=self,
+                status__code=Status.objects.Codes.PROCESSING
+                ).order_by('-status__assigned_at').values('id')[:1])
+
+        last_status_code = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'code')[:1])
+
+        return Ticket.objects\
+            .filter(id=last_assigned_ticket)\
+            .annotate(last_status_code=last_status_code)\
+            .filter(last_status_code=Status.objects.Codes.PROCESSING)\
+            .last()
 
     @property
     def is_free(self):
-        return False if self.current_ticket else True
+        if self.is_servicing and not self.current_ticket:
+            return True
+        return False
 
     def save(self, *args, **kwargs):
         '''Adds just created user to "operators" group
