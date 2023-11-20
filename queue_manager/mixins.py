@@ -37,7 +37,7 @@ class TopNavMenuMixin(ContextMixin):
                 ('Supervisor', reverse_lazy('supervisor-enter')))
 
         elif path.startswith('/operator/'):
-            if 'select' in path or 'no-permission' in path:
+            if 'select' in path or 'no_permission' in path:
                 pass
             elif 'manage' in path:
                 menu_items.append(

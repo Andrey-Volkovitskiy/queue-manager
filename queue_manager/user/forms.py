@@ -33,9 +33,9 @@ class OperatorUpdateForm(forms.ModelForm):
     class Meta:
         model = Operator
         fields = [
-            'username',
             'first_name',
             'last_name',
+            'username',
             'task_set'
             ]
 
