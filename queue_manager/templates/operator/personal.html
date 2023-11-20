@@ -10,7 +10,8 @@
   <h1 class="my-4">Operator dashboard</h1>
 
   <!-- Serving -->
-  <div class="text-muted">
+  <div class="text-muted border border-3">
+    <h4>Serviced tasks</h4>
     {% if is_servicing %}
       <span>Serving primary task "{{ primary_task.letter_code }}"</span>
       {% if secondary_tasks %}
@@ -31,7 +32,8 @@
   </div>
 
   <!-- Current ticket -->
-  <div class="my-4">
+  <div class="my-4 border border-3">
+    <h4>Current ticket</h4>
     <p>is_serving: {{ object.is_servicing }}</p>
     <p>is_free: {{ object.is_free }}</p>
     <p>last_assigned_ticket: {{ object.last_assigned_ticket.code }}</p>
