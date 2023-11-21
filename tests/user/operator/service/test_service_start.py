@@ -57,7 +57,7 @@ def test_service_start_success(client, get_operators):
     ]
     assert "Stop service" in content
     assert "Start service" not in content
-    primary_string = f'Serving primary task "{available_tasks[0].letter_code}"'
+    primary_string = f'Primary task "{available_tasks[0].letter_code}"'
     assert primary_string in content
     secondary_letter_codes = ','.join((
         available_tasks[1].letter_code,
@@ -106,7 +106,7 @@ def test_service_start_success_with_supervisor(
     ]
     assert "Stop service" in content
     assert "Start service" not in content
-    primary_string = f'Serving primary task "{available_tasks[0].letter_code}"'
+    primary_string = f'Primary task "{available_tasks[0].letter_code}"'
     assert primary_string in content
     secondary_letter_codes = ','.join((
         available_tasks[1].letter_code,
