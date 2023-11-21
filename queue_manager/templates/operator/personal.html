@@ -11,9 +11,9 @@
 
   <!-- Serving -->
   <div class="text-muted border border-3">
-    <h4>Serviced tasks</h4>
+    <h4>Currently serviced tasks</h4>
     {% if is_servicing %}
-      <span>Serving primary task "{{ primary_task.letter_code }}"</span>
+      <span>Primary task "{{ primary_task.letter_code }}"</span>
       {% if secondary_tasks %}
         <span> and secondary task(s):
         {% for sec_task in secondary_tasks %}
@@ -38,8 +38,8 @@
     <p>is_free: {{ object.is_free }}</p>
     <p>last_assigned_ticket: {{ object.last_assigned_ticket.code }}</p>
     <p>current_ticket: {{ object.current_ticket.code }}</p>
-    {% if object.current_ticket %}
 
+    {% if object.current_ticket %}
       <form method="post" class="d-inline" action="{% url 'ticket-mark-completed' object.current_ticket.id %}">
         {% csrf_token %}
         <input class="btn btn-success mx-3" type="submit" value="Mark completed">
@@ -51,7 +51,14 @@
       </form>
       
       <a class="btn btn-outline-secondary mx-3" href="{% url 'ticket-redirect' object.current_ticket.id %}?redirected_by={{object.id}}">Redirect</a>
-      
     {% endif %}
+  </div>
+
+
+  <div class="my-4 border border-3">
+    <h4>Queues</h4>
+    <h6>Personal tickets:</h6>
+    <h6>Primary task:</h6>
+    <h6>Secondary tasks:</h6>
   </div>
 {% endblock %}

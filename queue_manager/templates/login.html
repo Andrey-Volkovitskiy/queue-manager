@@ -15,4 +15,14 @@
           Sign In
         </button>
   </form>
+
+  <small>For demo purpuse you can login as a <a name="supervisor_cred" href="#">supervisor</a></small>
+
+  <script>
+    document.getElementsByName('supervisor_cred')[0].onclick = function(){ 
+    
+    document.getElementById('id_username').value = "default_supervisor";
+    document.getElementById('id_password').value = "default_pass";
+    };
+    </script>
 {% endblock %}
