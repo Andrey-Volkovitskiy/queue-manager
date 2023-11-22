@@ -20,8 +20,8 @@ class TopNavMenuMixin(ContextMixin):
         if path != '/':
             menu_items.append(('Home', reverse_lazy('home')))
 
-        if path.startswith('/printer/') and len(path) > len('/printer/'):
-            menu_items.append(('Client', reverse_lazy('printer-create')))
+        if path.startswith('/client/') and len(path) > len('/client/'):
+            menu_items.append(('Client', reverse_lazy('print-ticket')))
 
         elif path.startswith('/supervisor/'):
             pass

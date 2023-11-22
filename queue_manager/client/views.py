@@ -9,8 +9,8 @@ from django.urls import reverse_lazy
 TASK_CODE_PREFIX = "task_code:"
 
 
-class ItemCreateView(TopNavMenuMixin, TemplateView):
-    template_name = "printer/create.html"
+class PrintTicketView(TopNavMenuMixin, TemplateView):
+    template_name = "client/print_ticket.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -35,16 +35,16 @@ class ItemCreateView(TopNavMenuMixin, TemplateView):
             ticket = Ticket.objects.create_ticket(
                 task=Task.objects.get(letter_code=task_code))
             return redirect(reverse_lazy(
-                'printer-detail',
+                'printed-ticket-detail',
                 kwargs={'pk': ticket.id}))
         except Session.objects.NoActiveSessionsError:
             return redirect(reverse_lazy('printer-no-active-session'))
 
 
-class ItemDetailView(TopNavMenuMixin, DetailView):
+class PrintedTicketDetailView(TopNavMenuMixin, DetailView):
     model = Ticket
-    template_name = "printer/detail.html"
+    template_name = "client/printed_ticket_detail.html"
 
 
 class NoActiveSessionView(TopNavMenuMixin, TemplateView):
-    template_name = "printer/no-active-session.html"
+    template_name = "client/no-active-session.html"

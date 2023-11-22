@@ -6,7 +6,7 @@ from queue_manager.ticket.models import Ticket
 from queue_manager.session.models import Session
 
 
-TESTED_URL = package_conftest.ITEM_CREATE_URL
+TESTED_URL = package_conftest.PRINT_TICKET_URL
 TASK_CODE_PREFIX = "task_code:"
 
 
@@ -48,7 +48,7 @@ def test_successfuly_created_with_C002_ticket(client):
     assert "Your ticket:" in content
     assert "you will be redirected" in content
     assert response.redirect_chain == [
-        (f"/printer/{created_ticket.id}/", 302)
+        (f"/client/{created_ticket.id}/", 302)
     ]
 
 

@@ -4,9 +4,7 @@ from tests.fixtures.test_users_base import add_base_users
 
 ITEM_LIST_HEADER_ROWS = 1
 
-ITEM_NAME = "printer"
-
-ITEM_CREATE_URL = f"/{ITEM_NAME}/"
+PRINT_TICKET_URL = "/client/"
 
 
 @pytest.fixture(autouse=True)
