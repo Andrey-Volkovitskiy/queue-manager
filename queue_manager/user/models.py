@@ -82,6 +82,98 @@ class Operator(User):
             return True
         return False
 
+    def get_personal_tickets(self, limit=None):
+        '''Returns QuerySet with personal tickets assigned to the operator
+
+        Arguments:
+        limit - max numer of returned tickets'''
+        from queue_manager.ticket.models import Ticket
+        from queue_manager.status.models import Status
+
+        last_status_code = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'code')[:1])
+
+        last_status_assigned_at = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'assigned_at')[:1])
+
+        return Ticket.objects.filter(
+            status__code=Status.objects.Codes.REDIRECTED,
+            status__assigned_to=self
+        ).annotate(last_status_code=last_status_code).filter(
+            last_status_code=Status.objects.Codes.REDIRECTED).annotate(
+                last_status_assigned_at=last_status_assigned_at).order_by(
+            'last_status_assigned_at')[: limit]
+
+    def get_primary_tickets(self, limit=None, primary_task_id=None):
+        '''Returns QuerySet with primary tickets
+        which can be assigned to the operator
+
+        Arguments:
+        limit - max numer of returned tickets
+        primary_task - only used to test this method'''
+        from queue_manager.ticket.models import Ticket
+        from queue_manager.task.models import Service
+        from queue_manager.status.models import Status
+
+        last_status_code = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'code')[:1])
+
+        last_status_assigned_at = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'assigned_at')[:1])
+
+        if primary_task_id is None:
+            primary_task_id = Subquery(
+                Service.objects.filter(
+                    operator=self,
+                    is_servicing=True,
+                    priority_for_operator=9
+                ).values('task_id')[:1])
+
+        return Ticket.objects.filter(task__id=primary_task_id)\
+            .annotate(
+                last_status_code=last_status_code,
+                last_status_assigned_at=last_status_assigned_at)\
+            .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\
+            .order_by('last_status_assigned_at')[: limit]
+
+    def get_secondary_tickets(self, limit=None, secondery_tasks_ids=None):
+        '''Returns QuerySet with secondary tickets
+        which can be assigned to the operator
+
+        Arguments:
+        limit - max numer of returned tickets
+        secondery_tasks_ids - only used to test this method'''
+        from queue_manager.ticket.models import Ticket
+        from queue_manager.task.models import Service
+        from queue_manager.status.models import Status
+
+        last_status_code = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'code')[:1])
+
+        last_status_assigned_at = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'assigned_at')[:1])
+
+        if secondery_tasks_ids is None:
+            secondery_tasks_ids = Subquery(
+                Service.objects.filter(
+                    operator=self,
+                    is_servicing=True,
+                    priority_for_operator__lt=Service.HIGHEST_PRIORITY
+                ).values_list('task_id', flat=True))
+
+        return Ticket.objects.filter(task__id__in=secondery_tasks_ids)\
+            .annotate(
+                last_status_code=last_status_code,
+                last_status_assigned_at=last_status_assigned_at)\
+            .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\
+            .order_by('last_status_assigned_at')[: limit]
+
     def save(self, *args, **kwargs):
         '''Adds just created user to "operators" group
         and fixes pytest "pk=1' issue'''

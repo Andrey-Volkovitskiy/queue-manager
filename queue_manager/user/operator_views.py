@@ -58,9 +58,12 @@ class OperatorPersonalView(
         DetailView):
     model = MODEL
     template_name = "operator/personal.html"
+    queue_len_limit = 6
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Current serviced tasks
         available_services = self.get_object().service_set
         context['is_servicing'] = available_services.filter(
             is_servicing=True).exists()
@@ -76,6 +79,16 @@ class OperatorPersonalView(
             if secondary_services:
                 context['secondary_tasks'] = Task.objects.filter(
                     service__in=secondary_services).order_by('id')
+
+        # Queues
+        context['queue_len_limit'] = self.queue_len_limit
+        context['personal_tickets'] = self.get_object()\
+            .get_personal_tickets(limit=self.queue_len_limit)
+        context['primary_tickets'] = self.get_object()\
+            .get_primary_tickets(limit=self.queue_len_limit)
+        context['secondary_tickets'] = self.get_object()\
+            .get_secondary_tickets(limit=self.queue_len_limit)
+
         return context
 
 

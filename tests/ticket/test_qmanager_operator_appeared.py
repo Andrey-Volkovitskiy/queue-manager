@@ -249,11 +249,22 @@ def test_operator_appeared_end_to_end_success(client, get_supervisors):
     second_ticket = _add_general_ticket(task=task_primary)
     third_ticket = _add_general_ticket(task=task_primary)
 
-    # Add personal ticket
+    # Add personal tickets
     personal_ticket_1 = _add_personal_ticket(
         task=task_second_2, assidned_to=operator_1)
     personal_ticket_2 = _add_personal_ticket(
         task=task_primary,  assidned_to=operator_1)
+
+    # Are all tickets visualized on operators personal page?
+    response = client.get(f'/operator/{operator_1.id}', follow=True)
+    content = response.content.decode()
+    assert second_ticket.code in content
+    assert third_ticket.code in content
+    assert fourth_ticket.code in content
+    assert fifth_ticket.code in content
+    assert sixth_ticket.code in content
+    assert personal_ticket_1.code in content
+    assert personal_ticket_2.code in content
 
     # Make operator1 free and getting tickets
     response = client.post(

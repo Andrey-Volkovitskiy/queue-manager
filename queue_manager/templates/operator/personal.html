@@ -57,8 +57,46 @@
 
   <div class="my-4 border border-3">
     <h4>Queues</h4>
-    <h6>Personal tickets:</h6>
-    <h6>Primary task:</h6>
-    <h6>Secondary tasks:</h6>
+    <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+      
+      <div class="col">
+        <h6>Personal tickets:</h6>
+        <ul class="list-unstyled text-warning">
+          {% for ticket in personal_tickets %}
+            {% if forloop.last and personal_tickets|length == queue_len_limit %}
+              <li>...</li>
+            {% else %}
+              <li>{{ ticket.code }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      
+      <div class="col">
+        <h6>Primary task:</h6>
+        <ul class="list-unstyled text-primary">
+          {% for ticket in primary_tickets %}
+            {% if forloop.last and primary_tickets|length == queue_len_limit %}
+              <li>...</li>
+            {% else %}
+              <li>{{ ticket.code }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="col">
+        <h6>Secondary tasks:</h6>
+        <ul class="list-unstyled text-success">
+          {% for ticket in secondary_tickets %}
+            {% if forloop.last and secondary_tickets|length == queue_len_limit %}
+              <li>...</li>
+            {% else %}
+              <li>{{ ticket.code }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
   </div>
 {% endblock %}

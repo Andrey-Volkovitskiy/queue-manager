@@ -1,6 +1,6 @@
 import random
 from django.db import models
-from queue_manager.task.models import Task, Service
+from queue_manager.task.models import Task
 from queue_manager.session.models import Session
 from queue_manager.status.models import Status
 from django.db.models import OuterRef, Subquery
@@ -137,77 +137,31 @@ class QManager:
 
     @classmethod
     def _get_next_personal_ticket(cls, operator: Operator) -> Ticket:
-        last_status_code = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'code')[:1])
-
-        last_status_assigned_at = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'assigned_at')[:1])
-
-        return Ticket.objects.filter(
-            status__code=Status.objects.Codes.REDIRECTED,
-            status__assigned_to=operator
-        ).annotate(last_status_code=last_status_code).filter(
-            last_status_code=Status.objects.Codes.REDIRECTED).annotate(
-                last_status_assigned_at=last_status_assigned_at).order_by(
-            'last_status_assigned_at').first()
+        list_with_first_ticket = operator.get_personal_tickets(limit=1)
+        if len(list_with_first_ticket) > 0:
+            return list_with_first_ticket[0]
 
     @classmethod
     def _get_next_primary_ticket(
                 cls, operator: Operator, primary_task_id=None) -> Ticket:
         '''primary_task is only used to test this method'''
 
-        last_status_code = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'code')[:1])
-
-        last_status_assigned_at = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'assigned_at')[:1])
-
-        if primary_task_id is None:
-            primary_task_id = Subquery(
-                Service.objects.filter(
-                    operator=operator,
-                    is_servicing=True,
-                    priority_for_operator=9
-                ).values('task_id')[:1])
-
-        return Ticket.objects.filter(task__id=primary_task_id)\
-            .annotate(
-                last_status_code=last_status_code,
-                last_status_assigned_at=last_status_assigned_at)\
-            .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\
-            .order_by('last_status_assigned_at').first()
+        list_with_first_ticket = operator.get_primary_tickets(
+            limit=1,
+            primary_task_id=primary_task_id)
+        if len(list_with_first_ticket) > 0:
+            return list_with_first_ticket[0]
 
     @classmethod
     def _get_next_secondary_ticket(
             cls, operator: Operator, secondery_tasks_ids=None) -> Ticket:
         '''secondery_tasks_ids is only used to test this method'''
 
-        last_status_code = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'code')[:1])
-
-        last_status_assigned_at = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'assigned_at')[:1])
-
-        if secondery_tasks_ids is None:
-            secondery_tasks_ids = Subquery(
-                Service.objects.filter(
-                    operator=operator,
-                    is_servicing=True,
-                    priority_for_operator__lt=9
-                ).values_list('task_id', flat=True))
-
-        return Ticket.objects.filter(task__id__in=secondery_tasks_ids)\
-            .annotate(
-                last_status_code=last_status_code,
-                last_status_assigned_at=last_status_assigned_at)\
-            .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\
-            .order_by('last_status_assigned_at').first()
+        list_with_first_ticket = operator.get_secondary_tickets(
+            limit=1,
+            secondery_tasks_ids=secondery_tasks_ids)
+        if len(list_with_first_ticket) > 0:
+            return list_with_first_ticket[0]
 
     @classmethod
     def _get_free_operators(cls, task: Task):
