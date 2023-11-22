@@ -52,7 +52,9 @@ class TicketMarkCompletedView(
     def post(self, request, *args, **kwargs):
         ticket = MODEL.objects.get(id=self.kwargs['pk'])
         ticket.mark_completed()
-        return redirect(reverse_lazy('operator-enter'))  # TODO
+        assigned_by = ticket.status_set.last().assigned_by
+        return redirect(reverse_lazy(
+            'operator-personal', kwargs={'pk': assigned_by.id}))
 
 
 class TicketMarkMissedView(
@@ -63,7 +65,9 @@ class TicketMarkMissedView(
     def post(self, request, *args, **kwargs):
         ticket = MODEL.objects.get(id=self.kwargs['pk'])
         ticket.mark_missed()
-        return redirect(reverse_lazy('operator-enter'))  # TODO
+        assigned_by = ticket.status_set.last().assigned_by
+        return redirect(reverse_lazy(
+            'operator-personal', kwargs={'pk': assigned_by.id}))
 
 
 class TicketRedirectView(
@@ -75,7 +79,12 @@ class TicketRedirectView(
     form_class = forms.TicketRedirectForm
     template_name = f"{ITEM_NAME}/redirect.html"
     success_message = "The ticket was successfully redirected"
-    success_url = reverse_lazy('operator-enter')  # TODO
+
+    def get_success_url(self):
+        redirected_by = self.request.GET.get('redirected_by')
+        return reverse_lazy(
+            'operator-personal',
+            kwargs={'pk': redirected_by})
 
     def form_valid(self, form):
         ticket = self.get_object()

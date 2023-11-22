@@ -116,8 +116,7 @@ def test_general_ticket_appeared_success(client, get_supervisors):
     ticket_completed_URL = f'/ticket/{second_ticket.id}/mark_completed/'
     response = client.post(ticket_completed_URL, follow=True)
     assert response.redirect_chain == [
-        ('/operator/', 302),
-        ('/operator/select/', 302)
+        (f'/operator/{second_assigned_to_operator.id}/', 302),
     ]
     last_status = second_ticket.status_set.last()
     assert last_status.code == Status.objects.Codes.COMPLETED
@@ -137,7 +136,6 @@ def test_general_ticket_appeared_success(client, get_supervisors):
     ticket_completed_URL = f'/ticket/{first_ticket.id}/mark_completed/'
     response = client.post(ticket_completed_URL, follow=True)
     assert response.redirect_chain == [
-        ('/operator/', 302),
         (f'/operator/{first_assigned_to_operator.id}/', 302)
     ]
     last_status = first_ticket.status_set.last()
