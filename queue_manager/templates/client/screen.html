@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  Queue sreen
+{% endblock %}
+
+{% block content %}
+  <div>
+    <h1 class="my-4"> Last called tickets</h1>
+    <ul class="list-unstyled">
+    {% for status in object_list %}
+      <li>{{ status.ticket.code }} - {{ status.assigned_to.seat_number }} ({{ status.assigned_to.get_full_name }})</li>  
+    {% endfor %}
+    </ul>  
+  </div>
+
+  {% if request.GET.track_ticket %}
+    <div class="text-muted">
+      <small>Your ticket is: {{ request.GET.track_ticket }}</small>
+    </div>
+  {% endif %}
+{% endblock %}

@@ -7,12 +7,11 @@ from queue_manager.session.models import Session
 
 
 TESTED_URL = package_conftest.PRINT_TICKET_URL
-TASK_CODE_PREFIX = "task_code:"
+TASK_CODE_PREFIX = package_conftest.TASK_CODE_PREFIX
 
 
 @pytest.mark.django_db
-def test_basic_content(client, get_supervisors):
-    client.force_login(get_supervisors[0])
+def test_basic_content(client, print_ticket_db_setup):
     response = client.get(TESTED_URL)
     content = response.content.decode()
     assert response.status_code == 200
@@ -24,9 +23,10 @@ def test_basic_content(client, get_supervisors):
 
 
 @pytest.mark.django_db
-def test_successfuly_created_with_C002_ticket(client):
+def test_successfuly_created_with_C002_ticket(
+                                client, print_ticket_db_setup):
     existing_tickets_count = Ticket.objects.all().count()
-    chosen_task = Task.objects.filter(is_active=True).last()
+    chosen_task = Task.objects.get(is_active=True, letter_code='C')
     chosen_task_prefix = TASK_CODE_PREFIX + chosen_task.letter_code
     EXPECTED_CODE = "C002"
 
@@ -53,7 +53,7 @@ def test_successfuly_created_with_C002_ticket(client):
 
 
 @pytest.mark.django_db
-def test_successfuly_created_with_A001_ticket(client):
+def test_successfuly_created_with_A001_ticket(client, print_ticket_db_setup):
     chosen_task = Task.objects.filter(is_active=True).first()
     chosen_task_prefix = TASK_CODE_PREFIX + chosen_task.letter_code
     EXPECTED_CODE = "A001"
@@ -67,7 +67,8 @@ def test_successfuly_created_with_A001_ticket(client):
 
 
 @pytest.mark.django_db
-def test_print_ticket_get_without_active_session(client, get_supervisors):
+def test_print_ticket_get_without_active_session(
+                client, get_supervisors, print_ticket_db_setup):
     client.force_login(get_supervisors[0])
     client.post(SESSION_FINISH_URL, None, follow=True)
 
@@ -79,7 +80,8 @@ def test_print_ticket_get_without_active_session(client, get_supervisors):
 
 
 @pytest.mark.django_db
-def test_print_ticket_post_without_active_session(client, get_supervisors):
+def test_print_ticket_post_without_active_session(
+                client, get_supervisors, print_ticket_db_setup):
     client.force_login(get_supervisors[0])
     client.post(SESSION_FINISH_URL, None, follow=True)
     chosen_task = Task.objects.filter(is_active=True).first()

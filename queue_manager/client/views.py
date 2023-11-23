@@ -1,10 +1,13 @@
-from django.views.generic import (TemplateView, DetailView)
+from django.views.generic import (TemplateView, DetailView, ListView)
 from django.shortcuts import redirect
 from queue_manager.ticket.models import Ticket
 from queue_manager.session.models import Session
 from queue_manager.task.models import Task
+from queue_manager.status.models import Status
 from queue_manager.mixins import TopNavMenuMixin
 from django.urls import reverse_lazy
+
+from tests.client.test_screen import VISIBLE_TICKETS_QUAN
 
 TASK_CODE_PREFIX = "task_code:"
 
@@ -45,6 +48,24 @@ class PrintedTicketDetailView(TopNavMenuMixin, DetailView):
     model = Ticket
     template_name = "client/printed_ticket_detail.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['link_to_screen'] = (f"{reverse_lazy('screen')}"
+                                     f"?track_ticket={self.get_object().code}")
+        return context
+
 
 class NoActiveSessionView(TopNavMenuMixin, TemplateView):
     template_name = "client/no-active-session.html"
+
+
+class ScreenView(TopNavMenuMixin, ListView):
+    VISIBLE_TICKETS_QUAN = 7
+    template_name = "client/screen.html"
+
+    def get_queryset(self):
+        return Status.objects\
+            .filter(
+                ticket__session__is_active=True,
+                code=Status.objects.Codes.PROCESSING)\
+            .order_by('-assigned_at')[:VISIBLE_TICKETS_QUAN]

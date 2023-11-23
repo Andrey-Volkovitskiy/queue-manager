@@ -1,9 +1,9 @@
 import pytest
+from tests import conftest
 from queue_manager.user.models import Operator, Supervisor
 from queue_manager.ticket.models import QManager
 from queue_manager.session.models import Session
 from queue_manager.task.models import Task, Service
-from queue_manager.ticket.models import Ticket
 from queue_manager.status.models import Status
 
 
@@ -33,78 +33,6 @@ def _setup_db():
         )
 
 
-def _add_personal_ticket(task, assidned_to):
-    redirecting_operator = Operator.objects.last()
-    session = Session.objects.get_current_session()
-    ticket = Ticket.objects.create(
-        task=task,
-        session=session,
-        code=Ticket.objects._get_new_ticket_code(
-            session=session,
-            task=task
-        ))
-    Service.objects.filter(
-        task=task, operator=redirecting_operator).update(
-        is_servicing=True,
-        priority_for_operator=9,
-    )
-    Status.objects.create_initial(ticket=ticket)
-    Status.objects.create_additional(
-        ticket=ticket,
-        new_code=Status.objects.Codes.PROCESSING,
-        assigned_to=redirecting_operator,)
-    Status.objects.create_additional(
-        ticket=ticket,
-        new_code=Status.objects.Codes.REDIRECTED,
-        assigned_to=assidned_to)
-    return ticket
-
-
-def _add_general_ticket(task):
-    session = Session.objects.get_current_session()
-    ticket = Ticket.objects.create(
-        task=task,
-        session=session,
-        code=Ticket.objects._get_new_ticket_code(
-            session=session,
-            task=task
-        ))
-    Status.objects.create_initial(ticket=ticket)
-    return ticket
-
-
-def _add_completed_ticket(task):
-    compliting_operator = Operator.objects.last()
-    session = Session.objects.get_current_session()
-    ticket = Ticket.objects.create(
-        task=task,
-        session=session,
-        code=Ticket.objects._get_new_ticket_code(
-            session=session,
-            task=task
-        ))
-    # Service.objects.filter(
-    #     task=task, operator=compliting_operator).update(
-    #     is_servicing=True,
-    #     priority_for_operator=9,
-    # )
-    Status.objects.create_initial(ticket=ticket)
-    Status.objects.create_additional(
-        ticket=ticket,
-        new_code=Status.objects.Codes.PROCESSING,
-        assigned_to=compliting_operator,)
-    Status.objects.create_additional(
-        ticket=ticket,
-        new_code=Status.objects.Codes.COMPLETED,
-        assigned_by=compliting_operator)
-    # Service.objects.filter(
-    #     task=task, operator=compliting_operator).update(
-    #     is_servicing=False,
-    #     priority_for_operator=None,
-    # )
-    return ticket
-
-
 # _get_next_personal_ticket #######################
 @pytest.mark.django_db
 def test_get_next_personal_ticket_with_one_ticket():
@@ -112,9 +40,9 @@ def test_get_next_personal_ticket_with_one_ticket():
     tested_operator = Operator.objects.first()
     _setup_db()
 
-    expected_ticket = _add_personal_ticket(
+    expected_ticket = conftest.add_personal_ticket(
         task=taskA,
-        assidned_to=tested_operator
+        assigned_to=tested_operator
     )
     next_personal_ticket = QManager._get_next_personal_ticket(tested_operator)
     assert next_personal_ticket == expected_ticket
@@ -126,17 +54,17 @@ def test_get_next_personal_ticket_with_three_tickets():
     tested_operator = Operator.objects.first()
     _setup_db()
 
-    ticket1 = _add_personal_ticket(
+    ticket1 = conftest.add_personal_ticket(
         task=taskA,
-        assidned_to=tested_operator
+        assigned_to=tested_operator
     )
-    _add_personal_ticket(
+    conftest.add_personal_ticket(
         task=taskA,
-        assidned_to=tested_operator
+        assigned_to=tested_operator
     )
-    _add_personal_ticket(
+    conftest.add_personal_ticket(
         task=taskA,
-        assidned_to=tested_operator
+        assigned_to=tested_operator
     )
     next_personal_ticket = QManager._get_next_personal_ticket(tested_operator)
     assert next_personal_ticket == ticket1
@@ -148,9 +76,9 @@ def test_get_next_personal_ticket_with_old_R_status():
     tested_operator = Operator.objects.first()
     _setup_db()
 
-    ticket1 = _add_personal_ticket(
+    ticket1 = conftest.add_personal_ticket(
         task=taskA,
-        assidned_to=tested_operator
+        assigned_to=tested_operator
     )
     Status.objects.create_additional(
         ticket=ticket1,
@@ -161,13 +89,13 @@ def test_get_next_personal_ticket_with_old_R_status():
         new_code=Status.objects.Codes.COMPLETED,
         assigned_to=tested_operator,)
 
-    ticket2 = _add_personal_ticket(
+    ticket2 = conftest.add_personal_ticket(
         task=taskA,
-        assidned_to=tested_operator
+        assigned_to=tested_operator
     )
-    _add_personal_ticket(
+    conftest.add_personal_ticket(
         task=taskA,
-        assidned_to=tested_operator
+        assigned_to=tested_operator
     )
     next_personal_ticket = QManager._get_next_personal_ticket(tested_operator)
     assert next_personal_ticket == ticket2
@@ -180,10 +108,10 @@ def test_get_next_primary_ticket():
     tested_operator = Operator.objects.first()
     _setup_db()
 
-    _add_completed_ticket(task=taskA)
-    expected_ticket = _add_general_ticket(task=taskA)
-    _add_general_ticket(task=taskA)
-    _add_general_ticket(task=taskA)
+    conftest.add_completed_ticket(task=taskA)
+    expected_ticket = conftest.add_general_ticket(task=taskA)
+    conftest.add_general_ticket(task=taskA)
+    conftest.add_general_ticket(task=taskA)
 
     next_primary_ticket = QManager._get_next_primary_ticket(
         operator=tested_operator,
@@ -199,12 +127,12 @@ def test_get_next_secondary_ticket():
     tested_operator = Operator.objects.first()
     _setup_db()
 
-    _add_completed_ticket(task=taskA)
-    expected_ticket = _add_general_ticket(task=taskB)
-    _add_general_ticket(task=taskA)
-    _add_general_ticket(task=taskB)
-    _add_general_ticket(task=taskA)
-    _add_general_ticket(task=taskB)
+    conftest.add_completed_ticket(task=taskA)
+    expected_ticket = conftest.add_general_ticket(task=taskB)
+    conftest.add_general_ticket(task=taskA)
+    conftest.add_general_ticket(task=taskB)
+    conftest.add_general_ticket(task=taskA)
+    conftest.add_general_ticket(task=taskB)
 
     next_secondary_ticket = QManager._get_next_secondary_ticket(
         operator=tested_operator,
@@ -226,8 +154,8 @@ def test_operator_appeared_end_to_end_success(client, get_supervisors):
     client.force_login(get_supervisors[0])
 
     # Make operator1 busy
-    _add_completed_ticket(task=task_primary)
-    first_tiket = _add_general_ticket(task=task_primary)
+    conftest.add_completed_ticket(task=task_primary)
+    first_tiket = conftest.add_general_ticket(task=task_primary)
     response = client.post(
         f'/operator/{operator_1.id}/service_start/',
         {
@@ -243,17 +171,17 @@ def test_operator_appeared_end_to_end_success(client, get_supervisors):
     assert operator_1.current_ticket == first_tiket
 
     # Add prim & second tickets
-    fourth_ticket = _add_general_ticket(task=task_second_1)
-    fifth_ticket = _add_general_ticket(task=task_second_2)
-    sixth_ticket = _add_general_ticket(task=task_second_1)
-    second_ticket = _add_general_ticket(task=task_primary)
-    third_ticket = _add_general_ticket(task=task_primary)
+    fourth_ticket = conftest.add_general_ticket(task=task_second_1)
+    fifth_ticket = conftest.add_general_ticket(task=task_second_2)
+    sixth_ticket = conftest.add_general_ticket(task=task_second_1)
+    second_ticket = conftest.add_general_ticket(task=task_primary)
+    third_ticket = conftest.add_general_ticket(task=task_primary)
 
     # Add personal tickets
-    personal_ticket_1 = _add_personal_ticket(
-        task=task_second_2, assidned_to=operator_1)
-    personal_ticket_2 = _add_personal_ticket(
-        task=task_primary,  assidned_to=operator_1)
+    personal_ticket_1 = conftest.add_personal_ticket(
+        task=task_second_2, assigned_to=operator_1)
+    personal_ticket_2 = conftest.add_personal_ticket(
+        task=task_primary,  assigned_to=operator_1)
 
     # Are all tickets visualized on operators personal page?
     response = client.get(f'/operator/{operator_1.id}', follow=True)
