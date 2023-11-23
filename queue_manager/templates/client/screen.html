@@ -7,17 +7,24 @@
 {% endblock %}
 
 {% block content %}
-  <div>
+  <div class="row">
     <h1 class="my-4"> Last called tickets</h1>
-    <ul class="list-unstyled">
     {% for status in object_list %}
-      <li>{{ status.ticket.code }} - {{ status.assigned_to.seat_number }} ({{ status.assigned_to.get_full_name }})</li>  
+      {% if forloop.first %}
+        <div class="col-xl-1 border border-secondary border-3 shadow m-2 bg-body rounded p-2 text-center">
+      {% else %}
+        <div class="col-xl-1 border border-3 shadow m-2 bg-body rounded p-2 text-center">
+      {% endif %}
+        <h1 class="h3 mb-3 {% if status.ticket.code == request.GET.track_ticket %}text-danger{%endif%}">{{ status.ticket.code }}</h1>
+          <small>please poceede to operator</small>
+          <h5 class="h5 mt-3">{{ status.assigned_to.get_full_name }}</h5>
+      </div>
     {% endfor %}
     </ul>  
   </div>
 
   {% if request.GET.track_ticket %}
-    <div class="text-muted">
+    <div class="text-muted my-4">
       <small>Your ticket is: {{ request.GET.track_ticket }}</small>
     </div>
   {% endif %}
