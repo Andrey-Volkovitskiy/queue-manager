@@ -20,7 +20,14 @@
           <h5 class="h5 mt-3">{{ status.assigned_to.get_full_name }}</h5>
       </div>
     {% endfor %}
-    </ul>  
+
+    <div class="col-xl-2 position-relative py-4">
+      <div class="position-absolute bottom-0">
+          <div class="position-relative d-inline-block mx-1 border border-3 shadow mb-2 bg-body rounded-circle p-2"></div>
+          <div class="position-relative d-inline-block mx-1 border border-3 shadow mb-2 bg-body rounded-circle p-2"></div>
+          <div class="position-relative d-inline-block mx-1 border border-3 shadow mb-2 bg-body rounded-circle p-2"></div>
+      </div>
+    </div>
   </div>
 
   {% if request.GET.track_ticket %}
