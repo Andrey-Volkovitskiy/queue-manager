@@ -76,7 +76,7 @@
         <h6>Primary task:</h6>
         <ul class="list-unstyled text-primary">
           {% for ticket in primary_tickets %}
-            {% if forloop.last and primary_tickets|length == queue_len_limit %}
+            {% if primary_tickets and forloop.last|length == queue_len_limit %}
               <li>...</li>
             {% else %}
               <li>{{ ticket.code }}</li>
@@ -89,10 +89,58 @@
         <h6>Secondary tasks:</h6>
         <ul class="list-unstyled text-success">
           {% for ticket in secondary_tickets %}
-            {% if forloop.last and secondary_tickets|length == queue_len_limit %}
+            {% if secondary_tickets and forloop.last|length == queue_len_limit %}
               <li>...</li>
             {% else %}
               <li>{{ ticket.code }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="my-4 border border-3">
+    <h4>Processed tickets</h4>
+    <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
+      
+      <div class="col">
+        <h6 class="text-success">Completed:</h6>
+        <ul class="list-unstyled text-success">
+          {% for status in completed_statuses %}
+            {% if completed_statuses and forloop.last|length == processed_statuses_limit %}
+              <li>...</li>
+            {% else %}
+              <li>
+                {{ status.ticket.code }}
+              </li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+      
+      <div class="col">
+        <h6 class="text-warning">Missed:</h6>
+        <ul class="list-unstyled text-warning">
+          {% for status in missed_statuses %}
+            {% if missed_statuses and forloop.last|length == processed_statuses_limit %}
+              <li>...</li>
+            {% else %}
+              <li>{{ status.ticket.code }}</li>
+            {% endif %}
+          {% endfor %}
+        </ul>
+      </div>
+
+      <div class="col">
+        <h6 class="text-danger">Redirected:</h6>
+        <ul class="list-unstyled text-danger">
+          {% for status in redirected_statuses %}
+            {% if redirected_statuses and forloop.last|length == processed_statuses_limit %}
+              <li>...</li>
+            {% else %}
+              <li>{{ status.ticket.code }}</li>
             {% endif %}
           {% endfor %}
         </ul>

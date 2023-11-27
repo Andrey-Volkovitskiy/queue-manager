@@ -10,8 +10,10 @@ from django.views.generic import (ListView,
                                   View,)
 from django.shortcuts import redirect
 from django.http import HttpResponseRedirect
+from queue_manager.session.models import Session
 from queue_manager.user.models import Operator as MODEL
 from queue_manager.task.models import Service, Task
+from queue_manager.status.models import Status
 from queue_manager.user import forms
 from queue_manager.mixins import ContextMixinWithItemName
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -56,19 +58,21 @@ class OperatorPersonalView(
         OperatorPersonalPagePermissions,
         TopNavMenuMixin,
         DetailView):
+    QUEUE_LEN_LIMIT = 6
+    PROCESSED_STATUSES_LIMIT = 4
     model = MODEL
     template_name = "operator/personal.html"
-    queue_len_limit = 6
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        operator = self.get_object()
 
         # Current serviced tasks
-        available_services = self.get_object().service_set
+        available_services = operator.service_set
         context['is_servicing'] = available_services.filter(
             is_servicing=True).exists()
 
-        active_services = self.get_object().service_set.filter(
+        active_services = operator.service_set.filter(
             is_servicing=True)
         primary_service = active_services.filter(
             priority_for_operator=Service.HIGHEST_PRIORITY).last()
@@ -81,13 +85,38 @@ class OperatorPersonalView(
                     service__in=secondary_services).order_by('id')
 
         # Queues
-        context['queue_len_limit'] = self.queue_len_limit
-        context['personal_tickets'] = self.get_object()\
-            .get_personal_tickets(limit=self.queue_len_limit)
-        context['primary_tickets'] = self.get_object()\
-            .get_primary_tickets(limit=self.queue_len_limit)
-        context['secondary_tickets'] = self.get_object()\
-            .get_secondary_tickets(limit=self.queue_len_limit)
+        context['queue_len_limit'] = self.QUEUE_LEN_LIMIT
+        context['personal_tickets'] = operator\
+            .get_personal_tickets(limit=self.QUEUE_LEN_LIMIT)
+        context['primary_tickets'] = operator\
+            .get_primary_tickets(limit=self.QUEUE_LEN_LIMIT)
+        context['secondary_tickets'] = operator\
+            .get_secondary_tickets(limit=self.QUEUE_LEN_LIMIT)
+
+        # Processed tickets
+        last_session = Session.objects.last()
+        context['processed_statuses_limit'] = self.PROCESSED_STATUSES_LIMIT
+
+        context['completed_statuses'] = Status.objects\
+            .filter(
+                code=Status.objects.Codes.COMPLETED,
+                assigned_by=operator,
+                ticket__session=last_session)\
+            .order_by('-assigned_at')[:self.PROCESSED_STATUSES_LIMIT]
+
+        context['missed_statuses'] = Status.objects\
+            .filter(
+                code=Status.objects.Codes.MISSED,
+                assigned_by=operator,
+                ticket__session=last_session)\
+            .order_by('-assigned_at')[:self.PROCESSED_STATUSES_LIMIT]
+
+        context['redirected_statuses'] = Status.objects\
+            .filter(
+                code=Status.objects.Codes.REDIRECTED,
+                assigned_by=operator,
+                ticket__session=last_session)\
+            .order_by('-assigned_at')[:self.PROCESSED_STATUSES_LIMIT]
 
         return context
 
