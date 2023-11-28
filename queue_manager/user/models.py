@@ -70,10 +70,18 @@ class Operator(User):
             ticket=OuterRef('id')).order_by('-assigned_at').values(
                 'code')[:1])
 
+        last_status_assigned_to = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'assigned_to')[:1])
+
         return Ticket.objects\
             .filter(id=last_assigned_ticket)\
-            .annotate(last_status_code=last_status_code)\
-            .filter(last_status_code=Status.objects.Codes.PROCESSING)\
+            .annotate(
+                last_status_code=last_status_code,
+                last_status_assigned_to=last_status_assigned_to)\
+            .filter(
+                last_status_code=Status.objects.Codes.PROCESSING,
+                last_status_assigned_to=self)\
             .last()
 
     @property
@@ -90,21 +98,36 @@ class Operator(User):
         from queue_manager.ticket.models import Ticket
         from queue_manager.status.models import Status
 
-        last_status_code = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'code')[:1])
+        last_status_code = Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('code')[:1])
 
-        last_status_assigned_at = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'assigned_at')[:1])
+        last_status_assigned_to = Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('assigned_to')[:1])
 
-        return Ticket.objects.filter(
-            status__code=Status.objects.Codes.REDIRECTED,
-            status__assigned_to=self
-        ).annotate(last_status_code=last_status_code).filter(
-            last_status_code=Status.objects.Codes.REDIRECTED).annotate(
-                last_status_assigned_at=last_status_assigned_at).order_by(
-            'last_status_assigned_at')[: limit]
+        last_status_assigned_at = Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('assigned_at')[:1])
+
+        return Ticket.objects\
+            .filter(
+                status__code=Status.objects.Codes.REDIRECTED,
+                status__assigned_to=self)\
+            .annotate(
+                last_status_code=last_status_code,
+                last_status_assigned_to=last_status_assigned_to)\
+            .filter(
+                last_status_code=Status.objects.Codes.REDIRECTED,
+                last_status_assigned_to=self)\
+            .annotate(last_status_assigned_at=last_status_assigned_at)\
+            .order_by('last_status_assigned_at')[: limit]
 
     def get_primary_tickets(self, limit=None, primary_task_id=None):
         '''Returns QuerySet with primary tickets

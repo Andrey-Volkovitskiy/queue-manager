@@ -14,6 +14,9 @@ class ContextMixinWithItemName(ContextMixin):
 class TopNavMenuMixin(ContextMixin):
     def get_context_data(self, **kwargs):  # noqa C901
         context = super().get_context_data(**kwargs)
+        if self.request.method != 'GET':
+            return context
+
         menu_items = []
         path = self.request.path
 

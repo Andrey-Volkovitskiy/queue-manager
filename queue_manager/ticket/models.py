@@ -137,9 +137,9 @@ class QManager:
 
     @classmethod
     def _get_next_personal_ticket(cls, operator: Operator) -> Ticket:
-        list_with_first_ticket = operator.get_personal_tickets(limit=1)
-        if len(list_with_first_ticket) > 0:
-            return list_with_first_ticket[0]
+        first_ticket_list = operator.get_personal_tickets(limit=1)
+        if len(first_ticket_list) > 0:
+            return first_ticket_list[0]
 
     @classmethod
     def _get_next_primary_ticket(

@@ -124,3 +124,8 @@ class Status(models.Model):
         null=True,
     )
     objects = StatusManager()
+
+    def get_status_name(self):
+        dic = StatusManager.Codes.__dict__
+        name = {atr for atr in dic if dic[atr] == self.code}.pop()
+        return name.capitalize()

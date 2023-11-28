@@ -10,27 +10,23 @@ from queue_manager.status.models import Status
 def _setup_db():
     supervisor = Supervisor.objects.first()
     operators = Operator.objects.all().order_by('id')
-    taskA = Task.objects.get(letter_code='A')
-    taskB = Task.objects.get(letter_code='B')
+    tasks = (
+        Task.objects.get(letter_code='A'),
+        Task.objects.get(letter_code='B'),
+        Task.objects.get(letter_code='C'),
+    )
     Session.objects.finish_active_session(finished_by=supervisor)
     Session.objects.start_new_session(started_by=supervisor)
 
     for operator in operators:
-        # TaskA, is_servicing=False
-        Service.objects.create(
-            operator=operator,
-            task=taskA,
-            is_servicing=False,
-            priority_for_operator=None
-        )
-
-        # TaskB, is_servicing=False
-        Service.objects.create(
-            operator=operator,
-            task=taskB,
-            is_servicing=False,
-            priority_for_operator=None
-        )
+        for task in tasks:
+            # TaskN, is_servicing=False
+            Service.objects.create(
+                operator=operator,
+                task=task,
+                is_servicing=False,
+                priority_for_operator=None
+            )
 
 
 # _get_next_personal_ticket #######################
@@ -142,12 +138,12 @@ def test_get_next_secondary_ticket():
     assert next_secondary_ticket == expected_ticket
 
 
-# END TO END TEST #######################
+# END TO END TESTS #######################
 @pytest.mark.django_db
 def test_operator_appeared_end_to_end_success(client, get_supervisors):
     task_primary = Task.objects.get(letter_code='A')
     task_second_1 = Task.objects.get(letter_code='B')
-    task_second_2 = Task.objects.get(letter_code='B')
+    task_second_2 = Task.objects.get(letter_code='C')
     operator_1 = Operator.objects.first()
     operator_2 = Operator.objects.last()
     _setup_db()
@@ -257,3 +253,59 @@ def test_operator_appeared_end_to_end_success(client, get_supervisors):
         follow=True)
     assert response.status_code == 200
     assert operator_2.current_ticket == sixth_ticket
+
+
+@pytest.mark.django_db
+def test_take_again_and_redirect(client, get_supervisors):
+    task_primary = Task.objects.get(letter_code='A')
+    operator_1 = Operator.objects.first()
+    operator_2 = Operator.objects.last()
+    _setup_db()
+    client.force_login(get_supervisors[0])
+
+    # Make Operator2 busy
+    ticket_busy = conftest.add_general_ticket(task=task_primary)
+    response = client.post(
+        f'/operator/{operator_2.id}/service_start/',
+        {'primary_task': task_primary.id},
+        follow=True
+    )
+    assert response.status_code == 200
+    assert operator_2.current_ticket == ticket_busy
+
+    # Operator1 - Complete ticket_0
+    ticket_0 = conftest.add_general_ticket(task=task_primary)
+    response = client.post(
+        f'/operator/{operator_1.id}/service_start/',
+        {'primary_task': task_primary.id},
+        follow=True
+    )
+    assert response.status_code == 200
+    assert operator_1.current_ticket == ticket_0
+    response = client.post(
+        f'/ticket/{ticket_0.id}/mark_completed/',
+        follow=True)
+    assert response.status_code == 200
+    assert operator_1.current_ticket is None
+
+    # Operator1 - Take ticket_0 again
+    response = client.post(
+        f'/ticket/{ticket_0.id}/take_again/',
+        follow=True)
+    assert response.status_code == 200
+    assert operator_1.current_ticket == ticket_0
+
+    # Operator1 - Redirect ticket_1 to Operator 2
+    response = client.post(
+        f'/ticket/{ticket_0.id}/redirect/?redirected_by={operator_1.id}',
+        {'redirect_to': operator_2.id},
+        follow=True)
+    assert response.status_code == 200
+    assert operator_1.current_ticket is None
+
+    # Make Operator 2 free and take ticket_0
+    response = client.post(
+        f'/ticket/{ticket_busy.id}/mark_completed/',
+        follow=True)
+    assert response.status_code == 200
+    assert operator_2.current_ticket == ticket_0

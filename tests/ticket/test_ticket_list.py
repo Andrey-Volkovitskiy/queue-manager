@@ -24,12 +24,6 @@ def test_all_items_are_displayed(client, get_supervisors):
     expected_items_from_db = list(PackageModel.objects.filter(
         session=Session.objects.get_current_session()
     ))
-    print("======================================")
-    print(f"expected_items_from_db: {expected_items_from_db}")
-    session = Session.objects.get_current_session()
-    print(f"session: {session}")
-    print(f"session: {session.code}")
-    print("======================================")
 
     client.force_login(get_supervisors[0])
     response = client.get(TESTED_URL)

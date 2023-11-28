@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% load django_bootstrap5 %}
+
+{% block title %}
+  {{ item_name|capfirst }} "{{ object.code }}" details
+{% endblock %}
+
+{% block content %}
+  <h1 class="my-4">{{ item_name|capfirst }}  "{{ object.code }}" details</h1>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Status</th>
+        <th>Assigned_at</th>
+        <th>Assigned_by</th>
+        <th>Assigned_to</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% for status in object.status_set.all %}
+        <tr>
+          <td>{{ status.get_status_name }}</td>
+          <td>{{ status.assigned_at }}</td>
+          <td>{% if status.assigned_by %}{{ status.assigned_by }}{% endif %}</td>
+          <td>{% if status.assigned_to %}{{ status.assigned_to }}{% endif %}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  {% if ticket_is_redirectable %}
+    <form method="post" class="d-inline" action="{% url 'ticket-take-again' object.id %}">
+      {% csrf_token %}
+      <input class="btn btn-outline-primary mx-3" type="submit" value="Take again">
+    </form>
+
+    <a class="btn btn-outline-secondary mx-3" href="{% url 'ticket-redirect' object.id %}?redirected_by={{last_operator.id}}">Redirect</a>
+  {% endif %}
+{% endblock %}

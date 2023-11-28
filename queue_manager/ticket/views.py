@@ -1,7 +1,7 @@
 from django.contrib.auth.mixins import (
             PermissionRequiredMixin,
             UserPassesTestMixin)
-from django.views.generic import (View, UpdateView, ListView)
+from django.views.generic import (View, UpdateView, ListView, DetailView)
 from django.contrib.messages.views import SuccessMessageMixin
 from queue_manager.ticket.models import Ticket as MODEL
 from queue_manager.status.models import Status
@@ -27,6 +27,28 @@ class ItemListView(
     def get_queryset(self):
         return MODEL.objects.filter(
             session=Session.objects.get_current_session())
+
+
+class ItemDetailView(
+        ContextMixinWithItemName,
+        TopNavMenuMixin,
+        DetailView):
+    model = MODEL
+    item_name = ITEM_NAME  # TODO permissions
+    template_name = f"{ITEM_NAME}/detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        redirecteble_statuses = (
+            Status.objects.Codes.COMPLETED,
+            Status.objects.Codes.MISSED
+        )
+        last_status = self.get_object().status_set.last()
+        if last_status:
+            context['ticket_is_redirectable'] = (
+                last_status.code in redirecteble_statuses)
+            context['last_operator'] = last_status.assigned_by
+        return context
 
 
 class TicketMarkPermissions(UserPassesTestMixin):
@@ -98,3 +120,19 @@ class TicketRedirectView(
         if redirected_by:
             kwargs['redirected_by'] = redirected_by
         return kwargs
+
+
+class TicketTakeAgainView(
+        TopNavMenuMixin,
+        View):
+    http_method_names = ["post", ]
+
+    def post(self, request, *args, **kwargs):
+        ticket = MODEL.objects.get(id=self.kwargs['pk'])
+        last_operator = ticket.status_set\
+            .filter(
+                code=Status.objects.Codes.PROCESSING
+            ).last().assigned_to
+        ticket.redirect(redirect_to=last_operator)
+        return redirect(reverse_lazy(
+            'operator-personal', kwargs={'pk': last_operator.id}))
