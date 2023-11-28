@@ -50,7 +50,7 @@
         <input class="btn btn-outline-secondary mx-3" type="submit" value="Mark missed">
       </form>
       
-      <a class="btn btn-outline-secondary mx-3" href="{% url 'ticket-redirect' object.current_ticket.id %}?redirected_by={{object.id}}">Redirect</a>
+      <a class="btn btn-outline-secondary mx-3" href="{% url 'ticket-redirect' object.current_ticket.id %}?operator={{object.id}}">Redirect</a>
     {% endif %}
   </div>
 
@@ -113,7 +113,7 @@
               <li>...</li>
             {% else %}
               <li>
-                <a href="{% url 'ticket-detail' status.ticket.id %}" class="link-success">
+                <a href="{% url 'ticket-detail' status.ticket.id %}?operator={{object.id}}" class="link-success">
                   {{ status.ticket.code }}
                 </a>
               </li>
@@ -130,7 +130,7 @@
               <li>...</li>
             {% else %}
             <li>
-              <a href="{% url 'ticket-detail' status.ticket.id %}" class="link-warning">
+              <a href="{% url 'ticket-detail' status.ticket.id %}?operator={{object.id}}" class="link-warning">
                 {{ status.ticket.code }}
               </a>
             </li>
@@ -147,7 +147,7 @@
               <li>...</li>
             {% else %}
             <li>
-              <a href="{% url 'ticket-detail' status.ticket.id %}" class="link-danger">
+              <a href="{% url 'ticket-detail' status.ticket.id %}?operator={{object.id}}" class="link-danger">
                 {{ status.ticket.code }}
               </a>
             </li>

@@ -7,7 +7,7 @@ from queue_manager.ticket.models import ITEM_NAME
 urlpatterns = [
     path('', views.ItemListView.as_view(),
          name=f'{ITEM_NAME}-list'),
-    path('<int:pk>',
+    path('<int:pk>/',
          views.ItemDetailView.as_view(),
          name=f'{ITEM_NAME}-detail'),
     path('<int:pk>/mark_completed/',

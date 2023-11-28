@@ -156,7 +156,7 @@ def test_redirect_ticket_success(client, get_supervisors):
     response = client.get(operator_personal_page_url)
     content = response.content.decode()
     redirect_url = (f'/ticket/{ticket.id}/redirect/'
-                    f'?redirected_by={initial_operator.id}')
+                    f'?operator={initial_operator.id}')
     assert redirect_url in content
 
     # Redirect the ticket to another operator

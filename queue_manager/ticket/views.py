@@ -103,7 +103,7 @@ class TicketRedirectView(
     success_message = "The ticket was successfully redirected"
 
     def get_success_url(self):
-        redirected_by = self.request.GET.get('redirected_by')
+        redirected_by = self.request.GET.get('operator')
         return reverse_lazy(
             'operator-personal',
             kwargs={'pk': redirected_by})
@@ -116,7 +116,7 @@ class TicketRedirectView(
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        redirected_by = self.request.GET.get('redirected_by')
+        redirected_by = self.request.GET.get('operator')
         if redirected_by:
             kwargs['redirected_by'] = redirected_by
         return kwargs

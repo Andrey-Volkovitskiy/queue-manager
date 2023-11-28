@@ -297,7 +297,7 @@ def test_take_again_and_redirect(client, get_supervisors):
 
     # Operator1 - Redirect ticket_1 to Operator 2
     response = client.post(
-        f'/ticket/{ticket_0.id}/redirect/?redirected_by={operator_1.id}',
+        f'/ticket/{ticket_0.id}/redirect/?operator={operator_1.id}',
         {'redirect_to': operator_2.id},
         follow=True)
     assert response.status_code == 200

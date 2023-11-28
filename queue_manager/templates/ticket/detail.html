@@ -36,6 +36,6 @@
       <input class="btn btn-outline-primary mx-3" type="submit" value="Take again">
     </form>
 
-    <a class="btn btn-outline-secondary mx-3" href="{% url 'ticket-redirect' object.id %}?redirected_by={{last_operator.id}}">Redirect</a>
+    <a class="btn btn-outline-secondary mx-3" href="{% url 'ticket-redirect' object.id %}?operator={{last_operator.id}}">Redirect</a>
   {% endif %}
 {% endblock %}

@@ -11,7 +11,7 @@ class ContextMixinWithItemName(ContextMixin):
         return context
 
 
-class TopNavMenuMixin(ContextMixin):
+class TopNavMenuMixin(ContextMixin):  # TODO Refactor
     def get_context_data(self, **kwargs):  # noqa C901
         context = super().get_context_data(**kwargs)
         if self.request.method != 'GET':
@@ -64,15 +64,15 @@ class TopNavMenuMixin(ContextMixin):
                 menu_items.append(('Operator',
                                    reverse_lazy('operator-enter')))
 
-                redirected_by = self.request.GET.get('redirected_by')
+                pretend_operator_id = self.request.GET.get('operator')
                 request_by_supervisor = self.request.user.groups.filter(
                             name=DefaultDBData.groups['SUPERVISORS']).exists()
-                if redirected_by and request_by_supervisor:
+                if pretend_operator_id and request_by_supervisor:
                     menu_items.append((
                         Operator.objects.get(
-                                id=int(redirected_by)).get_full_name(),
+                                id=int(pretend_operator_id)).get_full_name(),
                         reverse_lazy('operator-personal',
-                                     kwargs={'pk': int(redirected_by)})
+                                     kwargs={'pk': int(pretend_operator_id)})
                         ))
 
         context['top_nav_menu'] = menu_items
