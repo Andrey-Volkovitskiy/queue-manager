@@ -14,6 +14,39 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 
 
+class OperatorIsLastAssignedToPermis(UserPassesTestMixin):
+    '''Allows access the ticket only the operator who was last assigned to.
+    Or a user with "pretend_operator" permission'''
+    def test_func(self):
+        request_user = self.request.user
+        if request_user.has_perm('user.pretend_operator'):
+            return True
+
+        ticket_id = int(self.kwargs['pk'])
+        last_ticket_assigned_to_status = MODEL.objects.get(id=ticket_id)\
+            .status_set.filter(assigned_to__isnull=False).last()
+        if last_ticket_assigned_to_status and (
+                last_ticket_assigned_to_status.assigned_to == request_user):
+            return True
+        return False
+
+
+class OperatorWasAssignedToPermis(UserPassesTestMixin):
+    '''Allows access the ticket only those operators to whom it was
+    once assigned.
+    Or a user with "pretend_operator" permission'''
+    def test_func(self):
+        request_user = self.request.user
+        if request_user.has_perm('user.pretend_operator'):
+            return True
+
+        ticket_id = int(self.kwargs['pk'])
+        if MODEL.objects.get(id=ticket_id)\
+                .status_set.filter(assigned_to=request_user).exists():
+            return True
+        return False
+
+
 class ItemListView(
         PermissionRequiredMixin,
         ContextMixinWithItemName,
@@ -29,45 +62,8 @@ class ItemListView(
             session=Session.objects.get_current_session())
 
 
-class ItemDetailView(
-        ContextMixinWithItemName,
-        TopNavMenuMixin,
-        DetailView):
-    model = MODEL
-    item_name = ITEM_NAME  # TODO permissions
-    template_name = f"{ITEM_NAME}/detail.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        redirecteble_statuses = (
-            Status.objects.Codes.COMPLETED,
-            Status.objects.Codes.MISSED
-        )
-        last_status = self.get_object().status_set.last()
-        if last_status:
-            context['ticket_is_redirectable'] = (
-                last_status.code in redirecteble_statuses)
-            context['last_operator'] = last_status.assigned_by
-        return context
-
-
-class TicketMarkPermissions(UserPassesTestMixin):
-    '''Allows only the processing operator to mark the ticket as completed.
-    Or user with "pretend_operator" permission can access it.'''
-    def test_func(self):
-        request_user = self.request.user
-        ticket_id = int(self.kwargs['pk'])
-        processing_user = MODEL.objects.get(id=ticket_id).status_set.filter(
-            code=Status.objects.Codes.PROCESSING).last().assigned_to
-        if request_user == processing_user or (
-                request_user.has_perm('user.pretend_operator')):
-            return True
-        else:
-            return False
-
-
 class TicketMarkCompletedView(
-        TicketMarkPermissions,
+        OperatorIsLastAssignedToPermis,
         View):
     http_method_names = ["post", ]
 
@@ -80,7 +76,7 @@ class TicketMarkCompletedView(
 
 
 class TicketMarkMissedView(
-        TicketMarkPermissions,
+        OperatorIsLastAssignedToPermis,
         View):
     http_method_names = ["post", ]
 
@@ -93,7 +89,7 @@ class TicketMarkMissedView(
 
 
 class TicketRedirectView(
-        TicketMarkPermissions,
+        OperatorIsLastAssignedToPermis,
         SuccessMessageMixin,
         TopNavMenuMixin,
         UpdateView):
@@ -123,6 +119,7 @@ class TicketRedirectView(
 
 
 class TicketTakeAgainView(
+        OperatorIsLastAssignedToPermis,
         TopNavMenuMixin,
         View):
     http_method_names = ["post", ]
@@ -136,3 +133,26 @@ class TicketTakeAgainView(
         ticket.redirect(redirect_to=last_operator)
         return redirect(reverse_lazy(
             'operator-personal', kwargs={'pk': last_operator.id}))
+
+
+class ItemDetailView(
+        OperatorWasAssignedToPermis,
+        ContextMixinWithItemName,
+        TopNavMenuMixin,
+        DetailView):
+    model = MODEL
+    item_name = ITEM_NAME  # TODO permissions
+    template_name = f"{ITEM_NAME}/detail.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        redirecteble_statuses = (
+            Status.objects.Codes.COMPLETED,
+            Status.objects.Codes.MISSED
+        )
+        last_status = self.get_object().status_set.last()
+        if last_status:
+            context['ticket_is_redirectable'] = (
+                last_status.code in redirecteble_statuses)
+            context['last_operator'] = last_status.assigned_by
+        return context
