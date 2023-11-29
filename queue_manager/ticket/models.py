@@ -106,7 +106,8 @@ class Ticket(models.Model):
             ticket=self,
             assigned_to=redirect_to
         )
-        QManager.free_operator_appeared(operator=processing_operator)
+        if processing_operator.is_free:
+            QManager.free_operator_appeared(operator=processing_operator)
 
 
 class QManager:
