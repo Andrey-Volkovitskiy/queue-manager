@@ -7,7 +7,7 @@ from tests.session.test_model import get_todays_date_str
 from html import escape
 
 TESTED_URL = package_conftest.ITEM_START_URL
-SUCCESS_URL = package_conftest.ITEM_LIST_URL
+SUCCESS_URL = '/supervisor/'
 SUCCESS_MESSAGE = "The session was successfully started"
 ERROR_MESSAGE = ("The session can't be started" +
                  " because another active session exists")
@@ -18,9 +18,7 @@ def test_start_new_session_success(client, get_supervisors):
     client.force_login(get_supervisors[0])
     item_creation_time = datetime.now(timezone.utc)
     response = client.post(TESTED_URL, None, follow=True)
-    assert response.redirect_chain == [
-        (SUCCESS_URL, 302)
-    ]
+    assert (SUCCESS_URL, 302) in response.redirect_chain
     response_content = response.content.decode()
     assert SUCCESS_MESSAGE in response_content
     new_session = PackageModel.objects.last()
@@ -40,9 +38,7 @@ def test_start_new_session_with_active_session_in_db(client, get_supervisors):
     item_creation_time = datetime.now(timezone.utc)
 
     response = client.post(TESTED_URL, None, follow=True)
-    assert response.redirect_chain == [
-        (SUCCESS_URL, 302)
-    ]
+    assert (SUCCESS_URL, 302) in response.redirect_chain
     response_content = response.content.decode()
     assert escape(ERROR_MESSAGE) in response_content
     assert PackageModel.objects.filter(

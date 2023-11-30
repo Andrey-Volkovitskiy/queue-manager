@@ -9,6 +9,22 @@
 {% block content %}
   <h1 class="my-4">Supervisor dashboard</h1>
 
+  <!-- Current session -->
+  <div class="my-4 border border-3">
+    <h4 class="d-inline me-2">
+      <a class="link-dark" href="{% url 'session-list' %}">Session</a>:
+    </h4>
+    {% if current_session %}
+      <span>{{ current_session.code}}</span>
+      <span class="ms-5 text-muted">
+        <span>Tickets completed: {{ current_session.tickets_competed }}</span>
+        <span class="ms-5">Tickets in queue/processing: {{ current_session.tickets_unprocessed }}</span>
+      </span>
+    {% else %}
+      <span class="text-danger">= Not started =</span>
+    {% endif %}
+  </div>
+
   <a href="{% url 'operator-list' %}" class="btn btn-outline-primary">
     Manage operators
   </a>

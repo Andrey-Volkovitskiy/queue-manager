@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import UserPassesTestMixin
 from queue_manager.mixins import TopNavMenuMixin
+from queue_manager.session.models import Session
 from queue_manager.user.models import Supervisor as MODEL
 
 
@@ -29,6 +30,10 @@ class SupervPersonalPagePermissions(UserPassesTestMixin):
             return False
 
 
+class SupervisorNoPermissionView(TopNavMenuMixin, TemplateView):
+    template_name = 'supervisor/no_permission.html'
+
+
 class SupervisorPersonalView(
         SupervPersonalPagePermissions,
         TopNavMenuMixin,
@@ -36,6 +41,7 @@ class SupervisorPersonalView(
     model = MODEL
     template_name = "supervisor/personal.html"
 
-
-class SupervisorNoPermissionView(TopNavMenuMixin, TemplateView):
-    template_name = 'supervisor/no_permission.html'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['current_session'] = Session.objects.get_current_session()
+        return context

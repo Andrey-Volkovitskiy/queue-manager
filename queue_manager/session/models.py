@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
+from queue_manager.status.models import Status
 from datetime import datetime, timezone
+from django.db.models import OuterRef, Subquery
 
 ITEM_NAME = 'session'
 
@@ -137,3 +139,32 @@ class Session(models.Model):
         verbose_name='Finished by'
     )
     objects = SessionManager()
+
+    @property
+    def tickets_issued(self):
+        return self.ticket_set.count()
+
+    @property
+    def tickets_competed(self):
+        last_status_code = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'code')[:1])
+        return self.ticket_set\
+            .annotate(last_status_code=last_status_code)\
+            .filter(last_status_code=Status.objects.Codes.COMPLETED)\
+            .count()
+
+    @property
+    def tickets_unprocessed(self):
+        unprocessed_status_codes = (
+            Status.objects.Codes.UNASSIGNED,
+            Status.objects.Codes.PROCESSING,
+            Status.objects.Codes.REDIRECTED,
+        )
+        last_status_code = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'code')[:1])
+        return self.ticket_set\
+            .annotate(last_status_code=last_status_code)\
+            .filter(last_status_code__in=unprocessed_status_codes)\
+            .count()

@@ -6,7 +6,7 @@ from queue_manager.session.models import Session as PackageModel
 from html import escape
 
 TESTED_URL = package_conftest.ITEM_FINISH_URL
-SUCCESS_URL = package_conftest.ITEM_LIST_URL
+SUCCESS_URL = '/supervisor/'
 SUCCESS_MESSAGE = "The session was successfully finished"
 ERROR_MESSAGE = ("The session can't be finished" +
                  " because there is no active session")
@@ -35,9 +35,7 @@ def test_finish_session_success(client, get_supervisors):
 
     item_prefinish_time = datetime.now(timezone.utc)
     response = client.post(TESTED_URL, None, follow=True)
-    assert response.redirect_chain == [
-        (SUCCESS_URL, 302)
-    ]
+    assert (SUCCESS_URL, 302) in response.redirect_chain
     response_content = response.content.decode()
     assert escape(SUCCESS_MESSAGE) in response_content
     last_session = PackageModel.objects.get(code=active_session.code)
@@ -51,9 +49,7 @@ def test_finish_session_get_without_active_session_in_db(
             client, get_supervisors):
     client.force_login(get_supervisors[0])
     response = client.get(TESTED_URL, follow=True)
-    assert response.redirect_chain == [
-        (SUCCESS_URL, 302)
-    ]
+    assert (SUCCESS_URL, 302) in response.redirect_chain
     response_content = response.content.decode()
     assert escape(ERROR_MESSAGE) in response_content
 
@@ -63,9 +59,7 @@ def test_finish_session_post_without_active_session_in_db(
             client, get_supervisors):
     client.force_login(get_supervisors[0])
     response = client.post(TESTED_URL, None, follow=True)
-    assert response.redirect_chain == [
-        (SUCCESS_URL, 302)
-    ]
+    assert (SUCCESS_URL, 302) in response.redirect_chain
     response_content = response.content.decode()
     assert escape(ERROR_MESSAGE) in response_content
 

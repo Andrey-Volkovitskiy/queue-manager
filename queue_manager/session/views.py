@@ -15,6 +15,7 @@ class ItemListView(
         TopNavMenuMixin,
         ListView):
     model = MODEL
+    paginate_by = 10
     item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/list.html"
     ordering = ['-started_at']
@@ -33,7 +34,7 @@ class ItemStartView(
         PermissionRequiredMixin,
         TopNavMenuMixin,
         View):
-    success_url = reverse_lazy(f"{ITEM_NAME}-list")
+    success_url = reverse_lazy("supervisor-enter")
     permission_required = (f'{ITEM_NAME}.add_{ITEM_NAME}', )
 
     def post(self, request):
@@ -62,7 +63,7 @@ class ItemFinishView(
     model = MODEL
     item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/finish.html"
-    success_url = reverse_lazy(f"{ITEM_NAME}-list")
+    success_url = reverse_lazy("supervisor-enter")
     permission_required = (f'{ITEM_NAME}.change_{ITEM_NAME}', )
 
     def post(self, request):
