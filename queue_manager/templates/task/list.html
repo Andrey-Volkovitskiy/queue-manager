@@ -44,7 +44,7 @@
           <td>
             {% if object.can_be_served_by.all %}
               <ul class="list-unstyled">
-                {% for can_be_serv_by in object.can_be_served_by.all|dictsort:"last_name"|dictsort:"first_name" %}
+                {% for can_be_serv_by in object.can_be_served_by.all %}
                   <li>{{ can_be_serv_by.get_full_name }}</li>
                 {% endfor %}
               </ul>

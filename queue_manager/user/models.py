@@ -38,6 +38,7 @@ class Operator(User):
         permissions = [(
             "pretend_operator",
             "Can serve tickets pretending to be any of the operators"), ]
+        ordering = ["last_name", "first_name"]
 
     objects = OperatorManager()
 

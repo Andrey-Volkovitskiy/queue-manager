@@ -44,7 +44,7 @@ def test_successfuly_created(client, get_supervisors):
     assert PackageModel.objects.all().count() == count_default_items_in_db + 1
 
     # Is the item added to the database?
-    db_item = PackageModel.objects.last()
+    db_item = PackageModel.objects.order_by('id').last()
     assert db_item.first_name == CORRECT_ITEM['first_name']
     assert db_item.last_name == CORRECT_ITEM['last_name']
     assert db_item.username == CORRECT_ITEM['username']
@@ -61,8 +61,8 @@ def test_with_related_tasks(client, get_supervisors):
     client.force_login(get_supervisors[0])
     CORRECT_ITEM = deepcopy(TEST_ITEMS[0])
     expected_tasks = (
-        Task.objects.first(),
-        Task.objects.last()
+        Task.objects.order_by('id').first(),
+        Task.objects.order_by('id').last()
     )
     CORRECT_ITEM['task_set'] = (
         expected_tasks[0].id,
@@ -77,7 +77,7 @@ def test_with_related_tasks(client, get_supervisors):
     assert package_conftest.CREATE_OK_MESSAGE in response_content
 
     # Is the item added to the database?
-    db_item = PackageModel.objects.last()
+    db_item = PackageModel.objects.order_by('id').last()
     assert db_item.task_set.order_by('id')[0].id == expected_tasks[0].id
     assert db_item.task_set.order_by('id')[1].id == expected_tasks[1].id
 

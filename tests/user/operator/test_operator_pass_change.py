@@ -55,7 +55,7 @@ def test_successfuly_updated(client, get_supervisors):
     ]
     assert "The operator was successfully updated" in response_content
 
-    db_user = PackageModel.objects.last()
+    db_user = PackageModel.objects.order_by('id').last()
     assert db_user.check_password(new_password)
 
 

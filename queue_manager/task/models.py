@@ -53,7 +53,7 @@ class Task(models.Model):
     def __str__(self):
         return f'{self.letter_code} - {self.name}'
 
-    @property  # TODO property or classmethod?
+    @property
     def primary_served_by(self) -> Operator:
         return Operator.objects\
             .filter(
