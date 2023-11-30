@@ -53,6 +53,24 @@ class Task(models.Model):
     def __str__(self):
         return f'{self.letter_code} - {self.name}'
 
+    @property  # TODO property or classmethod?
+    def primary_served_by(self) -> Operator:
+        return Operator.objects\
+            .filter(
+                service__task=self,
+                service__is_servicing=True,
+                service__priority_for_operator=Service.HIGHEST_PRIORITY)\
+            .order_by('last_name', 'first_name')
+
+    @property
+    def secondary_served_by(self) -> Operator:
+        return Operator.objects\
+            .filter(
+                service__task=self,
+                service__is_servicing=True,
+                service__priority_for_operator__lt=Service.HIGHEST_PRIORITY)\
+            .order_by('last_name', 'first_name')
+
 
 class Service(models.Model):
     '''If service record exists, than the operator have the authoriry

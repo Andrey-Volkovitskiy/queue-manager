@@ -19,7 +19,8 @@ def test_basic_content(client, get_supervisors):
     assert "Letter code" in content
     assert "Name" in content
     assert "Description" in content
-    assert "Created at" in content
+    assert "Currently serviced by" in content
+    assert "Can be serviced by" in content
 
 
 @pytest.mark.django_db
@@ -35,8 +36,6 @@ def test_all_items_are_displayed(client, get_supervisors):
         assert str(item.id) in content
         assert item.name in content
         assert item.description in content
-        time = item.created_at.strftime("%-H:%M")
-        assert time in content
 
     # No redundant items are displayed
     soup = BeautifulSoup(response.content, 'html.parser')

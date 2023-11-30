@@ -15,7 +15,7 @@
         <th>Letter code</th>
         <th>Name</th>
         <th>Description</th>
-        <th>Created at</th>
+        <th>Currently serviced by</th>
         <th>Can be serviced by</th>
       </tr>
     </thead>
@@ -26,12 +26,26 @@
           <td><a href="{% url item_name|add:'-update' object.id %}">{{ object.letter_code }}</a></td>
           <td>{{ object.name }}</td>
           <td>{{ object.description }}</td>
-          <td>{{ object.created_at }}</td>
+          <td>
+            {% if object.primary_served_by or object.secondary_served_by %}
+              <ul class="list-unstyled">
+                {% for primary_serv_by in object.primary_served_by %}
+                  <li class="text-primary">{{ primary_serv_by.get_full_name }} (prim.)</li>
+                {% endfor %}
+
+                {% for secondary_serv_by in object.secondary_served_by %}
+                  <li class="text-success">{{ secondary_serv_by.get_full_name }} (scnd.)</li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <span class="text-danger">= No one =</span>
+            {% endif %}
+          </td>
           <td>
             {% if object.can_be_served_by.all %}
               <ul class="list-unstyled">
-                {% for service_operator in object.can_be_served_by.all %}
-                  <li>{{ service_operator.get_full_name }}</li>
+                {% for can_be_serv_by in object.can_be_served_by.all|dictsort:"last_name"|dictsort:"first_name" %}
+                  <li>{{ can_be_serv_by.get_full_name }}</li>
                 {% endfor %}
               </ul>
             {% else %}
