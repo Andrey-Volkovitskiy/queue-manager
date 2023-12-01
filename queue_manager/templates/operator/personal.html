@@ -55,6 +55,7 @@
   </div>
 
 
+  <!-- Queues -->
   <div class="my-4 border border-3">
     <h4>Queues</h4>
     <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">
@@ -73,7 +74,7 @@
       </div>
       
       <div class="col">
-        <h6>Primary task:</h6>
+        <h6>Primary task tickets:</h6>
         <ul class="list-unstyled text-primary">
           {% for ticket in primary_tickets %}
             {% if primary_tickets and forloop.last|length == queue_len_limit %}
@@ -86,7 +87,7 @@
       </div>
 
       <div class="col">
-        <h6>Secondary tasks:</h6>
+        <h6>Secondary tasks tickets:</h6>
         <ul class="list-unstyled text-success">
           {% for ticket in secondary_tickets %}
             {% if secondary_tickets and forloop.last|length == queue_len_limit %}
@@ -101,6 +102,7 @@
   </div>
 
 
+  <!-- Processed tickets -->
   <div class="my-4 border border-3">
     <h4>Processed tickets</h4>
     <div class="row row-cols-1 row-cols-md-3 mb-3 text-center">

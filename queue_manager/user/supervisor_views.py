@@ -5,14 +5,14 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from queue_manager.mixins import TopNavMenuMixin
 from queue_manager.session.models import Session
 from queue_manager.task.models import Task
-from queue_manager.user.models import Supervisor as MODEL
+from queue_manager.user.models import Supervisor, Operator
 
 
 class SupervisorEnterView(View):
     '''Redirects the supervisor to they Personal dashboard page'''
     def get(self, request, *args, **kwargs):
         user_id = self.request.user.id
-        is_supervisor = MODEL.objects.filter(id=user_id).exists()
+        is_supervisor = Supervisor.objects.filter(id=user_id).exists()
         if is_supervisor:
             return redirect(reverse_lazy(
                 'supervisor-personal',
@@ -39,12 +39,15 @@ class SupervisorPersonalView(
         SupervPersonalPagePermissions,
         TopNavMenuMixin,
         DetailView):
-    model = MODEL
+    model = Supervisor
     template_name = "supervisor/personal.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['current_session'] = Session.objects.get_current_session()
-        context['tasks'] = Task.objects.filter(is_active=True)\
-            .order_by('letter_code')
+        context['tasks'] = Task.objects\
+            .filter(is_active=True).order_by('letter_code')
+        context['servicing_operators'] = Operator.objects\
+            .filter(service__is_servicing=True)\
+            .distinct().order_by('last_name', 'first_name')
         return context

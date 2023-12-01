@@ -91,6 +91,56 @@ class Operator(User):
             return True
         return False
 
+    @property
+    def primary_task(self):
+        from queue_manager.task.models import Service
+        return self.task_set\
+            .filter(
+                service__is_servicing=True,
+                service__priority_for_operator=Service.HIGHEST_PRIORITY)\
+            .last()
+
+    @property
+    def secondary_tasks(self):
+        from queue_manager.task.models import Service
+        return self.task_set\
+            .filter(
+                service__is_servicing=True,
+                service__priority_for_operator__lt=Service.HIGHEST_PRIORITY)\
+            .order_by('letter_code')
+
+    @property
+    def count_tickets_completed(self):
+        from queue_manager.ticket.models import Ticket
+        from queue_manager.session.models import Session
+        from queue_manager.status.models import Status
+        last_status_code = Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('code')[:1])
+
+        last_status_assigned_by = Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('assigned_by')[:1])
+
+        x = Ticket.objects\
+            .filter(
+                session=Session.objects.get_current_session(),
+                status__code=Status.objects.Codes.COMPLETED,
+                status__assigned_by=self)\
+            .annotate(
+                last_status_code=last_status_code,
+                last_status_assigned_by=last_status_assigned_by)\
+            .filter(
+                last_status_code=Status.objects.Codes.COMPLETED,
+                last_status_assigned_by=self)\
+            .count()
+        print(f'XXXXXXXXXX = {x}')
+        return x
+
     def get_personal_tickets(self, limit=None):
         '''Returns QuerySet with personal tickets assigned to the operator
 
