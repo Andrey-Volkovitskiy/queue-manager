@@ -111,8 +111,8 @@ class Ticket(models.Model):
 
 
 class QManager:
-    @classmethod
-    def personal_ticket_appeared(cls, ticket: Ticket, assigned_to: Operator):
+    @staticmethod
+    def personal_ticket_appeared(ticket: Ticket, assigned_to: Operator):
         if assigned_to.is_free:
             ticket.assign_to_operator(assigned_to)
 
@@ -136,15 +136,15 @@ class QManager:
         if general_ticket:
             return general_ticket.assign_to_operator(operator)
 
-    @classmethod
-    def _get_next_personal_ticket(cls, operator: Operator) -> Ticket:
+    @staticmethod
+    def _get_next_personal_ticket(operator: Operator) -> Ticket:
         first_ticket_list = operator.get_personal_tickets(limit=1)
         if len(first_ticket_list) > 0:
             return first_ticket_list[0]
 
-    @classmethod
+    @staticmethod
     def _get_next_primary_ticket(
-                cls, operator: Operator, primary_task_id=None) -> Ticket:
+                operator: Operator, primary_task_id=None) -> Ticket:
         '''primary_task is only used to test this method'''
 
         list_with_first_ticket = operator.get_primary_tickets(
@@ -153,9 +153,9 @@ class QManager:
         if len(list_with_first_ticket) > 0:
             return list_with_first_ticket[0]
 
-    @classmethod
+    @staticmethod
     def _get_next_secondary_ticket(
-            cls, operator: Operator, secondery_tasks_ids=None) -> Ticket:
+            operator: Operator, secondery_tasks_ids=None) -> Ticket:
         '''secondery_tasks_ids is only used to test this method'''
 
         list_with_first_ticket = operator.get_secondary_tickets(
@@ -164,8 +164,8 @@ class QManager:
         if len(list_with_first_ticket) > 0:
             return list_with_first_ticket[0]
 
-    @classmethod
-    def _get_free_operators(cls, task: Task):
+    @staticmethod
+    def _get_free_operators(task: Task):
         '''Returns all operators which:
         - currently is_servicing the task
         - don't currently have ticket in processing'''
