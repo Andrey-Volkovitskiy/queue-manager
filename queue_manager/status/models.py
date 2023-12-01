@@ -28,6 +28,12 @@ class StatusManager(models.Manager):
         REDIRECTED = 'R'
         MISSED = 'M'
 
+        unprocessed_status_codes = (
+            UNASSIGNED,
+            PROCESSING,
+            REDIRECTED
+        )
+
     def create_initial(self, ticket):
         '''Creates the initial status when creating a ticket'''
         return self.create(

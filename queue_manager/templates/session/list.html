@@ -53,7 +53,7 @@
               {{ object.finished_by }}
             {% endif %}
           </td>
-          <td class="{% if object.is_active %}bg-primary text-white{% endif %}">{{ object.tickets_issued }}</td>
+          <td class="{% if object.is_active %}bg-primary text-white{% endif %}">{{ object.count_tickets_issued }}</td>
         </tr>
       {% endfor %}
     </tbody>

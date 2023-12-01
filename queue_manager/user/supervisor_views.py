@@ -4,6 +4,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import UserPassesTestMixin
 from queue_manager.mixins import TopNavMenuMixin
 from queue_manager.session.models import Session
+from queue_manager.task.models import Task
 from queue_manager.user.models import Supervisor as MODEL
 
 
@@ -44,4 +45,6 @@ class SupervisorPersonalView(
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['current_session'] = Session.objects.get_current_session()
+        context['tasks'] = Task.objects.filter(is_active=True)\
+            .order_by('letter_code')
         return context

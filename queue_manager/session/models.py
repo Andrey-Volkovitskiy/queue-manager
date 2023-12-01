@@ -141,11 +141,11 @@ class Session(models.Model):
     objects = SessionManager()
 
     @property
-    def tickets_issued(self):
+    def count_tickets_issued(self):
         return self.ticket_set.count()
 
     @property
-    def tickets_competed(self):
+    def count_tickets_completed(self):
         last_status_code = Subquery(Status.objects.filter(
             ticket=OuterRef('id')).order_by('-assigned_at').values(
                 'code')[:1])
@@ -155,16 +155,12 @@ class Session(models.Model):
             .count()
 
     @property
-    def tickets_unprocessed(self):
-        unprocessed_status_codes = (
-            Status.objects.Codes.UNASSIGNED,
-            Status.objects.Codes.PROCESSING,
-            Status.objects.Codes.REDIRECTED,
-        )
+    def count_tickets_unprocessed(self):
         last_status_code = Subquery(Status.objects.filter(
             ticket=OuterRef('id')).order_by('-assigned_at').values(
                 'code')[:1])
         return self.ticket_set\
             .annotate(last_status_code=last_status_code)\
-            .filter(last_status_code__in=unprocessed_status_codes)\
+            .filter(last_status_code__in=(
+                Status.objects.Codes.unprocessed_status_codes))\
             .count()

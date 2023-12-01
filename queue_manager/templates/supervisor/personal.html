@@ -16,9 +16,9 @@
     </h4>
     {% if current_session %}
       <span>{{ current_session.code}}</span>
-      <span class="ms-5 text-muted">
-        <span>Tickets completed: {{ current_session.tickets_competed }}</span>
-        <span class="ms-5">Tickets in queue/processing: {{ current_session.tickets_unprocessed }}</span>
+      <span class="ms-5 text-black-50">
+        <span>Total tickets completed: {{ current_session.count_tickets_completed }}</span>
+        <span class="ms-5">Tickets in queue/processing: {{ current_session.count_tickets_unprocessed }}</span>
       </span>
     {% else %}
       <span class="text-danger">= Not started =</span>
@@ -32,11 +32,57 @@
       <a class="link-dark" href="{% url 'task-list' %}">Tasks</a>
     </h4>
     {% if current_session %}
-      <span>{{ current_session.code}}</span>
-      <span class="ms-5 text-muted">
-        <span>Tickets completed: {{ current_session.tickets_competed }}</span>
-        <span class="ms-5">Tickets in queue/processing: {{ current_session.tickets_unprocessed }}</span>
-      </span>
+      <table class="table border-1 table-sm">
+        <thead>
+          <tr>
+            <th>Code</th>
+            <th>Currently serviced by</th>
+            <th class="text-center">Tickets in queue/processing</th>
+            <th class="text-center">Tickets completed</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for task in tasks %}
+            <tr>
+              <td class="fw-bold">{{ task.letter_code }}</td>
+
+              <td>
+                {% if task.primary_served_by or task.secondary_served_by %}
+                  <ul class="list-unstyled mb-0">
+                    {% for primary_serv_by in task.primary_served_by %}
+                      <li class="text-primary">{{ primary_serv_by.get_full_name }} <span class="text-black-50">(prim.)</span></li>
+                    {% endfor %}
+
+                    {% for secondary_serv_by in task.secondary_served_by %}
+                      <li class="text-success">{{ secondary_serv_by.get_full_name }} <span class="text-black-50">(scnd.)</span></li>
+                    {% endfor %}
+                  </ul>
+                {% else %}
+                  <span class="text-danger">= No one =</span>
+                {% endif %}
+              </td>
+
+              <td class="text-center">
+                {% if task.count_tickets_unprocessed %}
+                  {% if not task.primary_served_by and not task.secondary_served_by %}
+                    <span class="text-danger fw-bold">
+                      = {{ task.count_tickets_unprocessed }} =
+                    </span>
+                  {% else %}
+                    {{ task.count_tickets_unprocessed }}
+                  {% endif %}
+                {% endif %}
+              </td>
+
+              <td class="text-center">
+                {% if task.count_tickets_completed %}
+                  {{ task.count_tickets_completed }}
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     {% endif %}
   </div>
 

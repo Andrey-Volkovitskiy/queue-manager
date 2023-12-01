@@ -1,6 +1,9 @@
 from django.db import models
 from django.core.validators import RegexValidator
+from queue_manager.session.models import Session
 from queue_manager.user.models import Operator
+from queue_manager.status.models import Status
+from django.db.models import OuterRef, Subquery
 
 
 ITEM_NAME = 'task'
@@ -70,6 +73,29 @@ class Task(models.Model):
                 service__is_servicing=True,
                 service__priority_for_operator__lt=Service.HIGHEST_PRIORITY)\
             .order_by('last_name', 'first_name')
+
+    @property
+    def count_tickets_completed(self):
+        last_status_code = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'code')[:1])
+        return self.ticket_set\
+            .filter(session=Session.objects.get_current_session())\
+            .annotate(last_status_code=last_status_code)\
+            .filter(last_status_code=Status.objects.Codes.COMPLETED)\
+            .count()
+
+    @property
+    def count_tickets_unprocessed(self):
+        last_status_code = Subquery(Status.objects.filter(
+            ticket=OuterRef('id')).order_by('-assigned_at').values(
+                'code')[:1])
+        return self.ticket_set\
+            .filter(session=Session.objects.get_current_session())\
+            .annotate(last_status_code=last_status_code)\
+            .filter(last_status_code__in=(
+                Status.objects.Codes.unprocessed_status_codes))\
+            .count()
 
 
 class Service(models.Model):
