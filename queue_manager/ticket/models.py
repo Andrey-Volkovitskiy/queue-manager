@@ -63,6 +63,13 @@ class Ticket(models.Model):
                 name='unique_code_in_session')
         ]
 
+    @property
+    def responsible(self):
+        '''The operator currenlly responsible for the ticket'''
+        last_status = self.status_set.last
+        if last_status:
+            return last_status.responsible
+
     def __str__(self):
         return self.code
 

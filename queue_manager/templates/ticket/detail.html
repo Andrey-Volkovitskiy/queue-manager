@@ -21,10 +21,10 @@
     <tbody>
       {% for status in object.status_set.all %}
         <tr>
-          <td>{{ status.get_status_name }}</td>
-          <td>{{ status.assigned_at }}</td>
-          <td>{% if status.assigned_by %}{{ status.assigned_by }}{% endif %}</td>
-          <td>{% if status.assigned_to %}{{ status.assigned_to }}{% endif %}</td>
+          <td class="text-{{ status.colour }}">{{ status.name }}</td>
+          <td class="text-{{ status.colour }}">{{ status.assigned_at }}</td>
+          <td class="text-{{ status.colour }}">{% if status.assigned_by %}{{ status.assigned_by }}{% endif %}</td>
+          <td class="text-{{ status.colour }}">{% if status.assigned_to %}{{ status.assigned_to }}{% endif %}</td>
         </tr>
       {% endfor %}
     </tbody>

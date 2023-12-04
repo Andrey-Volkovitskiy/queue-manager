@@ -114,6 +114,7 @@ class Operator(User):
         from queue_manager.ticket.models import Ticket
         from queue_manager.session.models import Session
         from queue_manager.status.models import Status
+
         last_status_code = Subquery(
             Status.objects
             .filter(ticket=OuterRef('id'))
@@ -126,7 +127,7 @@ class Operator(User):
             .order_by('-assigned_at')
             .values('assigned_by')[:1])
 
-        x = Ticket.objects\
+        return Ticket.objects\
             .filter(
                 session=Session.objects.get_current_session(),
                 status__code=Status.objects.Codes.COMPLETED,
@@ -138,8 +139,6 @@ class Operator(User):
                 last_status_code=Status.objects.Codes.COMPLETED,
                 last_status_assigned_by=self)\
             .count()
-        print(f'XXXXXXXXXX = {x}')
-        return x
 
     def get_personal_tickets(self, limit=None):
         '''Returns QuerySet with personal tickets assigned to the operator

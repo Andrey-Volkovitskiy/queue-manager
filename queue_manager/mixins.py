@@ -60,7 +60,7 @@ class TopNavMenuMixin(ContextMixin):  # TODO Refactor
                         ('Operator', reverse_lazy('operator-enter')))
 
         elif path.startswith('/ticket/'):
-            if len(path) > len('/ticket/'):
+            if self.request.GET.get('operator'):
                 menu_items.append(('Operator',
                                    reverse_lazy('operator-enter')))
 
@@ -74,6 +74,10 @@ class TopNavMenuMixin(ContextMixin):  # TODO Refactor
                         reverse_lazy('operator-personal',
                                      kwargs={'pk': int(pretend_operator_id)})
                         ))
+
+            else:
+                menu_items.append(
+                    ('Supervisor', reverse_lazy('supervisor-enter')))
 
         context['top_nav_menu'] = menu_items
         return context

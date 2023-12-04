@@ -131,7 +131,35 @@ class Status(models.Model):
     )
     objects = StatusManager()
 
-    def get_status_name(self):
+    @property
+    def responsible(self):
+        '''The operator currenlly responsihble for the status'''
+        if self.code in (
+                StatusManager.Codes.PROCESSING,
+                StatusManager.Codes.REDIRECTED):
+            return self.assigned_to
+        elif self.code in (
+                StatusManager.Codes.MISSED,
+                StatusManager.Codes.COMPLETED):
+            return self.assigned_by
+
+    @property
+    def name(self):
+        '''The status name based on code'''
         dic = StatusManager.Codes.__dict__
         name = {atr for atr in dic if dic[atr] == self.code}.pop()
         return name.capitalize()
+
+    @property
+    def colour(self):
+        '''The status colour based on code'''
+        if self.code == StatusManager.Codes.UNASSIGNED:
+            return 'secondary'
+        elif self.code == StatusManager.Codes.PROCESSING:
+            return 'success'
+        elif self.code == StatusManager.Codes.COMPLETED:
+            return 'primary'
+        elif self.code == StatusManager.Codes.REDIRECTED:
+            return 'danger'
+        elif self.code == StatusManager.Codes.MISSED:
+            return 'warning'

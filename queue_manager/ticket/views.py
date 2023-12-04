@@ -54,12 +54,13 @@ class ItemListView(
         ListView):
     item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/list.html"
-    ordering = ['-code']
+    paginate_by = 20
     permission_required = f'{ITEM_NAME}.view_{ITEM_NAME}'
 
     def get_queryset(self):
-        return MODEL.objects.filter(
-            session=Session.objects.get_current_session())
+        return MODEL.objects\
+            .filter(session=Session.objects.get_current_session())\
+            .order_by('-id')
 
 
 class TicketMarkCompletedView(
