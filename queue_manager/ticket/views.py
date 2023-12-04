@@ -54,7 +54,7 @@ class ItemListView(
         ListView):
     item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/list.html"
-    paginate_by = 20
+    paginate_by = 30
     permission_required = f'{ITEM_NAME}.view_{ITEM_NAME}'
 
     def get_queryset(self):

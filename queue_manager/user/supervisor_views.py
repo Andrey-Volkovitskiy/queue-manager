@@ -5,6 +5,7 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from queue_manager.mixins import TopNavMenuMixin
 from queue_manager.session.models import Session
 from queue_manager.task.models import Task
+from queue_manager.ticket.models import Ticket
 from queue_manager.user.models import Supervisor, Operator
 
 
@@ -41,6 +42,7 @@ class SupervisorPersonalView(
         DetailView):
     model = Supervisor
     template_name = "supervisor/personal.html"
+    TICKETS_SHOWN = 20
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -50,4 +52,7 @@ class SupervisorPersonalView(
         context['servicing_operators'] = Operator.objects\
             .filter(service__is_servicing=True)\
             .distinct().order_by('last_name', 'first_name')
+        context['last_tickets'] = Ticket.objects\
+            .filter(session=Session.objects.get_current_session())\
+            .order_by('-id')[0: self.TICKETS_SHOWN]
         return context

@@ -143,52 +143,16 @@
   <!-- Last tickets -->
   <div class="my-4 border border-3">
     <h4>
-      Last 20 <a class="link-dark" href="{% url 'ticket-list' %}">tickets</a>
+      Last issued <a class="link-dark" href="{% url 'ticket-list' %}">tickets</a>
     </h4>
     {% if current_session %}
-      <table class="table border-1 table-sm">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th class="text-center">Current ticket</th>
-            <th class="text-center">Tasks in service</th>
-            <th class="text-center">Tickets completed</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for operator in servicing_operators %}
-            <tr>
-              <td>{{ operator.get_full_name }}</td>
-
-              <td class="text-center">
-                {% if operator.current_ticket %}
-                  {{ operator.current_ticket.code }}
-                {% endif %}
-              </td>
-
-              <td class="text-center">
-               <ul class="list-unstyled mb-0">
-                  <li class="text-primary d-inline me-2">{{ operator.primary_task.letter_code }} <span class="text-black-50">(prim.)</span></li>
-                  {% if operator.secondary_tasks %}
-                    <li class="text-secondary d-inline">
-                      {% for scnd_task in operator.secondary_tasks %}
-                        {{ scnd_task.letter_code }}{% if not forloop.last %}, {% endif %}
-                      {% endfor %}
-                      <span class="text-black-50">(scnd.)</span>
-                    </li>
-                  {% endif %}
-                </ul>
-              </td>
-
-              <td class="text-center">
-                {% if operator.count_tickets_completed %}
-                  {{ operator.count_tickets_completed }}
-                {% endif %}
-              </td>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+      <ul class="list-unstyled mb-0 card-columns" style="column-count: 4">
+        {% for ticket in last_tickets %}
+          <li class="text-black-50">
+            {{ forloop.counter }} - <a class="link-{{ ticket.status_set.last.colour }}" href="{% url 'ticket-detail' ticket.id %}">{{ ticket.code }}</a>
+          </li>
+        {% endfor %}
+      </ul>
     {% endif %}
   </div>
 
