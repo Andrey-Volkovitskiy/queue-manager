@@ -11,17 +11,25 @@
 
   <!-- Current session -->
   <div class="my-4 border border-3">
-    <h4 class="d-inline me-2">
-      Current <a class="link-dark" href="{% url 'session-list' %}">session</a>
-    </h4>
     {% if current_session %}
+      <h4 class="d-inline me-2">
+        Current <a class="link-dark" href="{% url 'session-list' %}">session</a>
+      </h4>
       <span class="ms-3">{{ current_session.code}}</span>
       <span class="ms-5 text-black-50">
         <span>Total tickets completed: {{ current_session.count_tickets_completed }}</span>
         <span class="ms-5">Tickets in queue/processing: {{ current_session.count_tickets_unprocessed }}</span>
       </span>
     {% else %}
-      <span class="text-danger">= Not started =</span>
+      <h4 class="d-inline me-2">
+        No current <a class="link-dark" href="{% url 'session-list' %}">session</a>
+      </h4>
+      <form method="post" class="form d-inline ms-4" action="{% url 'session-start' %}">
+        {% csrf_token %}
+            <button type="submit" class="btn btn-outline-primary border-1">
+              Start new session
+            </button>
+      </form>
     {% endif %}
   </div>
 
