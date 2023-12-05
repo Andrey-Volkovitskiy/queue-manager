@@ -1,4 +1,5 @@
 from django.db import models
+from queue_manager.models import SoftDeletionModel
 from django.core.validators import RegexValidator
 from queue_manager.session.models import Session
 from queue_manager.user.models import Operator
@@ -22,10 +23,9 @@ class CapitalizedCharField(models.CharField):
         return value
 
 
-class Task(models.Model):
+class Task(SoftDeletionModel):
     name = CapitalizedCharField(
         max_length=75,
-        unique=True,
         verbose_name='Name'
     )
     description = CapitalizedCharField(
@@ -35,7 +35,6 @@ class Task(models.Model):
     )
     letter_code = CapitalizedCharField(
         max_length=1,
-        unique=True,
         verbose_name='Letter code',
         validators=[only_letters],
     )
@@ -55,6 +54,9 @@ class Task(models.Model):
 
     def __str__(self):
         return f'{self.letter_code} - {self.name}'
+
+    class Meta:
+        unique_together = ['letter_code', 'deleted_at']
 
     @property
     def primary_served_by(self) -> Operator:
