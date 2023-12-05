@@ -7,4 +7,3 @@ Deployed at: https://queue-man.up.railway.app/
 
 - I practiced with Object permissions, Proxy models
 
-#TODO add file migrations which adds supervisor's permissions to DB

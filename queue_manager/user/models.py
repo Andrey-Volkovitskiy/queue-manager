@@ -249,7 +249,7 @@ class Operator(User):
 
     def save(self, *args, **kwargs):
         '''Adds just created user to "operators" group
-        and fixes pytest "pk=1' issue'''
+        and fixes pytest "pk=1' issue'''  # TODO Fix it
         just_created = self.id is None
         if just_created and "pytest" in sys.modules:
             max_pk = User.objects.last().id

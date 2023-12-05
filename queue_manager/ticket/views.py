@@ -142,7 +142,7 @@ class ItemDetailView(
         TopNavMenuMixin,
         DetailView):
     model = MODEL
-    item_name = ITEM_NAME  # TODO permissions
+    item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/detail.html"
 
     def get_context_data(self, **kwargs):
