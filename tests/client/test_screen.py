@@ -1,4 +1,5 @@
 import pytest
+from queue_manager.session.models import Session
 from tests import conftest
 from . import conftest as package_conftest
 from tests.session.conftest import ITEM_START_URL as SESSION_START_URL
@@ -63,7 +64,6 @@ def test_show_list_of_tickets(client, get_supervisors, get_operators):
 @pytest.mark.django_db
 def test_show_clients_ticket(client, get_supervisors):
     expected_ticket_code = 'F001'
-    expected_url = f'/client/screen/?track_ticket={expected_ticket_code}'
 
     client.force_login(get_supervisors[0])
     client.post(SESSION_START_URL, None, follow=True)
@@ -79,6 +79,10 @@ def test_show_clients_ticket(client, get_supervisors):
     content = response.content.decode()
     assert response.status_code == 200
     assert expected_ticket_code in content
+    expected_ticket_id = Ticket.objects.get(
+        code=expected_ticket_code,
+        session=Session.objects.get_current_session()).id
+    expected_url = f'/client/screen/?track_ticket={expected_ticket_id}'
     assert expected_url in content
 
     response = client.get(expected_url, follow=True)

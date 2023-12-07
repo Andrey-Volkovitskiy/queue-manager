@@ -30,9 +30,13 @@
     </div>
   </div>
 
-  {% if request.GET.track_ticket %}
+  {% if track_ticket %}
     <div class="text-muted my-4">
-      <small>Your ticket is: {{ request.GET.track_ticket }}</small>
+      <small>
+        Your ticket is:
+        <span class="fw-bold">{{ track_ticket.code }}</span>
+        <span class="fst-italic">({{ track_ticket.num_tickets_ahead }} client{{ track_ticket.num_tickets_ahead|pluralize }} ahead)</span>
+      </small>
     </div>
   {% endif %}
 {% endblock %}

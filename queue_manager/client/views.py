@@ -50,7 +50,7 @@ class PrintedTicketDetailView(TopNavMenuMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['link_to_screen'] = (f"{reverse_lazy('screen')}"
-                                     f"?track_ticket={self.get_object().code}")
+                                     f"?track_ticket={self.get_object().id}")
         return context
 
 
@@ -68,3 +68,11 @@ class ScreenView(TopNavMenuMixin, ListView):
                 ticket__session__is_active=True,
                 code=Status.objects.Codes.PROCESSING)\
             .order_by('-assigned_at')[:VISIBLE_TICKETS_QUAN]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        track_ticket_id = self.request.GET.get('track_ticket')
+        track_ticket = Ticket.objects.filter(id=track_ticket_id).last()
+        if track_ticket:
+            context['track_ticket'] = track_ticket
+        return context

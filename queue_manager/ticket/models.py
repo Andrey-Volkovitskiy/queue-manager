@@ -70,6 +70,24 @@ class Ticket(models.Model):
         if last_status:
             return last_status.responsible
 
+    @property
+    def num_tickets_ahead(self):
+        '''The number of unassidned tickets in front the ticket'''
+        last_status_code = Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-id')
+            .values('code')[:1])
+
+        return self._meta.model.objects\
+            .filter(
+                session=Session.objects.get_current_session(),
+                task=self.task,
+                id__lt=self.id,)\
+            .annotate(last_status_code=last_status_code)\
+            .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\
+            .count()
+
     def __str__(self):
         return self.code
 
