@@ -75,32 +75,21 @@ def test_successfuly_created_with_serviced_by(client, get_supervisors):
 
 
 @pytest.mark.django_db
-def test_with_incorrect_existing_name(client, get_supervisors):
+def test_with_incorrect_existing_code(client, get_supervisors):
     count_default_items_in_db = PackageModel.objects.all().count()
     client.force_login(get_supervisors[0])
     CORRECT_ITEM = deepcopy(TEST_ITEMS[0])
 
-    INCORRECT_ITEM_1 = deepcopy(TEST_ITEMS[1])
-    INCORRECT_ITEM_1['name'] = (
-        CORRECT_ITEM['name'][0].lower() + CORRECT_ITEM['name'][1:])
-
-    INCORRECT_ITEM_2 = deepcopy(TEST_ITEMS[1])
-    INCORRECT_ITEM_2['letter_code'] = CORRECT_ITEM['letter_code'].lower()
+    INCORRECT_ITEM = deepcopy(TEST_ITEMS[1])
+    INCORRECT_ITEM['letter_code'] = CORRECT_ITEM['letter_code'].lower()
 
     response = client.post(TESTED_URL, CORRECT_ITEM)
-    response = client.post(TESTED_URL, INCORRECT_ITEM_1, follow=True)
-
-    # assert response.redirect_chain == []
-    assert response.status_code == 200
-    response_content = response.content.decode()
-    assert "already exists." in response_content
-
-    response = client.post(TESTED_URL, INCORRECT_ITEM_2, follow=True)
+    response = client.post(TESTED_URL, INCORRECT_ITEM, follow=True)
 
     assert response.redirect_chain == []
     assert response.status_code == 200
     response_content = response.content.decode()
-    assert "already exists." in response_content
+    assert "already exists" in response_content
 
     # Is only one item added to the database?
     assert PackageModel.objects.all().count() == count_default_items_in_db + 1

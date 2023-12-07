@@ -16,17 +16,18 @@
       </div>
       <div class="my-4 text-center">
         <small>After <span id="counter">7</span> seconds, you will be redirected to the <a href="{{ link_to_screen }}">queue screen</a>.</small>
-          <script>
-              setInterval(function() {
-                  var div = document.querySelector("#counter");
-                  var count = div.textContent * 1 - 1;
-                  div.textContent = count;
-                  if (count <= 0) {
-                      window.location.replace("{{link_to_screen}}");
-                  }
-              }, 1000);
-          </script>
       </div>
     </div>
   </div>
+
+  <script>
+    setInterval(function() {
+        var div = document.querySelector("#counter");
+        var count = div.textContent * 1 - 1;
+        div.textContent = count;
+        if (count <= 0) {
+            window.location.replace("{{link_to_screen}}");
+        }
+    }, 1000);
+</script>
 {% endblock %}

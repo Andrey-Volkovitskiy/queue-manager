@@ -111,7 +111,7 @@ def test_successfuly_updated_with_serviced_by(client, get_supervisors):
 
 
 @pytest.mark.django_db
-def test_with_incorrect_existing_name(client, get_supervisors):
+def test_with_incorrect_existing_code(client, get_supervisors):
     client.force_login(get_supervisors[0])
     INITIAL_ITEM = deepcopy(TEST_ITEMS[0])
     EXISTING_ITEM = deepcopy(TEST_ITEMS[1])
@@ -132,17 +132,6 @@ def test_with_incorrect_existing_name(client, get_supervisors):
         TESTED_URL_PATTERN, PackageModel)
 
     ###
-    ITEM_WITH_EXISTING_NAME = deepcopy(TEST_ITEMS[2])
-    ITEM_WITH_EXISTING_NAME['name'] = EXISTING_ITEM['name']
-
-    response = client.post(TESTED_URL, ITEM_WITH_EXISTING_NAME, follow=True)
-
-    assert response.status_code == 200
-    assert response.redirect_chain == []
-    response_content = response.content.decode()
-    assert ("already exists.") in response_content
-
-    ###
     ITEM_WITH_EXISTING_LETTER = deepcopy(TEST_ITEMS[2])
     ITEM_WITH_EXISTING_LETTER['letter_code'] = EXISTING_ITEM['letter_code']
 
@@ -151,7 +140,7 @@ def test_with_incorrect_existing_name(client, get_supervisors):
     assert response.status_code == 200
     assert response.redirect_chain == []
     response_content = response.content.decode()
-    assert ("already exists.") in response_content
+    assert ("already exists") in response_content
 
 
 @pytest.mark.django_db

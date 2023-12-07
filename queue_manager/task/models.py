@@ -56,7 +56,11 @@ class Task(SoftDeletionModel):
         return f'{self.letter_code} - {self.name}'
 
     class Meta:
-        unique_together = ['letter_code', 'deleted_at']
+        constraints = [models.UniqueConstraint(
+            fields=['letter_code'],
+            condition=models.Q(deleted_at=None),
+            name='unique_if_not_deleted'
+        )]
 
     @property
     def primary_served_by(self) -> Operator:
