@@ -63,7 +63,7 @@ def test_service_start_success(client, get_operators):
         available_tasks[1].letter_code,
         available_tasks[2].letter_code
     ))
-    secondary_string = f'andsecondarytask(s):{secondary_letter_codes}'
+    secondary_string = f'andsecondarytask(s):"{secondary_letter_codes}"'
     clean_content = content.replace("\n", "").replace(" ", "")
     assert secondary_string in clean_content
 
@@ -112,7 +112,7 @@ def test_service_start_success_with_supervisor(
         available_tasks[1].letter_code,
         available_tasks[2].letter_code
     ))
-    secondary_string = f'andsecondarytask(s):{secondary_letter_codes}'
+    secondary_string = f'andsecondarytask(s):"{secondary_letter_codes}"'
     clean_content = content.replace("\n", "").replace(" ", "")
     assert secondary_string in clean_content
 

@@ -21,6 +21,8 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 
 ITEM_NAME = 'operator'
+# TODO %s vs code injections
+# TODO Add icon and static files distribution
 
 
 class OperatorEnterView(View):
@@ -59,7 +61,7 @@ class OperatorPersonalView(
         TopNavMenuMixin,
         DetailView):
     QUEUE_LEN_LIMIT = 6
-    PROCESSED_STATUSES_LIMIT = 4
+    PROCESSED_STATUSES_LIMIT = 9
     model = MODEL
     template_name = "operator/personal.html"
 
