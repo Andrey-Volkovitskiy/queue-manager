@@ -5,5 +5,5 @@
 
 Deployed at: https://queue-man.up.railway.app/
 
-- I practiced with Object permissions, Proxy models
+- I practiced with Object permissions, Proxy models, Optimized DB queries
 

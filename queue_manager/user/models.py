@@ -38,7 +38,7 @@ class Operator(User):
         permissions = [(
             "pretend_operator",
             "Can serve tickets pretending to be any of the operators"), ]
-        ordering = ["last_name", "first_name"]
+        ordering = ['first_name', 'last_name']
 
     objects = OperatorManager()
 
@@ -47,7 +47,7 @@ class Operator(User):
         return self.service_set.filter(is_servicing=True).exists()
 
     @property
-    def last_assigned_ticket(self):
+    def last_assigned_ticket(self):  # TODO Add select_related() and defer/only
         from queue_manager.status.models import Status
         last_processing_status = Status.objects.filter(
             code=Status.objects.Codes.PROCESSING,

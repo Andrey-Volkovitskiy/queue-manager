@@ -69,7 +69,7 @@ class Task(SoftDeletionModel):
                 service__task=self,
                 service__is_servicing=True,
                 service__priority_for_operator=Service.HIGHEST_PRIORITY)\
-            .order_by('last_name', 'first_name')
+            .order_by('first_name', 'last_name')
 
     @property
     def secondary_served_by(self) -> Operator:
@@ -78,7 +78,7 @@ class Task(SoftDeletionModel):
                 service__task=self,
                 service__is_servicing=True,
                 service__priority_for_operator__lt=Service.HIGHEST_PRIORITY)\
-            .order_by('last_name', 'first_name')
+            .order_by('first_name', 'last_name')
 
     @property
     def count_tickets_completed(self):
