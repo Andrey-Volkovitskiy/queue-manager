@@ -16,7 +16,7 @@ def test_basic_content(client, get_supervisors):
     assert response.status_code == 200
     assert "Tickets" in content
     assert "Code" in content
-    assert "Only tickets from the current session are displayed" in content
+    assert "Only tickets from the last session are displayed" in content
 
 
 @pytest.mark.django_db

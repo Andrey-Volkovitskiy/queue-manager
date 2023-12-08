@@ -58,8 +58,9 @@ class ItemListView(
     permission_required = f'{ITEM_NAME}.view_{ITEM_NAME}'
 
     def get_queryset(self):
+        '''Returns all tickets for the last session'''
         return MODEL.objects\
-            .filter(session=Session.objects.get_current_session())\
+            .filter(session=Session.objects.last())\
             .order_by('-id')
 
 

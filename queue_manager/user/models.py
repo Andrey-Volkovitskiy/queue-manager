@@ -46,8 +46,10 @@ class Operator(User):
     def is_servicing(self):
         return self.service_set.filter(is_servicing=True).exists()
 
+    # TODO Add explain(), select_related/prefetch and defer/only
+    # contains, F, Q, Subquery
     @property
-    def last_assigned_ticket(self):  # TODO Add select_related() and defer/only
+    def last_assigned_ticket(self):
         from queue_manager.status.models import Status
         last_processing_status = Status.objects.filter(
             code=Status.objects.Codes.PROCESSING,

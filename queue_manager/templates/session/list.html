@@ -10,7 +10,7 @@
   <h1 class="my-4">{{ item_name|capfirst }}s</h1>
 
   {% if active_session_exists %}
-    <a href="{% url 'session-finish' %}" class="btn btn-outline-primary">
+    <a href="{% url 'session-finish' %}" class="btn btn-outline-danger">
       Finish current {{ item_name }}
     </a>
   {% else %}
