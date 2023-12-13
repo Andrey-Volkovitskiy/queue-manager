@@ -13,34 +13,35 @@
   </head>
 
   <body class="d-flex flex-column min-vh-100">
-    <!-- TODO Adjust for mobile device -->
     <div class="container"> 
-        <header class="d-flex flex-wrap align-items-center justify-content-center justify-content-md-between py-3 mb-2 border-bottom">
-          <div class="col-md-3 mb-2 mb-md-0 text-muted">
+        <header class="d-flex flex-wrap align-items-center justify-content-lg-between py-3 mb-2 border-bottom">
+          <div class="col-md-4 mb-2 mb-md-0 text-muted align-items-left">
             <a href="/" class="d-inline-flex link-secondary text-decoration-none">
                 <span class="fs-4 fst-italic">Queue Manager</span>
             </a>
             <div>
-                <small class="fst-italic">Helps serve clients in order of appearance</small>
+                <small class="fst-italic">Helps serve bank clients in order of appearance</small>
             </div>
           </div>
     
-          {% if top_nav_menu %}
-            <ul class="nav col-12 col-md-auto mb-2 justify-content-center mb-md-0">
-              {% if top_nav_menu|length == 1 %}
-                <li><span class="nav-link px-2 link-secondary">>></span></li>
-              {% endif %}
-              
-              {% for menu_item in top_nav_menu %}
-                <li><a href="{{ menu_item.1 }}" class="nav-link link-secondary px-2">{{ menu_item.0 }}</a></li>
-                {% if forloop.first or not forloop.last %}
+          <div class="col-md-4 mx-2">
+            {% if top_nav_menu %}
+              <ul class="nav col-md-auto mb-2 justify-content-center mb-md-0">
+                {% if top_nav_menu|length == 1 %}
                   <li><span class="nav-link px-2 link-secondary">>></span></li>
                 {% endif %}
-              {% endfor %}
-            </ul>
-          {% endif %}
-    
-          <div class="col-md-3 text-end">
+                
+                {% for menu_item in top_nav_menu %}
+                  <li><a href="{{ menu_item.1 }}" class="nav-link link-secondary px-2">{{ menu_item.0 }}</a></li>
+                  {% if forloop.first or not forloop.last %}
+                    <li><span class="nav-link px-2 link-secondary">>></span></li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            {% endif %}
+          </div>
+
+          <div class="col-md-3 text-end mx-2">
             {% if user.is_authenticated %}
               <div>
                 <a class="btn btn-outline-secondary" href="{% url 'logout' %}">Logout</a>
@@ -49,7 +50,7 @@
                 <small class="w-light text-muted">{{ user.first_name }} {{ user.last_name }}</small>
               </div>
             {% else %}
-              <a class="btn btn-outline-secondary me-2" href="{% url 'login' %}">Sign In</a>
+              <a class="btn btn-outline-secondary" href="{% url 'login' %}">Sign In</a>
             {% endif %}
           </div>
         </header>
