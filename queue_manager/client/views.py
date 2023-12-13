@@ -7,8 +7,6 @@ from queue_manager.status.models import Status
 from queue_manager.mixins import TopNavMenuMixin
 from django.urls import reverse_lazy
 
-from tests.client.test_screen import VISIBLE_TICKETS_QUAN
-
 
 class PrintTicketView(TopNavMenuMixin, TemplateView):
     TASK_CODE_PREFIX = "task_code:"
@@ -67,7 +65,7 @@ class ScreenView(TopNavMenuMixin, ListView):
             .filter(
                 ticket__session__is_active=True,
                 code=Status.objects.Codes.PROCESSING)\
-            .order_by('-assigned_at')[:VISIBLE_TICKETS_QUAN]
+            .order_by('-assigned_at')[:self.VISIBLE_TICKETS_QUAN]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
