@@ -14,7 +14,7 @@
     {% if is_servicing %}
       <h4 class="d-inline me-3">Currently serviced tasks</h4>
 
-      <span class="mb-2 me-3 my-2 text-black-50 text-nowrap">
+      <span class="mb-2 me-3 my-2 text-black-50">
         <span class="text-nowrap">Primary task "{{ primary_task.letter_code }}"</span>
         {% if secondary_tasks %}
           <span class="text-nowrap">
@@ -23,7 +23,7 @@
         {% endif %}
       </span>
 
-      <form method="post" class="d-inline-block" action="{% url 'service-stop' object.id %}">
+      <form method="post" class="d-inline-block mt-1 mb-0" action="{% url 'service-stop' object.id %}">
         {% csrf_token %}
         <input class="btn btn-outline-secondary" type="submit" value="Stop service">
       </form>
