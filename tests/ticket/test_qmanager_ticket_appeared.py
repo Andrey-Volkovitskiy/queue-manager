@@ -198,6 +198,12 @@ def test_redirect_ticket_success(client, get_supervisors):
     assert second_assigment_status.code == Status.objects.Codes.PROCESSING
     assert second_assigment_status.assigned_to.id == redirected_to_id
 
+    # Can the initial operator get new general tickets?
+    new_ticket = Ticket.objects.create_ticket(taskC)
+    last_ststus_of_new_ticket = new_ticket.status_set.last()
+    assert last_ststus_of_new_ticket.code == Status.objects.Codes.PROCESSING
+    assert last_ststus_of_new_ticket.assigned_to == initial_operator
+
 
 @pytest.mark.django_db
 def test_mark_ticket_missed_success(client, get_supervisors):

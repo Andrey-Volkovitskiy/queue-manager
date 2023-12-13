@@ -80,6 +80,10 @@
               <li>{{ ticket.code }}</li>
             {% endif %}
           {% endfor %}
+          
+          {% if not personal_tickets %}
+            <li class="text-black-50">-</li>
+          {% endif %}
         </ul>
       </div>
       
@@ -93,6 +97,10 @@
               <li>{{ ticket.code }}</li>
             {% endif %}
           {% endfor %}
+
+          {% if not primary_tickets %}
+            <li class="text-black-50">-</li>
+          {% endif %}
         </ul>
       </div>
 
@@ -106,6 +114,10 @@
               <li>{{ ticket.code }}</li>
             {% endif %}
           {% endfor %}
+
+          {% if not secondary_tickets %}
+            <li class="text-black-50">-</li>
+          {% endif %}
         </ul>
       </div>
     </div>
@@ -131,6 +143,10 @@
               </li>
             {% endif %}
           {% endfor %}
+
+          {% if not completed_statuses %}
+            <li class="text-black-50">-</li>
+          {% endif %}
         </ul>
       </div>
       
@@ -148,6 +164,10 @@
             </li>
             {% endif %}
           {% endfor %}
+
+          {% if not missed_statuses %}
+            <li class="text-black-50">-</li>
+          {% endif %}
         </ul>
       </div>
 
@@ -165,6 +185,10 @@
             </li>
             {% endif %}
           {% endfor %}
+
+          {% if not redirected_statuses %}
+            <li class="text-black-50">-</li>
+          {% endif %}
         </ul>
       </div>
     </div>

@@ -136,12 +136,12 @@ class Ticket(models.Model):
 
 
 class QManager:
-    @staticmethod
+    @staticmethod  # Personal - ticket redirected by someone to the operator
     def personal_ticket_appeared(ticket: Ticket, assigned_to: Operator):
         if assigned_to.is_free:
             ticket.assign_to_operator(assigned_to)
 
-    @classmethod
+    @classmethod  # General - ticket just issued to a client
     def general_ticket_appeared(cls, ticket: Ticket):
         task = ticket.task
         free_operator = cls._get_next_free_operator(task)
@@ -195,24 +195,46 @@ class QManager:
         - currently is_servicing the task
         - don't currently have ticket in processing'''
         last_assigned_ticket = Subquery(
-            Ticket.objects.filter(
+            Ticket.objects
+            .filter(
                 status__assigned_to=OuterRef(OuterRef('id')),
-                status__code=Status.objects.Codes.PROCESSING
-                ).order_by('-status__assigned_at').values(
-                'id')[:1])
+                status__code=Status.objects.Codes.PROCESSING)
+            .order_by('-status__assigned_at')
+            .values('id')[:1])
 
-        last_status_of_last_ticket = Subquery(Status.objects.filter(
-            ticket=last_assigned_ticket).order_by('-assigned_at').values(
-                'code')[:1])
+        last_status_code = Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('code')[:1])
+
+        last_status_assigned_to = Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('assigned_to')[:1])
+
+        current_ticket = Subquery(
+            Ticket.objects
+            .filter(id=last_assigned_ticket)
+            .annotate(
+                last_status_code=last_status_code,
+                last_status_assigned_to=last_status_assigned_to)
+            .filter(
+                last_status_code=Status.objects.Codes.PROCESSING,
+                last_status_assigned_to=OuterRef('id'))
+            .values('id'))
 
         processing_operators = Subquery(
-            Operator.objects.filter(id=OuterRef('id')).annotate(
-                last_status_of_last_ticket=last_status_of_last_ticket).
-            filter(last_status_of_last_ticket=Status.
-                   objects.Codes.PROCESSING).values('id'))
+            Operator.objects
+            .filter(id=OuterRef('id'))
+            .annotate(current_ticket=current_ticket)
+            .filter(current_ticket__isnull=False)
+            .values('id'))
 
         free_operators = task.can_be_served_by.filter(
             service__is_servicing=True).exclude(id__in=processing_operators)
+
         return free_operators
 
     @classmethod

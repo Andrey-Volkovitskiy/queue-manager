@@ -64,18 +64,24 @@ class Operator(User):
         from queue_manager.ticket.models import Ticket
 
         last_assigned_ticket = Subquery(
-            Ticket.objects.filter(
+            Ticket.objects
+            .filter(
                 status__assigned_to=self,
-                status__code=Status.objects.Codes.PROCESSING
-                ).order_by('-status__assigned_at').values('id')[:1])
+                status__code=Status.objects.Codes.PROCESSING)
+            .order_by('-status__assigned_at')
+            .values('id')[:1])
 
-        last_status_code = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'code')[:1])
+        last_status_code = Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('code')[:1])
 
-        last_status_assigned_to = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'assigned_to')[:1])
+        last_status_assigned_to = Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('assigned_to')[:1])
 
         return Ticket.objects\
             .filter(id=last_assigned_ticket)\
