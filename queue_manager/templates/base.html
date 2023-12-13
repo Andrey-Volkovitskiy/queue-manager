@@ -15,7 +15,7 @@
   <body class="d-flex flex-column min-vh-100">
     <div class="container"> 
         <header class="d-flex flex-wrap align-items-center justify-content-lg-between py-3 mb-2 border-bottom">
-          <div class="col-md-4 mb-2 mb-md-0 text-muted align-items-left">
+          <div class="col-lg-4 mb-2 mb-md-0 text-muted align-items-left">
             <a href="/" class="d-inline-flex link-secondary text-decoration-none">
                 <span class="fs-4 fst-italic">Queue Manager</span>
             </a>
@@ -24,9 +24,9 @@
             </div>
           </div>
     
-          <div class="col-md-4 mx-2">
+          <div class="col-lg-4 col-sm-12 col-xs-12 mx-2">
             {% if top_nav_menu %}
-              <ul class="nav col-md-auto mb-2 justify-content-center mb-md-0">
+              <ul class="nav mb-2 justify-content-center mb-md-0">
                 {% if top_nav_menu|length == 1 %}
                   <li><span class="nav-link px-2 link-secondary">>></span></li>
                 {% endif %}
@@ -41,7 +41,7 @@
             {% endif %}
           </div>
 
-          <div class="col-md-3 text-end mx-2">
+          <div class="col-lg-3 text-end mx-2">
             {% if user.is_authenticated %}
               <div>
                 <a class="btn btn-outline-secondary" href="{% url 'logout' %}">Logout</a>
