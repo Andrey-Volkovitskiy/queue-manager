@@ -15,10 +15,10 @@
       <h4 class="d-inline me-2">
         Current <a class="link-dark" href="{% url 'session-list' %}">session</a>
       </h4>
-      <span class="ms-3">{{ current_session.code}}</span>
-      <span class="ms-5 text-black-50">
-        <span>Total tickets completed: {{ current_session.count_tickets_completed }}</span>
-        <span class="ms-5">Tickets in queue/processing: {{ current_session.count_tickets_unprocessed }}</span>
+      <span class="me-4 text-nowrap">{{ current_session.code}}</span>
+      <span class="text-black-50">
+        <span class="me-3 text-nowrap">Total tickets completed: {{ current_session.count_tickets_completed }}</span>
+        <span class="text-nowrap">Tickets in queue/processing: {{ current_session.count_tickets_unprocessed }}</span>
       </span>
     {% else %}
       <h4 class="d-inline me-2 text-danger">
