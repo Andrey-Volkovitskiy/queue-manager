@@ -36,7 +36,7 @@
 
   <!-- Current ticket -->
   <div class="my-4 p-3 border border-2 rounded-3 border-success">
-    <h4 class="d-inline-block me-5">Current ticket:
+    <h4 class="d-lg-inline-block me-5">Current ticket:
       {% if object.current_ticket %}
         "<a href="{% url 'ticket-detail' object.current_ticket.id %}?operator={{object.id}}">{{ object.current_ticket.code }}</a>"
       {% else %}
@@ -47,17 +47,17 @@
 
     {% if object.current_ticket %}
       <div class="d-inline-block">
-        <form method="post" class="d-inline-block mb-0" action="{% url 'ticket-mark-completed' object.current_ticket.id %}">
+        <form method="post" class="d-md-inline-block mb-0" action="{% url 'ticket-mark-completed' object.current_ticket.id %}">
           {% csrf_token %}
           <input class="btn btn-success me-5" type="submit" value="Mark completed">
         </form>
 
-        <form method="post" class="d-inline-block my-1" action="{% url 'ticket-mark-missed' object.current_ticket.id %}">
+        <form method="post" class="d-md-inline-block my-1" action="{% url 'ticket-mark-missed' object.current_ticket.id %}">
           {% csrf_token %}
           <input class="btn btn-outline-warning me-5" type="submit" value="Mark missed">
         </form>
         
-        <a class="d-inline-block btn btn-outline-danger me-5" href="{% url 'ticket-redirect' object.current_ticket.id %}?operator={{object.id}}">
+        <a class="d-md-inline-block btn btn-outline-danger me-5" href="{% url 'ticket-redirect' object.current_ticket.id %}?operator={{object.id}}">
           Redirect
         </a>
       </div>
