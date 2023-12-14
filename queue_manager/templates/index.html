@@ -81,7 +81,11 @@
           <ul class="list-unstyled fw-light mt-3 mb-4">
             <li>To explore how the queue works and tickets are distributed, you can:</li>
           </ul>
-          <button type="button" class="btn btn-outline-secondary px-5 mb-5">Add 10 tickets</button>
+
+          <form class="form d-inline-block mb-0 mx-2" method="post" action="{% url 'print-10-tickets' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-secondary px-5 mb-5">Add 10 tickets</button>
+          </form>
           <button type="button" class="btn btn-outline-secondary px-5 mb-5">Add 2 robotic operators</button>
         </div>
       </div>

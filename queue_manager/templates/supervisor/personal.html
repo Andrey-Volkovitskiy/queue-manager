@@ -121,6 +121,8 @@
               <td class="text-center">
                 {% if operator.current_ticket %}
                   {{ operator.current_ticket.code }}
+                {% else %}
+                  <span class="text-black-50">-</span>
                 {% endif %}
               </td>
 

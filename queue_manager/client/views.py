@@ -1,11 +1,13 @@
-from django.views.generic import (TemplateView, DetailView, ListView)
+from django.views.generic import (TemplateView, DetailView, ListView, View)
 from django.shortcuts import redirect
+from django.contrib import messages
 from queue_manager.ticket.models import Ticket
 from queue_manager.session.models import Session
 from queue_manager.task.models import Task
 from queue_manager.status.models import Status
 from queue_manager.mixins import TopNavMenuMixin
 from django.urls import reverse_lazy
+import random
 
 
 class PrintTicketView(TopNavMenuMixin, TemplateView):
@@ -74,3 +76,19 @@ class ScreenView(TopNavMenuMixin, ListView):
         if track_ticket:
             context['track_ticket'] = track_ticket
         return context
+
+
+class Print10TicketsView(View):
+    http_method_names = ["post", ]
+
+    def post(self, request, *args, **kwargs):
+        for i in range(10):
+            random_task = random.choice(Task.objects.all())
+            Ticket.objects.create_ticket(random_task)
+
+        messages.add_message(
+                self.request,
+                messages.SUCCESS,
+                "10 random tickets were successfully added to the queue"
+            )
+        return redirect(reverse_lazy('home'))
