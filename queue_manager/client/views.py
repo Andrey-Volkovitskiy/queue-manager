@@ -81,8 +81,8 @@ class ScreenView(TopNavMenuMixin, ListView):
 class Print10TicketsView(View):
     http_method_names = ["post", ]
 
-    def post(self, request, *args, **kwargs):
-        for i in range(10):
+    def post(self, *args, **kwargs):
+        for _ in range(10):
             random_task = random.choice(Task.objects.all())
             Ticket.objects.create_ticket(random_task)
 
