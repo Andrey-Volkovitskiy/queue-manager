@@ -3,11 +3,11 @@ from tests import conftest
 from . import conftest as package_conftest
 from queue_manager.task.models import Task as PackageModel
 from bs4 import BeautifulSoup
+from django.utils import timezone
 
 TESTED_URL = package_conftest.ITEM_LIST_URL
 
 
-# TODO Only active tasks are displayed
 @pytest.mark.django_db
 def test_basic_content(client, get_supervisors):
     client.force_login(get_supervisors[0])
@@ -42,6 +42,23 @@ def test_all_items_are_displayed(client, get_supervisors):
     rows = soup.find_all('tr')
     assert len(rows) == (len(default_items_in_db)
                          + package_conftest.ITEM_LIST_HEADER_ROWS)
+
+
+@pytest.mark.django_db
+def test_softdeleted_item_not_shown(client, get_supervisors):
+    soft_deleted_item = PackageModel.objects.create(
+        name='Inactive name',
+        description='Inactive description',
+        letter_code='J',
+        deleted_at=timezone.now(),
+    )
+
+    client.force_login(get_supervisors[0])
+    response = client.get(TESTED_URL)
+    content = response.content.decode()
+
+    assert soft_deleted_item.name not in content
+    assert soft_deleted_item.description not in content
 
 
 @pytest.mark.django_db

@@ -8,8 +8,6 @@ from bs4 import BeautifulSoup
 TESTED_URL = package_conftest.ITEM_LIST_URL
 
 
-# TODO Only active operators are displayed
-# TODO Avaliable tasks are shown
 @pytest.mark.django_db
 def test_basic_content(client, get_supervisors):
     client.force_login(get_supervisors[0])
@@ -42,6 +40,22 @@ def test_all_items_are_displayed(client, get_supervisors):
     rows = soup.find_all('tr')
     assert len(rows) == (len(default_items_in_db)
                          + package_conftest.ITEM_LIST_HEADER_ROWS)
+
+
+@pytest.mark.django_db
+def test_inactive_item_doesnt_shown(client, get_supervisors, get_operators):
+    active_item = get_operators[1]
+    client.force_login(get_supervisors[0])
+    response = client.get(TESTED_URL)
+    content = response.content.decode()
+    assert active_item.username in content
+
+    inactive_item = get_operators[1]
+    inactive_item.is_active = False
+    inactive_item.save()
+    response = client.get(TESTED_URL)
+    content = response.content.decode()
+    assert active_item.username not in content
 
 
 @pytest.mark.django_db

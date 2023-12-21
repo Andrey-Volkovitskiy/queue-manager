@@ -15,6 +15,7 @@
         <th>Full name</th>
         <th>Username</th>
         <th>Can serve tasks</th>
+        <th>Tasks in service</th>
       </tr>
     </thead>
 
@@ -22,7 +23,9 @@
       {% for object in object_list %}
         <tr>
           <td><a href="{% url item_name|add:'-update' object.id %}">{{ object.get_full_name }}</a></td>
+          
           <td>{{ object.username }}</td>
+          
           <td>
             {% if object.task_set.all %}
               <ul class="list-unstyled">
@@ -32,6 +35,24 @@
               </ul>
             {% else %}
               <span class="text-danger">= No one =</span>
+            {% endif %}
+          </td>
+
+          <td>
+            {% if object.primary_task %}
+              <ul class="list-unstyled mb-0">
+                <li class="text-primary me-2">{{ object.primary_task.letter_code }} <span class="text-black-50">(prim.)</span></li>
+                {% if object.secondary_tasks %}
+                  <li class="text-secondary">
+                    {% for scnd_task in object.secondary_tasks %}
+                      {{ scnd_task.letter_code }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                    <span class="text-black-50">(scnd.)</span>
+                  </li>
+                {% endif %}
+              </ul>
+            {% else %}
+              <span class="text-black-50">-</span>
             {% endif %}
           </td>
         </tr>
