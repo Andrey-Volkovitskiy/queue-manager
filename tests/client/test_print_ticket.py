@@ -74,7 +74,7 @@ def test_print_ticket_get_without_active_session(
 
     response = client.get(TESTED_URL, follow=True)
     content = response.content.decode()
-    assert "Please wait until service begins" in content
+    assert "wait until service begins" in content
     assert "Refresh" in content
     assert TESTED_URL in content
 
@@ -89,6 +89,6 @@ def test_print_ticket_post_without_active_session(
 
     response = client.post(TESTED_URL, {chosen_task_prefix: ''}, follow=True)
     content = response.content.decode()
-    assert "Please wait until service begins" in content
+    assert "wait until service begins" in content
     assert "Refresh" in content
     assert TESTED_URL in content

@@ -1,6 +1,7 @@
 from django.views.generic import (TemplateView, DetailView, ListView, View)
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.db.models import Subquery
 from queue_manager.ticket.models import Ticket
 from queue_manager.session.models import Session
 from queue_manager.task.models import Task
@@ -63,9 +64,11 @@ class ScreenView(TopNavMenuMixin, ListView):
     template_name = "client/screen.html"
 
     def get_queryset(self):
+        last_session_id = Subquery(
+            Session.objects.order_by('-started_at').values('id')[0:1])
         return Status.objects\
             .filter(
-                ticket__session__is_active=True,
+                ticket__session__id=last_session_id,
                 code=Status.objects.Codes.PROCESSING)\
             .order_by('-assigned_at')[:self.VISIBLE_TICKETS_QUAN]
 

@@ -7,9 +7,11 @@
 {% endblock %}
 
 {% block content %}
-  <h1 class="my-4">Please wait until service begins</h1>
+  <h1 class="my-4">To print a new ticket, please wait until service begins</h1>
   <small class="text-muted">(until a supervisor starts a new session)</small>
   <div class="mt-4">
     <a href="{% url 'print-ticket' %}" class="btn btn-outline-primary">Refresh</a>
   </div>
+  <h3 class="mt-5 mb-3 text-black-50">Or watch the last session queue:</h3>
+  <a class="btn btn-outline-warning" href="{% url 'screen' %}">Queue screen</a>
 {% endblock %}

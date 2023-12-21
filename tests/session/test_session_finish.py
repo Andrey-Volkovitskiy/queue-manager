@@ -12,8 +12,6 @@ ERROR_MESSAGE = ("The session can't be finished" +
                  " because there is no active session")
 
 
-# TODO Customers won't be able to print new tickets,
-# but operators can continue to service existing tickets
 @pytest.mark.django_db
 def test_finish_session_success(client, get_supervisors):
     client.force_login(get_supervisors[0])
