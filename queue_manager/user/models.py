@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User, Group, UserManager
 from django.db.models import OuterRef, Subquery
+from queue_manager.default_db_data import DefaultDBData
 import sys
 
 
@@ -14,7 +15,8 @@ User.name = User.username
 class SupervisorManager(UserManager):
     def get_queryset(self):
         return super().get_queryset().filter(
-            groups=(Group.objects.get(name='supervisors')),
+            groups=(Group.objects.get(
+                name=DefaultDBData.groups['SUPERVISORS'])),
             is_active=True)
 
 
@@ -28,7 +30,8 @@ class Supervisor(User):
 class OperatorManager(UserManager):
     def get_queryset(self):
         return super().get_queryset().filter(
-            groups=(Group.objects.get(name='operators')),
+            groups=(Group.objects.get(
+                name=DefaultDBData.groups['OPERATORS'])),
             is_active=True)
 
 
@@ -264,4 +267,5 @@ class Operator(User):
             self.id = max_pk + 1
         super().save(*args, **kwargs)
         if just_created:
-            self.groups.add(Group.objects.get(name='operators'))
+            self.groups.add(Group.objects.get(
+                name=DefaultDBData.groups['OPERATORS']))
