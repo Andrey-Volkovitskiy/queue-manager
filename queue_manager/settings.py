@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_bootstrap5',
     'django_filters',
+    'debug_toolbar',
     'queue_manager',
     'queue_manager.user',
     'queue_manager.task',
@@ -63,6 +64,7 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -162,3 +164,7 @@ ROLLBAR = {
     'code_version': '1.0',
     'root': str(BASE_DIR),
 }
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+]
