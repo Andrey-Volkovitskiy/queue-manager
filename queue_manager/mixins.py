@@ -6,6 +6,7 @@ from queue_manager.user.models import Operator
 
 class ContextMixinWithItemName(ContextMixin):
     def get_context_data(self, **kwargs):
+        '''Get ItemName to use in universal Add, Upd, Del templates'''
         context = super().get_context_data(**kwargs)
         context['item_name'] = self.item_name
         return context
@@ -13,6 +14,7 @@ class ContextMixinWithItemName(ContextMixin):
 
 class TopNavMenuMixin(ContextMixin):  # TODO Refactor
     def get_context_data(self, **kwargs):  # noqa C901
+        '''Returns items for navigation menu at the top of any page'''
         context = super().get_context_data(**kwargs)
 
         menu_items = []
