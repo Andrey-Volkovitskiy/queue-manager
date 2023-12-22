@@ -14,7 +14,6 @@ python-dotenv = "^1.0.0"
 dj-database-url = "^2.1.0"
 gunicorn = "^21.2.0"
 psycopg2-binary = "^2.9.7"
-django-filter = "^23.2"
 rollbar = "^0.16.3"
 django-bootstrap5 = "^23.3"
 
