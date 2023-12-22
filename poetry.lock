@@ -300,7 +300,7 @@ django = ">=3.2"
 name = "django-debug-toolbar"
 version = "4.2.0"
 description = "A configurable set of panels that display various debug information about the current request/response."
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.8"
 files = [
@@ -735,4 +735,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.8.1"
-content-hash = "8a0a889198660daff91c192d3beba68eebd98f303a85c0a23f4edc134b58664e"
+content-hash = "363e0f93091213cca55b4f121d0aed834c3b18411f4be98b4c137f3bf7fbd6f5"

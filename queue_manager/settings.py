@@ -48,7 +48,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_bootstrap5',
-    'django_filters',
     'debug_toolbar',
     'queue_manager',
     'queue_manager.user',
