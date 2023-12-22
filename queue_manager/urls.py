@@ -30,6 +30,6 @@ urlpatterns = [
     path('logout/', views.SiteLogoutView.as_view(), name='logout'),
     path('error/', views.intendent_error),  # Rollbarr debug page
     path('debug/', views.Debug.as_view()),  # Permission debug page
-    path("__debug__/", include('debug_toolbar.urls')),
+    path('__debug__/', include('debug_toolbar.urls')),
     path('admin/', admin.site.urls),
 ]

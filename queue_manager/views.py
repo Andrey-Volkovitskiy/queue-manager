@@ -36,6 +36,7 @@ def intendent_error(request):
 
 
 class Debug(TemplateView):
+    '''Service page to check user permissions'''
     template_name = 'debug.html'
 
     def get_context_data(self, **kwargs):
