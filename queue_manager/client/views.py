@@ -12,13 +12,13 @@ import random
 
 
 class PrintTicketView(TopNavMenuMixin, TemplateView):
+    '''Issuing a new ticket to a client'''
     TASK_CODE_PREFIX = "task_code:"
     template_name = "client/print_ticket.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['tasks'] = Task.objects\
-            .filter(is_active=True).order_by('letter_code')
+        context['tasks'] = Task.objects.order_by('letter_code')
         context['code_prefix'] = self.TASK_CODE_PREFIX
         return context
 

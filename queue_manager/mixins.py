@@ -22,7 +22,6 @@ class TopNavMenuMixin(ContextMixin):
 
         menu_items = []
         path = self.request.path.split('/')[1:]
-        print(f'=== PATH: {path} ===')
 
         if len(path[0]) > 0:
             menu_items.append(('Home', reverse_lazy('home')))

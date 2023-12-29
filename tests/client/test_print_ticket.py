@@ -17,7 +17,7 @@ def test_basic_content(client, print_ticket_db_setup):
     assert response.status_code == 200
     assert "Welcome dear client!" in content
     assert "Please select the purpose" in content
-    expected_tasks = Task.objects.filter(is_active=True)
+    expected_tasks = Task.objects.all()
     for task in expected_tasks:
         assert task.name in content
 
@@ -26,7 +26,7 @@ def test_basic_content(client, print_ticket_db_setup):
 def test_successfuly_created_with_C002_ticket(
                                 client, print_ticket_db_setup):
     existing_tickets_count = Ticket.objects.all().count()
-    chosen_task = Task.objects.get(is_active=True, letter_code='C')
+    chosen_task = Task.objects.get(letter_code='C')
     chosen_task_prefix = TASK_CODE_PREFIX + chosen_task.letter_code
     EXPECTED_CODE = "C002"
 
@@ -54,7 +54,7 @@ def test_successfuly_created_with_C002_ticket(
 
 @pytest.mark.django_db
 def test_successfuly_created_with_A001_ticket(client, print_ticket_db_setup):
-    chosen_task = Task.objects.filter(is_active=True).first()
+    chosen_task = Task.objects.all().first()
     chosen_task_prefix = TASK_CODE_PREFIX + chosen_task.letter_code
     EXPECTED_CODE = "A001"
 
@@ -84,7 +84,7 @@ def test_print_ticket_post_without_active_session(
                 client, get_supervisors, print_ticket_db_setup):
     client.force_login(get_supervisors[0])
     client.post(SESSION_FINISH_URL, None, follow=True)
-    chosen_task = Task.objects.filter(is_active=True).first()
+    chosen_task = Task.objects.all().first()
     chosen_task_prefix = TASK_CODE_PREFIX + chosen_task.letter_code
 
     response = client.post(TESTED_URL, {chosen_task_prefix: ''}, follow=True)
