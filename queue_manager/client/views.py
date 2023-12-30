@@ -70,6 +70,7 @@ class ScreenView(TopNavMenuMixin, ListView):
             .filter(
                 ticket__session__id=last_session_id,
                 code=Status.objects.Codes.PROCESSING)\
+            .select_related('ticket', 'assigned_to')\
             .order_by('-assigned_at')[:self.VISIBLE_TICKETS_QUAN]
 
     def get_context_data(self, **kwargs):
