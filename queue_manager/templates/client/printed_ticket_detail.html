@@ -17,7 +17,9 @@
 
       <div class="py-2 border-bottom border-2 text-center">
         <small class="fst-italic">
-          {{ object.num_tickets_ahead }} client{{ object.num_tickets_ahead|pluralize }} ahead
+          {% with object.num_tickets_ahead as tickets_ahead %}
+            {{ tickets_ahead }} client{{ tickets_ahead|pluralize }} ahead
+          {% endwith %}
         </small>
       </div>
 
@@ -27,7 +29,7 @@
     </div>
   </div>
 
-  <!-- <script>  # TODO
+  <script>
     setInterval(function() {
         var div = document.querySelector("#counter");
         var count = div.textContent * 1 - 1;
@@ -36,5 +38,5 @@
             window.location.replace("{{link_to_screen}}");
         }
     }, 1000);
-</script> -->
+</script>
 {% endblock %}

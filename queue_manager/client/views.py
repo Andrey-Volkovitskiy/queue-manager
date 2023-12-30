@@ -51,7 +51,7 @@ class PrintedTicketDetailView(TopNavMenuMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['link_to_screen'] = (f"{reverse_lazy('screen')}"
-                                     f"?track_ticket={self.get_object().id}")
+                                     f"?track_ticket={self.kwargs['pk']}")
         return context
 
 
