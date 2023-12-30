@@ -33,10 +33,10 @@ class PrintTicketView(TopNavMenuMixin, TemplateView):
             if (key.startswith(self.TASK_CODE_PREFIX)
                     and len(key) == len(self.TASK_CODE_PREFIX) + 1):
                 task_code = key[len(self.TASK_CODE_PREFIX)]
+        chosen_task = Task.objects.get(letter_code=task_code)
 
         try:
-            ticket = Ticket.objects.create_ticket(
-                task=Task.objects.get(letter_code=task_code))
+            ticket = Ticket.objects.create_ticket(task=chosen_task)
             return redirect(reverse_lazy(
                 'printed-ticket-detail',
                 kwargs={'pk': ticket.id}))
@@ -65,7 +65,7 @@ class ScreenView(TopNavMenuMixin, ListView):
 
     def get_queryset(self):
         last_session_id = Subquery(
-            Session.objects.order_by('-started_at').values('id')[0:1])
+            Session.objects.order_by('-started_at').values('id')[:1])
         return Status.objects\
             .filter(
                 ticket__session__id=last_session_id,

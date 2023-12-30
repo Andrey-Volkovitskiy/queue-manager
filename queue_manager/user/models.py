@@ -29,10 +29,10 @@ class Supervisor(User):
 
 class OperatorManager(UserManager):
     def get_queryset(self):
-        return super().get_queryset().filter(
-            groups=(Group.objects.get(
-                name=DefaultDBData.groups['OPERATORS'])),
-            is_active=True)
+        return super().get_queryset()\
+            .filter(
+                groups__name=DefaultDBData.groups['OPERATORS'],
+                is_active=True)
 
 
 class Operator(User):

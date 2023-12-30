@@ -69,7 +69,7 @@ class SessionManager(models.Manager):
 
     def get_current_session(self):
         '''Returns active session on None (if there is no active session)'''
-        return self.filter(is_active=True).first()
+        return self.filter(is_active=True).only('id').first()
 
     def start_new_session(self, started_by):
         '''Starts new avtive session (Must be used instead of create).
