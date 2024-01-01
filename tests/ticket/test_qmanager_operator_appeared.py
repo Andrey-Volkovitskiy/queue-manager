@@ -15,7 +15,7 @@ def _setup_db():
         Task.objects.get(letter_code='B'),
         Task.objects.get(letter_code='C'),
     )
-    Session.objects.finish_active_session(finished_by=supervisor)
+    Session.objects.finish_current_session(finished_by=supervisor)
     Session.objects.start_new_session(started_by=supervisor)
 
     for operator in operators:

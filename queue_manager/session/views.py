@@ -68,7 +68,7 @@ class ItemFinishView(
 
     def post(self, request):
         try:
-            MODEL.objects.finish_active_session(self.request.user)
+            MODEL.objects.finish_current_session(self.request.user)
             messages.add_message(
                 self.request,
                 messages.SUCCESS,

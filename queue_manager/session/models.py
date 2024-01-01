@@ -87,8 +87,8 @@ class SessionManager(models.Manager):
             started_by=started_by
         )
 
-    def finish_active_session(self, finished_by):
-        '''Finishes an active session.
+    def finish_current_session(self, finished_by):
+        '''Finishes an active session (with finished_at=None).
 
         Arguments:
             finished_by - User who finished this session
@@ -124,7 +124,7 @@ class Session(models.Model):
     finished_at = models.DateTimeField(
         null=True,
         verbose_name='Finished at'
-    )
+    )  # If finished_at is None than the session is Active
     finished_by = models.ForeignKey(
         User,
         related_name='sessions_finished_by',

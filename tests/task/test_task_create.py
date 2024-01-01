@@ -46,7 +46,6 @@ def test_successfuly_created(client, get_supervisors):
     assert db_item.name == CORRECT_ITEM['name']
     assert db_item.description == CORRECT_ITEM['description']
     assert db_item.letter_code == CORRECT_ITEM['letter_code']
-    assert db_item.is_active is True
     time_difference = db_item.created_at - item_creation_time
     assert time_difference.total_seconds() < 1
 

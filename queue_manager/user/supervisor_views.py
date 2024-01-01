@@ -48,7 +48,7 @@ class SupervisorPersonalView(
         context = super().get_context_data(**kwargs)
         context['current_session'] = Session.objects.get_current_session()
         context['tasks'] = Task.objects\
-            .filter(is_active=True).order_by('letter_code')
+            .filter(deleted_at__isnull=True).order_by('letter_code')
         context['servicing_operators'] = Operator.objects\
             .filter(service__is_servicing=True)\
             .distinct().order_by('first_name', 'last_name')

@@ -71,11 +71,12 @@ def test_new_session_code_with_empty_db(
 @pytest.mark.django_db
 def test_new_session_code_with_old_CODE_in_db(get_supervisors):
     OLD_CODE = '2023-09-20A'
+    sprvsr = get_supervisors[0]
     Session.objects.create(
         code=OLD_CODE,
-        started_by=get_supervisors[0])
+        started_by=sprvsr)
     new_session = Session.objects.create(
-        started_by=get_supervisors[0],
+        started_by=sprvsr,
         code=Session.objects._get_new_session_code())
     assert new_session.code == get_todays_date_str() + "A"
 
@@ -83,11 +84,12 @@ def test_new_session_code_with_old_CODE_in_db(get_supervisors):
 @pytest.mark.django_db
 def test_new_session_code_with_today_code_without_letters(get_supervisors):
     TODAY_CODE = get_todays_date_str()
+    sprvsr = get_supervisors[0]
     Session.objects.create(
         code=TODAY_CODE,
-        started_by=get_supervisors[0])
+        started_by=sprvsr)
     new_session = Session.objects.create(
-        started_by=get_supervisors[0],
+        started_by=sprvsr,
         code=Session.objects._get_new_session_code())
     assert new_session.code == get_todays_date_str() + "A"
 
@@ -95,11 +97,12 @@ def test_new_session_code_with_today_code_without_letters(get_supervisors):
 @pytest.mark.django_db
 def test_new_session_code_with_today_code_in_db(get_supervisors):
     TODAY_CODE = get_todays_date_str() + "A"
+    sprvsr = get_supervisors[0]
     Session.objects.create(
         code=TODAY_CODE,
-        started_by=get_supervisors[0])
+        started_by=sprvsr)
     new_session = Session.objects.create(
-        started_by=get_supervisors[0],
+        started_by=sprvsr,
         code=Session.objects._get_new_session_code())
     assert new_session.code == get_todays_date_str() + "B"
 
@@ -107,11 +110,12 @@ def test_new_session_code_with_today_code_in_db(get_supervisors):
 @pytest.mark.django_db
 def test_new_session_code_with_today_big_code_in_db(get_supervisors):
     TODAY_CODE = get_todays_date_str() + "ZZ"
+    sprvsr = get_supervisors[0]
     Session.objects.create(
         code=TODAY_CODE,
-        started_by=get_supervisors[0])
+        started_by=sprvsr)
     new_session = Session.objects.create(
-        started_by=get_supervisors[0],
+        started_by=sprvsr,
         code=Session.objects._get_new_session_code())
     assert new_session.code == get_todays_date_str() + "ZZA"
 
@@ -166,25 +170,26 @@ def test_start_new_session_success(get_supervisors):
 
 @pytest.mark.django_db
 def test_start_new_session_with_existing_active_session_in_db(get_supervisors):
+    sprvsr = get_supervisors[0]
     TODAY_CODE = get_todays_date_str() + "A"
     Session.objects.create(
         code=TODAY_CODE,
-        started_by=get_supervisors[0])
+        started_by=sprvsr)
 
     with pytest.raises(Session.objects.ActiveSessionAlreadyExistsError):
-        Session.objects.start_new_session(get_supervisors[0])
+        Session.objects.start_new_session(sprvsr)
 
 
 @pytest.mark.django_db
 def test_finish_active_session_success(get_supervisors):
+    sprvsr = get_supervisors[0]
     TODAY_CODE = get_todays_date_str() + "A"
     Session.objects.create(
         code=TODAY_CODE,
-        started_by=get_supervisors[0])
+        started_by=sprvsr)
 
     item_finish_time = datetime.now(timezone.utc)
-    finished_session = Session.objects.finish_active_session(
-                                                get_supervisors[0])
+    finished_session = Session.objects.finish_current_session(sprvsr)
     assert finished_session.code == TODAY_CODE
     assert finished_session.finished_by == get_supervisors[0]
     time_difference = finished_session.started_at - item_finish_time
@@ -203,4 +208,4 @@ def test_finish_active_session_without_existing_active_session_in_db(
         finished_by=sprvsr,)
 
     with pytest.raises(Session.objects.NoActiveSessionsError):
-        Session.objects.finish_active_session(sprvsr)
+        Session.objects.finish_current_session(sprvsr)

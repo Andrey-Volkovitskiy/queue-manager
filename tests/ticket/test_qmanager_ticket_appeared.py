@@ -11,7 +11,7 @@ def setup_db():
     supervisor = Supervisor.objects.first()
     operA, operB, operC, operD = Operator.objects.all().order_by('id')
     taskC = Task.objects.get(letter_code='C')
-    Session.objects.finish_active_session(finished_by=supervisor)
+    Session.objects.finish_current_session(finished_by=supervisor)
     session = Session.objects.start_new_session(started_by=supervisor)
 
     # OperA: is_free, has no processed tickets

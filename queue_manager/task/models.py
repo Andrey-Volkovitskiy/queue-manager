@@ -38,10 +38,6 @@ class Task(SoftDeletionModel):
         verbose_name='Letter code',
         validators=[only_letters],
     )
-    is_active = models.BooleanField(
-        default=True,
-        verbose_name='Is active'
-    )
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Created at'
