@@ -47,10 +47,9 @@ class Operator(User):
 
     @property
     def is_servicing(self):
-        return self.service_set.filter(is_servicing=True).exists()
+        return self.service_set.filter(priority__gt=0).exists()
 
-    # TODO Add explain(), select_related/prefetch and defer/only
-    # contains, F, Q, Subquery
+    # TODO Add defer/only, contains, F, Q
     @property
     def last_assigned_ticket(self):
         from queue_manager.status.models import Status
@@ -107,8 +106,7 @@ class Operator(User):
         from queue_manager.task.models import Service
         return self.task_set\
             .filter(
-                service__is_servicing=True,
-                service__priority_for_operator=Service.HIGHEST_PRIORITY)\
+                service__priority=Service.HIGHEST_PRIORITY)\
             .last()
 
     @property
@@ -116,8 +114,8 @@ class Operator(User):
         from queue_manager.task.models import Service
         return self.task_set\
             .filter(
-                service__is_servicing=True,
-                service__priority_for_operator__lt=Service.HIGHEST_PRIORITY)\
+                service__priority__lt=Service.HIGHEST_PRIORITY,
+                service__priority__gt=Service.NOT_IN_SERVICE)\
             .order_by('letter_code')
 
     @property
@@ -209,12 +207,11 @@ class Operator(User):
             ticket=OuterRef('id')).order_by('-assigned_at').values(
                 'assigned_at')[:1])
 
-        if primary_task_id is None:
+        if primary_task_id is None:  # TODO Mayby better to exclude IF
             primary_task_id = Subquery(
                 Service.objects.filter(
                     operator=self,
-                    is_servicing=True,
-                    priority_for_operator=9
+                    priority=Service.HIGHEST_PRIORITY
                 ).values('task_id')[:1])
 
         return Ticket.objects.filter(task__id=primary_task_id)\
@@ -247,8 +244,8 @@ class Operator(User):
             secondery_tasks_ids = Subquery(
                 Service.objects.filter(
                     operator=self,
-                    is_servicing=True,
-                    priority_for_operator__lt=Service.HIGHEST_PRIORITY
+                    priority__lt=Service.HIGHEST_PRIORITY,
+                    priority__gt=Service.NOT_IN_SERVICE
                 ).values_list('task_id', flat=True))
 
         return Ticket.objects.filter(task__id__in=secondery_tasks_ids)\

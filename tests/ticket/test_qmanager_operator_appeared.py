@@ -20,12 +20,11 @@ def _setup_db():
 
     for operator in operators:
         for task in tasks:
-            # TaskN, is_servicing=False
+            # TaskN, not in servicing
             Service.objects.create(
                 operator=operator,
                 task=task,
-                is_servicing=False,
-                priority_for_operator=None
+                priority=0
             )
 
 

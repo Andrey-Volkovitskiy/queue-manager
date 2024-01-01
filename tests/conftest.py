@@ -45,11 +45,8 @@ def add_personal_ticket(task, assigned_to):
             session=session,
             task=task
         ))
-    Service.objects.filter(
-        task=task, operator=redirecting_operator).update(
-        is_servicing=True,
-        priority_for_operator=9,
-    )
+    Service.objects.filter(task=task, operator=redirecting_operator)\
+        .update(priority=9)
     Status.objects.create_initial(ticket=ticket)
     Status.objects.create_additional(
         ticket=ticket,
@@ -107,8 +104,7 @@ def complete_tickets(tickets, completed_by):
                 task=ticket.task,
                 operator=completed_by)\
             .update(
-                is_servicing=True,
-                priority_for_operator=9,
+                priority=9,
             )
         Status.objects.create_initial(ticket=ticket)
         Status.objects.create_additional(

@@ -226,7 +226,7 @@ class QManager:
 
         free_operators = task.can_be_served_by\
             .filter(
-                Q(service__is_servicing=True) &
+                Q(service__priority__gt=0) &
                 Q(~Exists(current_ticket)))\
             .only('username', 'first_name', 'last_name', 'is_active')
 

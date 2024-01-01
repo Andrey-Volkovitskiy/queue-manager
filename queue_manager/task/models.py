@@ -63,8 +63,7 @@ class Task(SoftDeletionModel):
         return Operator.objects\
             .filter(
                 service__task=self,
-                service__is_servicing=True,
-                service__priority_for_operator=Service.HIGHEST_PRIORITY)\
+                service__priority=Service.HIGHEST_PRIORITY)\
             .order_by('first_name', 'last_name')
 
     @property
@@ -72,8 +71,7 @@ class Task(SoftDeletionModel):
         return Operator.objects\
             .filter(
                 service__task=self,
-                service__is_servicing=True,
-                service__priority_for_operator__lt=Service.HIGHEST_PRIORITY)\
+                service__priority__lt=Service.HIGHEST_PRIORITY)\
             .order_by('first_name', 'last_name')
 
     @property
@@ -103,8 +101,9 @@ class Task(SoftDeletionModel):
 class Service(models.Model):
     '''If service record exists, than the operator have the authoriry
     to serve the task.
-    If is_servicing flag is true, the operator is currently servicing the task
-    with given priority.'''
+    If priority field is Null, the operator isn't currently
+    servicing the task.'''
+    NOT_IN_SERVICE = 0
     LOWEST_PRIORITY = 1
     HIGHEST_PRIORITY = 9
 
@@ -116,9 +115,10 @@ class Service(models.Model):
         Operator,
         on_delete=models.CASCADE
     )
-    is_servicing = models.BooleanField(
-        default=False
+    priority = models.SmallIntegerField(
+        default=NOT_IN_SERVICE
     )
-    priority_for_operator = models.SmallIntegerField(
-        null=True
-    )
+
+    @property
+    def is_servicing(self):
+        return bool(self.priority)

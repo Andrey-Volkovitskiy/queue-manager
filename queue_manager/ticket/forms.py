@@ -19,9 +19,9 @@ class TicketRedirectForm(forms.ModelForm):
         redirected_by = kwargs.pop('redirected_by', None)
         super().__init__(*args, **kwargs)
         if redirected_by:
-            all_serving_operators = Operator.objects.filter(
-                service__is_servicing=True).distinct().order_by(
-                    'first_name', 'last_name')
+            all_serving_operators = Operator.objects\
+                .filter(service__priority__gt=0).distinct()\
+                .order_by('first_name', 'last_name')
             operators_except_request_user = all_serving_operators.exclude(
                 id=redirected_by)
             self.fields['redirect_to'].queryset = operators_except_request_user

@@ -18,15 +18,13 @@ def setup_db():
     Service.objects.create(
         operator=operA,
         task=taskC,
-        is_servicing=True,
-        priority_for_operator=9)
+        priority=9)
 
     # OperB: is_bussy, has a ticket in processing
     Service.objects.create(
         operator=operB,
         task=taskC,
-        is_servicing=True,
-        priority_for_operator=9
+        priority=9
     )
     ticket_in_processing = Ticket.objects.create(
         task=taskC,
@@ -45,8 +43,7 @@ def setup_db():
     Service.objects.create(
         operator=operC,
         task=taskC,
-        is_servicing=True,
-        priority_for_operator=1
+        priority=1
     )
     ticket_processed = Ticket.objects.create(
         task=taskC,
@@ -66,12 +63,11 @@ def setup_db():
         assigned_by=operC,
         assigned_to=operC)
 
-    # OperD: is_servicing = False
+    # OperD: isn't servicing
     Service.objects.create(
         operator=operD,
         task=taskC,
-        is_servicing=False,
-        priority_for_operator=None
+        priority=0
     )
 
     expected_free_operators_ids = sorted((
@@ -166,7 +162,7 @@ def test_redirect_ticket_success(client, get_supervisors):
     assert 'Redirect ticket' in content
     assert ticket.code in content
     all_servicing_operators = Operator.objects.filter(
-        service__is_servicing=True).distinct()
+        service__priority__gt=0).distinct()
     all_operators_except_initial = all_servicing_operators.exclude(
         id=initial_operator.id)
     for redirect_to_option in all_operators_except_initial:

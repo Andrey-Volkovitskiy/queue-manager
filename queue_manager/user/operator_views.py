@@ -70,14 +70,12 @@ class OperatorPersonalView(
         operator = self.get_object()
 
         # Current serviced tasks
-        available_services = operator.service_set
-        context['is_servicing'] = available_services.filter(
-            is_servicing=True).exists()
-
         active_services = operator.service_set.filter(
-            is_servicing=True)
+            priority__gt=0)
+        context['is_servicing'] = bool(active_services)
+
         primary_service = active_services.filter(
-            priority_for_operator=Service.HIGHEST_PRIORITY).last()
+            priority=Service.HIGHEST_PRIORITY).last()
         if primary_service:
             context['primary_task'] = primary_service.task
             secondary_services = active_services.exclude(
@@ -159,11 +157,12 @@ class OperatorStopServiceView(
 
     def post(self, request, *args, **kwargs):
         operator_id = self.kwargs['pk']
-        available_services = Service.objects.filter(
-            operator_id=operator_id)
-        is_servicing = available_services.filter(is_servicing=True).exists()
-        if is_servicing:
-            available_services.update(is_servicing=False)
+        active_services = Service.objects\
+            .filter(
+                operator_id=operator_id,
+                priority__gt=0)
+        if active_services:
+            active_services.update(priority=Service.NOT_IN_SERVICE)
         return redirect(reverse_lazy(
             'operator-personal', kwargs={'pk': operator_id}))
 

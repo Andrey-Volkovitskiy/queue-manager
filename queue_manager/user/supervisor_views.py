@@ -50,7 +50,7 @@ class SupervisorPersonalView(
         context['tasks'] = Task.objects\
             .filter(deleted_at__isnull=True).order_by('letter_code')
         context['servicing_operators'] = Operator.objects\
-            .filter(service__is_servicing=True)\
+            .filter(service__priority__gt=0)\
             .distinct().order_by('first_name', 'last_name')
         context['last_tickets'] = Ticket.objects\
             .filter(session=Session.objects.last())\

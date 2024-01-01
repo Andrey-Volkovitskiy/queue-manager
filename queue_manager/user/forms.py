@@ -100,8 +100,7 @@ class OperatorStartServiceForm(forms.ModelForm):
 
         primary_service = instance.service_set.get(
                 task=self.cleaned_data['primary_task'])
-        primary_service.is_servicing = True
-        primary_service.priority_for_operator = Service.HIGHEST_PRIORITY
+        primary_service.priority = Service.HIGHEST_PRIORITY
         primary_service.save()
 
         secondary_tasks_cleaned = self.cleaned_data['secondary_tasks'].exclude(
@@ -109,8 +108,7 @@ class OperatorStartServiceForm(forms.ModelForm):
         secondary_services = instance.service_set.filter(
                     task__in=secondary_tasks_cleaned)
         secondary_services.update(
-            is_servicing=True,
-            priority_for_operator=Service.LOWEST_PRIORITY
+            priority=Service.LOWEST_PRIORITY
         )
 
         QManager.free_operator_appeared(operator=instance)
