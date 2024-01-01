@@ -69,7 +69,7 @@ class SessionManager(models.Manager):
 
     def get_current_session(self):
         '''Returns active session on None (if there is no active session)'''
-        return self.filter(is_active=True).only('id').first()
+        return self.filter(finished_at__isnull=True).only('id').first()
 
     def start_new_session(self, started_by):
         '''Starts new avtive session (Must be used instead of create).
@@ -84,7 +84,6 @@ class SessionManager(models.Manager):
             raise self.ActiveSessionAlreadyExistsError
         return self.create(
             code=Session.objects._get_new_session_code(),
-            is_active=True,
             started_by=started_by
         )
 
@@ -100,7 +99,6 @@ class SessionManager(models.Manager):
         current_session = self.get_current_session()
         if not current_session:
             raise self.NoActiveSessionsError
-        current_session.is_active = False
         current_session.finished_by = finished_by
         current_session.finished_at = datetime.now(timezone.utc)
         current_session.save()
@@ -112,10 +110,6 @@ class Session(models.Model):
         max_length=15,
         unique=True,
         verbose_name='Code'
-    )
-    is_active = models.BooleanField(
-        default=True,
-        verbose_name='Is active'
     )
     started_at = models.DateTimeField(
         auto_now_add=True,
@@ -139,6 +133,10 @@ class Session(models.Model):
         verbose_name='Finished by'
     )
     objects = SessionManager()
+
+    @property
+    def is_active(self):
+        return not bool(self.finished_at)
 
     @property
     def count_tickets_issued(self):

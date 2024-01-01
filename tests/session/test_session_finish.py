@@ -37,7 +37,6 @@ def test_finish_session_success(client, get_supervisors):
     response_content = response.content.decode()
     assert escape(SUCCESS_MESSAGE) in response_content
     last_session = PackageModel.objects.get(code=active_session.code)
-    assert last_session.is_active is False
     assert last_session.finished_at >= item_prefinish_time
     assert last_session.finished_by == get_supervisors[0]
 

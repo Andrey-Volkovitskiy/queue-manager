@@ -121,8 +121,7 @@ def test_get_current_session_with_active_session_in_db(get_supervisors):
     TODAY_CODE = get_todays_date_str() + "A"
     active_session = Session.objects.create(
         code=TODAY_CODE,
-        started_by=get_supervisors[0],
-        is_active=True)
+        started_by=get_supervisors[0])
     current_session = Session.objects.get_current_session()
     assert current_session == active_session
 
@@ -137,10 +136,12 @@ def test_get_current_session_with_empty_db():
 def test_get_current_session_with_only_nonactive_sessions_in_db(
         get_supervisors):
     TODAY_CODE = get_todays_date_str() + "A"
+    sprvsr = get_supervisors[0]
     Session.objects.create(
         code=TODAY_CODE,
-        started_by=get_supervisors[0],
-        is_active=False)
+        started_by=sprvsr,
+        finished_at=datetime.now(timezone.utc),
+        finished_by=sprvsr)
     current_session = Session.objects.get_current_session()
     assert current_session is None
 
@@ -148,16 +149,17 @@ def test_get_current_session_with_only_nonactive_sessions_in_db(
 @pytest.mark.django_db
 def test_start_new_session_success(get_supervisors):
     TODAY_CODE = get_todays_date_str() + "A"
+    sprvsr = get_supervisors[0]
     Session.objects.create(
         code=TODAY_CODE,
-        is_active=False,
-        started_by=get_supervisors[0])
+        started_by=sprvsr,
+        finished_at=datetime.now(timezone.utc),
+        finished_by=sprvsr)
 
     item_creation_time = datetime.now(timezone.utc)
-    new_session = Session.objects.start_new_session(get_supervisors[0])
-    assert new_session.is_active is True
+    new_session = Session.objects.start_new_session(sprvsr)
     assert new_session.code == get_todays_date_str() + "B"
-    assert new_session.started_by == get_supervisors[0]
+    assert new_session.started_by == sprvsr
     time_difference = new_session.started_at - item_creation_time
     assert time_difference.total_seconds() <= 1
 
@@ -167,7 +169,6 @@ def test_start_new_session_with_existing_active_session_in_db(get_supervisors):
     TODAY_CODE = get_todays_date_str() + "A"
     Session.objects.create(
         code=TODAY_CODE,
-        is_active=True,
         started_by=get_supervisors[0])
 
     with pytest.raises(Session.objects.ActiveSessionAlreadyExistsError):
@@ -179,13 +180,11 @@ def test_finish_active_session_success(get_supervisors):
     TODAY_CODE = get_todays_date_str() + "A"
     Session.objects.create(
         code=TODAY_CODE,
-        is_active=True,
         started_by=get_supervisors[0])
 
     item_finish_time = datetime.now(timezone.utc)
     finished_session = Session.objects.finish_active_session(
                                                 get_supervisors[0])
-    assert finished_session.is_active is False
     assert finished_session.code == TODAY_CODE
     assert finished_session.finished_by == get_supervisors[0]
     time_difference = finished_session.started_at - item_finish_time
@@ -196,10 +195,12 @@ def test_finish_active_session_success(get_supervisors):
 def test_finish_active_session_without_existing_active_session_in_db(
             get_supervisors):
     TODAY_CODE = get_todays_date_str() + "A"
+    sprvsr = get_supervisors[0]
     Session.objects.create(
         code=TODAY_CODE,
-        is_active=False,
-        started_by=get_supervisors[0])
+        started_by=sprvsr,
+        finished_at=datetime.now(timezone.utc),
+        finished_by=sprvsr,)
 
     with pytest.raises(Session.objects.NoActiveSessionsError):
-        Session.objects.finish_active_session(get_supervisors[0])
+        Session.objects.finish_active_session(sprvsr)
