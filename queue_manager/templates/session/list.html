@@ -26,7 +26,6 @@
     <thead>
       <tr>
         <th>Code</th>
-        <!-- <th>Is active</th> -->
         <th>Started at</th>
         <th>Started by</th>
         <th>Finished at</th>
@@ -37,24 +36,25 @@
 
     <tbody>
       {% for object in page_obj %}
-        <tr>
-          <td class="{% if object.is_active %}bg-primary text-white{% endif %}">{{ object.code }}</td>
-          <td class="{% if object.is_active %}bg-primary text-white{% endif %}">{{ object.started_at }}</td>
-          <td class="{% if object.is_active %}bg-primary text-white{% endif %}">{{ object.started_by }}</td>
-          <td class="{% if object.is_active %}bg-primary text-white{% endif %}">
-            {% if object.is_active %}
-              = CURRENT SESSION =
-            {% else %}
-              {{ object.finished_at }}
-            {% endif %}
-          </td>
-          <td class="{% if object.is_active %}bg-primary text-white{% endif %}">
-            {% if object.finished_by %}
-              {{ object.finished_by }}
-            {% endif %}
-          </td>
-          <td class="{% if object.is_active %}bg-primary text-white{% endif %}">{{ object.count_tickets_issued }}</td>
-        </tr>
+        {% if forloop.first and active_session_exists %}
+          <tr>
+            <td class="bg-primary text-white">{{ object.code }}</td>
+            <td class="bg-primary text-white">{{ object.started_at }}</td>
+            <td class="bg-primary text-white">{{ object.started_by }}</td>
+            <td class="bg-primary text-white">= CURRENT SESSION =</td>
+            <td class="bg-primary text-white"></td>
+            <td class="bg-primary text-white">{{ object.num_tickets_issued }}</td>
+          </tr>
+        {% else %}
+          <tr>
+            <td>{{ object.code }}</td>
+            <td>{{ object.started_at }}</td>
+            <td>{{ object.started_by }}</td>
+            <td>{{ object.finished_at }}</td>
+            <td>{{ object.finished_by }}</td>
+            <td>{{ object.num_tickets_issued }}</td>
+          </tr>
+        {% endif %}
       {% endfor %}
     </tbody>
   </table>

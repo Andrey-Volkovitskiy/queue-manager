@@ -94,7 +94,7 @@ class Task(SoftDeletionModel):
             .filter(session=Session.objects.get_current_session())\
             .annotate(last_status_code=last_status_code)\
             .filter(last_status_code__in=(
-                Status.objects.Codes.unprocessed_status_codes))\
+                Status.objects.Codes.unprocessed_codes))\
             .count()
 
 

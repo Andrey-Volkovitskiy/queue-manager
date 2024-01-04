@@ -28,7 +28,7 @@ class StatusManager(models.Manager):
         REDIRECTED = 'R'
         MISSED = 'M'
 
-        unprocessed_status_codes = (
+        unprocessed_codes = (
             UNASSIGNED,
             PROCESSING,
             REDIRECTED

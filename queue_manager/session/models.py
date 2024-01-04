@@ -14,12 +14,12 @@ class SessionManager(models.Manager):
 
     class ActiveSessionAlreadyExistsError(SessionErrors):
         '''Raised when attempt is made to create a new active session
-        while another active session already exists in the DB'''
+        while another active session already exists.'''
         pass
 
     class NoActiveSessionsError(SessionErrors):
         '''Raised when attempt is made to finish an active session
-        while there is no active session in the DB'''
+        while there is no active session'''
         pass
 
     def _get_last_session_code(self):
@@ -68,14 +68,14 @@ class SessionManager(models.Manager):
         return self._get_today_date_str() + last_letters[:-1] + next_char
 
     def get_current_session(self):
-        '''Returns active session on None (if there is no active session)'''
+        '''Returns active session (empty QS if there is no active session)'''
         return self.filter(finished_at__isnull=True).only('id').first()
 
     def start_new_session(self, started_by):
-        '''Starts new avtive session (Must be used instead of create).
+        '''Starts new avtive session (Must be used instead of create()).
 
         Arguments:
-            staarted_by - User who started this session
+            staarted_by - Supervisor who started this session
 
         Returns:
             New Session instance (or raise exception)
@@ -88,10 +88,10 @@ class SessionManager(models.Manager):
         )
 
     def finish_current_session(self, finished_by):
-        '''Finishes an active session (with finished_at=None).
+        '''Finishes an active session.
 
         Arguments:
-            finished_by - User who finished this session
+            finished_by - supervisor who finished this session
 
         Returns:
             Finished Session instance (or raise exception)
@@ -106,6 +106,10 @@ class SessionManager(models.Manager):
 
 
 class Session(models.Model):
+    '''Every day a supervisor starts a new session.
+    If there is an active session, clients can print new tickets.
+    If a supervisor finished the session, clients can't print no more tickets.
+    But issued tickets still can be served by operators.'''
     code = models.CharField(
         max_length=15,
         unique=True,
@@ -144,9 +148,11 @@ class Session(models.Model):
 
     @property
     def count_tickets_completed(self):
-        last_status_code = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'code')[:1])
+        last_status_code = Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('code')[:1])
         return self.ticket_set\
             .annotate(last_status_code=last_status_code)\
             .filter(last_status_code=Status.objects.Codes.COMPLETED)\
@@ -154,11 +160,13 @@ class Session(models.Model):
 
     @property
     def count_tickets_unprocessed(self):
-        last_status_code = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'code')[:1])
+        last_status_code = Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('code')[:1])
         return self.ticket_set\
             .annotate(last_status_code=last_status_code)\
             .filter(last_status_code__in=(
-                Status.objects.Codes.unprocessed_status_codes))\
+                Status.objects.Codes.unprocessed_codes))\
             .count()

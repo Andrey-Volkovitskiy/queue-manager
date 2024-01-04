@@ -17,7 +17,6 @@ def test_basic_content(client, get_supervisors):
     assert "Sessions" in content
     assert "Start new session" in content
     assert "Code" in content
-    assert "Is active" in content
     assert "Started at" in content
     assert "Started by" in content
     assert "Finished at" in content
