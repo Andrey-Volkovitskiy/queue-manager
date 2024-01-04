@@ -45,6 +45,7 @@ class PrintTicketView(TopNavMenuMixin, TemplateView):
 
 
 class PrintedTicketDetailView(TopNavMenuMixin, DetailView):
+    '''Shows the details of just issued ticket'''
     model = Ticket
     template_name = "client/printed_ticket_detail.html"
 
@@ -60,6 +61,7 @@ class NoActiveSessionView(TopNavMenuMixin, TemplateView):
 
 
 class ScreenView(TopNavMenuMixin, ListView):
+    '''Screen with last called tickets'''
     VISIBLE_TICKETS_QUAN = 7
     template_name = "client/screen.html"
 
@@ -83,11 +85,13 @@ class ScreenView(TopNavMenuMixin, ListView):
 
 
 class Print10TicketsView(View):
+    '''Issue 10 tickets for random tasks'''
     http_method_names = ["post", ]
 
     def post(self, *args, **kwargs):
+        all_tasks = Task.objects.all()
         for _ in range(10):
-            random_task = random.choice(Task.objects.all())
+            random_task = random.choice(all_tasks)
             Ticket.objects.create_ticket(random_task)
 
         messages.add_message(
