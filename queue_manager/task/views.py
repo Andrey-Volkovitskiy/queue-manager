@@ -23,8 +23,17 @@ class ItemListView(
     model = MODEL
     item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/list.html"
-    ordering = ['letter_code']
     permission_required = f'{ITEM_NAME}.view_{ITEM_NAME}'
+
+    def get_queryset(self):
+        '''An optimized query to get all data from DB in one step'''
+        return self.model.objects\
+            .all()\
+            .prefetch_related(
+                'can_be_served_by',
+                'service_set',
+                'service_set__operator')\
+            .order_by('letter_code')
 
 
 class ItemCreateView(
@@ -56,7 +65,7 @@ class ItemUpdateView(
     permission_required = f'{ITEM_NAME}.change_{ITEM_NAME}'
 
     def form_valid(self, form):
-        '''Task letter code can't be modified while
+        '''A letter code can't be modified while
         there is an active session (it can cause integrity conflicts)'''
         letter_code_in_object = self.get_object().letter_code
         letter_code_in_form = form.cleaned_data['letter_code']

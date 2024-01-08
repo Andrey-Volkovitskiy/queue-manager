@@ -29,13 +29,13 @@
           <td>{{ object.name }}</td>
           <td>{{ object.description }}</td>
           <td>
-            {% if object.primary_served_by or object.secondary_served_by %}
+            {% if object.prim_srvd_by or object.scnd_srvd_by %}
               <ul class="list-unstyled">
-                {% for primary_serv_by in object.primary_served_by %}
+                {% for primary_serv_by in object.prim_srvd_by %}
                   <li class="text-primary">{{ primary_serv_by.get_full_name }} <span class="text-black-50">(prim.)</span></li>
                 {% endfor %}
 
-                {% for secondary_serv_by in object.secondary_served_by %}
+                {% for secondary_serv_by in object.scnd_srvd_by %}
                   <li class="text-success">{{ secondary_serv_by.get_full_name }} <span class="text-black-50">(scnd.)</span></li>
                 {% endfor %}
               </ul>

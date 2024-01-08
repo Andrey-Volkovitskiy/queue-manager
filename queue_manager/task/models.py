@@ -16,6 +16,7 @@ only_letters = RegexValidator(
 
 
 class CapitalizedCharField(models.CharField):
+    '''A CharField with capitalized first character'''
     def get_prep_value(self, value):
         value = super().get_prep_value(value)
         if isinstance(value, str) and len(value) > 0:
@@ -60,6 +61,7 @@ class Task(SoftDeletionModel):
 
     @property
     def primary_served_by(self) -> Operator:
+        '''Returns operators who serve the task as primary.'''
         return Operator.objects\
             .filter(
                 service__task=self,
@@ -68,33 +70,52 @@ class Task(SoftDeletionModel):
 
     @property
     def secondary_served_by(self) -> Operator:
+        '''Returns operators who serve the task as secondary.'''
         return Operator.objects\
             .filter(
                 service__task=self,
-                service__priority__lt=Service.HIGHEST_PRIORITY)\
+                service__priority__lt=Service.HIGHEST_PRIORITY,
+                service__priority__gt=Service.NOT_IN_SERVICE)\
             .order_by('first_name', 'last_name')
 
     @property
     def count_tickets_completed(self):
-        last_status_code = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'code')[:1])
+        '''Counts complited tickets for the task for current session'''
+        current_session_id = Subquery(
+            Session.objects
+            .filter(finished_at__isnull=True)
+            .order_by('-started_at')
+            .values('id')[:1])
+        last_status_code = Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('code')[:1])
         return self.ticket_set\
-            .filter(session=Session.objects.get_current_session())\
             .annotate(last_status_code=last_status_code)\
-            .filter(last_status_code=Status.objects.Codes.COMPLETED)\
+            .filter(
+                session__id=current_session_id,
+                last_status_code=Status.objects.Codes.COMPLETED)\
             .count()
 
     @property
     def count_tickets_unprocessed(self):
-        last_status_code = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'code')[:1])
+        current_session_id = Subquery(
+            Session.objects
+            .filter(finished_at__isnull=True)
+            .order_by('-started_at')
+            .values('id')[:1])
+        last_status_code = Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('code')[:1])
         return self.ticket_set\
-            .filter(session=Session.objects.get_current_session())\
             .annotate(last_status_code=last_status_code)\
-            .filter(last_status_code__in=(
-                Status.objects.Codes.unprocessed_codes))\
+            .filter(
+                session__id=current_session_id,
+                last_status_code__in=(
+                    Status.objects.Codes.unprocessed_codes))\
             .count()
 
 

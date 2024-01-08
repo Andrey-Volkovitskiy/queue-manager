@@ -28,6 +28,7 @@ class SessionListView(
         return context
 
     def get_queryset(self):
+        '''An optimized query to get all data from DB in one step'''
         return self.model.objects\
             .all()\
             .select_related('started_by', 'finished_by')\

@@ -74,21 +74,25 @@
               </td>
 
               <td class="text-center">
-                {% if task.count_tickets_unprocessed %}
-                  {% if not task.primary_served_by and not task.secondary_served_by %}
-                    <span class="text-danger fw-bold">
-                      = {{ task.count_tickets_unprocessed }} =
-                    </span>
-                  {% else %}
-                    {{ task.count_tickets_unprocessed }}
+                {% with task.count_tickets_unprocessed as num_tickets_unprocessed %}
+                  {% if num_tickets_unprocessed %}
+                    {% if not task.primary_served_by and not task.secondary_served_by %}
+                      <span class="text-danger fw-bold">
+                        = {{ num_tickets_unprocessed }} =
+                      </span>
+                    {% else %}
+                      {{ num_tickets_unprocessed }}
+                    {% endif %}
                   {% endif %}
-                {% endif %}
+                {% endwith %}
               </td>
 
               <td class="text-center">
-                {% if task.count_tickets_completed %}
-                  {{ task.count_tickets_completed }}
-                {% endif %}
+                {% with task.count_tickets_completed as num_tickets_completed %}
+                  {% if num_tickets_completed %}
+                    {{ num_tickets_completed }}
+                  {% endif %}
+                {% endwith %}
               </td>
             </tr>
           {% endfor %}

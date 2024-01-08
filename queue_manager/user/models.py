@@ -49,7 +49,7 @@ class Operator(User):
     def is_servicing(self):
         return self.service_set.filter(priority__gt=0).exists()
 
-    # TODO Add defer/only, contains, F, Q
+    # TODO Add F, Q
     @property
     def last_assigned_ticket(self):
         from queue_manager.status.models import Status

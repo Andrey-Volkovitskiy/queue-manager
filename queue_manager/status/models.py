@@ -102,6 +102,7 @@ class StatusManager(models.Manager):
 
 
 class Status(models.Model):
+    '''The current state of the ticket described by its latest status.'''
     ticket = models.ForeignKey(
         'ticket.Ticket',
         on_delete=models.PROTECT,
@@ -147,12 +148,12 @@ class Status(models.Model):
     def name(self):
         '''The status name based on code'''
         dic = StatusManager.Codes.__dict__
-        name = {atr for atr in dic if dic[atr] == self.code}.pop()
+        name = {key for key in dic if dic[key] == self.code}.pop()
         return name.capitalize()
 
     @property
     def colour(self):
-        '''The status colour based on code'''
+        '''The status colour for Bootstrap template based on code'''
         if self.code == StatusManager.Codes.UNASSIGNED:
             return 'secondary'
         elif self.code == StatusManager.Codes.PROCESSING:
