@@ -13,8 +13,11 @@ NUM_OF_DIGITS_IN_TICKET_CODE = 3
 
 class TicketManager(models.Manager):
     def _get_new_ticket_code(self, session: Session, task: Task):
-        last_ticket = Ticket.objects.filter(
-            session=session, task=task).order_by('code').last()
+        last_ticket = Ticket.objects\
+            .filter(session=session, task=task)\
+            .order_by('code')\
+            .only('code')\
+            .last()
         if last_ticket is None:
             new_ticket_number = 1
         else:
@@ -24,7 +27,8 @@ class TicketManager(models.Manager):
             new_ticket_number, f'0{NUM_OF_DIGITS_IN_TICKET_CODE}d')
 
     def create_ticket(self, task: Task):
-        '''Creates a new Ticket instance with properly filed fields'''
+        '''Creates a new Ticket instance with properly filed fields.
+        Use it instead of create().'''
         current_session = Session.objects.get_current_session()
         if not current_session:
             raise Session.objects.NoActiveSessionsError
@@ -73,6 +77,12 @@ class Ticket(models.Model):
     @property
     def num_tickets_ahead(self):
         '''The number of unassidned tickets in front the ticket'''
+        current_session_id = Subquery(
+            Session.objects
+            .filter(finished_at__isnull=True)
+            .order_by('id')
+            .values('id')[:1])
+
         last_status_code = Subquery(
             Status.objects
             .filter(ticket=OuterRef('id'))
@@ -81,8 +91,8 @@ class Ticket(models.Model):
 
         return self._meta.model.objects\
             .filter(
-                session=Session.objects.get_current_session(),
-                task=self.task,
+                session_id=current_session_id,
+                task__id=self.task_id,
                 id__lt=self.id,)\
             .annotate(last_status_code=last_status_code)\
             .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\

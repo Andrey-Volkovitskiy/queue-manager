@@ -124,6 +124,12 @@ class Operator(User):
         from queue_manager.session.models import Session
         from queue_manager.status.models import Status
 
+        current_session_id = Subquery(
+            Session.objects
+            .filter(finished_at__isnull=True)
+            .order_by('id')
+            .values('id')[:1])
+
         last_status_code = Subquery(
             Status.objects
             .filter(ticket=OuterRef('id'))
@@ -138,7 +144,7 @@ class Operator(User):
 
         return Ticket.objects\
             .filter(
-                session=Session.objects.get_current_session(),
+                session__id=current_session_id,
                 status__code=Status.objects.Codes.COMPLETED,
                 status__assigned_by=self)\
             .annotate(

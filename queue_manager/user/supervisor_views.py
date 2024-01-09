@@ -7,6 +7,7 @@ from queue_manager.session.models import Session
 from queue_manager.task.models import Task
 from queue_manager.ticket.models import Ticket
 from queue_manager.user.models import Supervisor, Operator
+from django.db.models import Subquery
 
 
 class SupervisorEnterView(View):
@@ -52,7 +53,12 @@ class SupervisorPersonalView(
         context['servicing_operators'] = Operator.objects\
             .filter(service__priority__gt=0)\
             .distinct().order_by('first_name', 'last_name')
+
+        last_session = Subquery(
+            Session.objects
+            .order_by('-id')
+            .values('id')[:1])
         context['last_tickets'] = Ticket.objects\
-            .filter(session=Session.objects.last())\
+            .filter(session=last_session)\
             .order_by('-id')[0: self.TICKETS_SHOWN]
         return context

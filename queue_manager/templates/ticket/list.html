@@ -24,11 +24,15 @@
           <td>
             <a class="link-dark" href="{% url 'ticket-detail' object.id %}">{{ object.code }}</a>
           </td>
-          <td class="text-{{ object.status_set.last.colour }}">
-            {{ object.status_set.last.name }}
+          <td class="text-{{ object.last_status.0.colour }}">
+            {{ object.last_status.0.name }}
           </td>
           <td>
-            {{ object.status_set.last.responsible }}
+            {% with responsible_operator=object.last_status.0.responsible %}
+              {% if responsible_operator %}
+                {{ responsible_operator }}
+              {% endif %}
+            {% endwith %}
           </td>
         </tr>
       {% endfor %}

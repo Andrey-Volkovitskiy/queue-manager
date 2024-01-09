@@ -12,6 +12,10 @@ from queue_manager.mixins import TopNavMenuMixin
 from queue_manager.ticket import forms
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
+from django.db.models import Subquery, Prefetch
+
+# to get TicketCreateView go to client.PrintTicketView
+# to get TicketDetailedView go to client.PrintedTicketDetailView
 
 
 class OperatorIsLastAssignedToPermis(UserPassesTestMixin):
@@ -59,8 +63,20 @@ class ItemListView(
 
     def get_queryset(self):
         '''Returns all tickets for the last session'''
+        last_session = Subquery(
+            Session.objects
+            .order_by('-id')
+            .values('id')[:1])
+
         return MODEL.objects\
-            .filter(session=Session.objects.last())\
+            .filter(session=last_session)\
+            .prefetch_related(
+                Prefetch(
+                    'status_set',
+                    queryset=Status.objects.order_by('-assigned_at')[:1],
+                    to_attr='last_status'),
+                'last_status__assigned_to',
+                'last_status__assigned_by')\
             .order_by('-id')
 
 
