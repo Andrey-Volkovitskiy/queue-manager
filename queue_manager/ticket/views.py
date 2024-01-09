@@ -123,7 +123,7 @@ class TicketRedirectView(
             kwargs={'pk': redirected_by})
 
     def form_valid(self, form):
-        ticket = self.get_object()
+        ticket = self.object
         redirect_to = form.cleaned_data['redirect_to']
         ticket.redirect(redirect_to=redirect_to)
         return super().form_valid(form)

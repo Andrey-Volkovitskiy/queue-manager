@@ -109,8 +109,17 @@ class Ticket(models.Model):
         )
 
     def mark_completed(self):
-        processing_operator = self.status_set.filter(
-            code=Status.objects.Codes.PROCESSING).last().assigned_to
+        '''Mark the ticket as complited by current operator'''
+        last_processing_status_id = Subquery(
+            Status.objects
+            .filter(
+                ticket__id=self.id,
+                code=Status.objects.Codes.PROCESSING)
+            .order_by('-assigned_at')
+            .values('id')[:1])
+        processing_operator = Operator.objects\
+            .filter(assigned_to__id=last_processing_status_id)\
+            .last()
         Status.objects.create_additional(
             ticket=self,
             new_code=Status.objects.Codes.COMPLETED,
@@ -119,8 +128,17 @@ class Ticket(models.Model):
         QManager.free_operator_appeared(operator=processing_operator)
 
     def mark_missed(self):
-        processing_operator = self.status_set.filter(
-            code=Status.objects.Codes.PROCESSING).last().assigned_to
+        '''Mark the ticket as missed by current operator'''
+        last_processing_status_id = Subquery(
+            Status.objects
+            .filter(
+                ticket__id=self.id,
+                code=Status.objects.Codes.PROCESSING)
+            .order_by('-assigned_at')
+            .values('id')[:1])
+        processing_operator = Operator.objects\
+            .filter(assigned_to__id=last_processing_status_id)\
+            .last()
         Status.objects.create_additional(
             ticket=self,
             new_code=Status.objects.Codes.MISSED,
@@ -129,8 +147,17 @@ class Ticket(models.Model):
         QManager.free_operator_appeared(operator=processing_operator)
 
     def redirect(self, redirect_to: Operator):
-        processing_operator = self.status_set.filter(
-            code=Status.objects.Codes.PROCESSING).last().assigned_to
+        '''Redirect the ticket to another operator'''
+        last_processing_status_id = Subquery(
+            Status.objects
+            .filter(
+                ticket__id=self.id,
+                code=Status.objects.Codes.PROCESSING)
+            .order_by('-assigned_at')
+            .values('id')[:1])
+        processing_operator = Operator.objects\
+            .filter(assigned_to__id=last_processing_status_id)\
+            .last()
         Status.objects.create_additional(
             ticket=self,
             new_code=Status.objects.Codes.REDIRECTED,
