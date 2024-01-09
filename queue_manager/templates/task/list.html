@@ -29,19 +29,21 @@
           <td>{{ object.name }}</td>
           <td>{{ object.description }}</td>
           <td>
-            {% if object.prim_srvd_by or object.scnd_srvd_by %}
-              <ul class="list-unstyled">
-                {% for primary_serv_by in object.prim_srvd_by %}
-                  <li class="text-primary">{{ primary_serv_by.get_full_name }} <span class="text-black-50">(prim.)</span></li>
-                {% endfor %}
+            {% with primary_served_by=object.prim_served_by secondary_served_by=object.scnd_served_by %}
+              {% if primary_served_by or secondary_served_by %}
+                <ul class="list-unstyled">
+                  {% for primary_serv_by in primary_served_by %}
+                    <li class="text-primary">{{ primary_serv_by.get_full_name }} <span class="text-black-50">(prim.)</span></li>
+                  {% endfor %}
 
-                {% for secondary_serv_by in object.scnd_srvd_by %}
-                  <li class="text-success">{{ secondary_serv_by.get_full_name }} <span class="text-black-50">(scnd.)</span></li>
-                {% endfor %}
-              </ul>
-            {% else %}
-              <span class="text-danger">= No one =</span>
-            {% endif %}
+                  {% for secondary_serv_by in secondary_served_by %}
+                    <li class="text-success">{{ secondary_serv_by.get_full_name }} <span class="text-black-50">(scnd.)</span></li>
+                  {% endfor %}
+                </ul>
+              {% else %}
+                <span class="text-danger">= No one =</span>
+              {% endif %}
+            {% endwith %}
           </td>
           <td>
             {% if object.can_be_served_by.all %}

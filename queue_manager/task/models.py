@@ -62,18 +62,15 @@ class Task(SoftDeletionModel):
     @property
     def primary_served_by(self) -> Operator:
         '''Returns operators who serve the task as primary.'''
-        return Operator.objects\
-            .filter(
-                service__task=self,
-                service__priority=Service.HIGHEST_PRIORITY)\
+        return self.can_be_served_by\
+            .filter(service__priority=Service.HIGHEST_PRIORITY)\
             .order_by('first_name', 'last_name')
 
     @property
     def secondary_served_by(self) -> Operator:
         '''Returns operators who serve the task as secondary.'''
-        return Operator.objects\
+        return self.can_be_served_by\
             .filter(
-                service__task=self,
                 service__priority__lt=Service.HIGHEST_PRIORITY,
                 service__priority__gt=Service.NOT_IN_SERVICE)\
             .order_by('first_name', 'last_name')

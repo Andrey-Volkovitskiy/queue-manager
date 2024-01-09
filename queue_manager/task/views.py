@@ -5,14 +5,16 @@ from django.views.generic import (ListView,
                                   UpdateView,
                                   DeleteView)
 from queue_manager.task.models import Task as MODEL
-from queue_manager.task.models import ITEM_NAME
+from queue_manager.task.models import ITEM_NAME, Service
 from queue_manager.session.models import Session
+from queue_manager.user.models import Operator
 from queue_manager.task.forms import TaskForm as FORM
 from queue_manager.mixins import ContextMixinWithItemName
 from queue_manager.mixins import TopNavMenuMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.shortcuts import redirect
+from django.db.models import Prefetch
 
 
 class ItemListView(
@@ -27,12 +29,31 @@ class ItemListView(
 
     def get_queryset(self):
         '''An optimized query to get all data from DB in one step'''
+
+        prim_served_by = Operator.objects\
+            .filter(service__priority=Service.HIGHEST_PRIORITY)\
+            .distinct()\
+            .order_by('first_name', 'last_name')
+
+        scnd_served_by = Operator.objects\
+            .filter(
+                service__priority__lt=Service.HIGHEST_PRIORITY,
+                service__priority__gt=Service.NOT_IN_SERVICE)\
+            .distinct()\
+            .order_by('first_name', 'last_name')
+
         return self.model.objects\
             .all()\
             .prefetch_related(
                 'can_be_served_by',
-                'service_set',
-                'service_set__operator')\
+                Prefetch(
+                    'can_be_served_by',
+                    queryset=prim_served_by,
+                    to_attr='prim_served_by'),
+                Prefetch(
+                    'can_be_served_by',
+                    queryset=scnd_served_by,
+                    to_attr='scnd_served_by'))\
             .order_by('letter_code')
 
 
