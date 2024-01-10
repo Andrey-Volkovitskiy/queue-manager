@@ -44,6 +44,8 @@ class TicketManager(models.Manager):
 
 
 class Ticket(models.Model):
+    '''The ticket is issued (printed) to the client
+    after he has chosen the purpuse of the request'''
     code = models.CharField(
         max_length=6,
         verbose_name='Alphanumeric code'
@@ -124,51 +126,54 @@ class Ticket(models.Model):
             assigned_to=operator,
         )
 
-    def mark_completed(self):
+    def mark_completed(self, marked_by: Operator):
         '''Mark the ticket as complited by current operator'''
-        processing_operator = self.processing_operator
         Status.objects.create_additional(
             ticket=self,
             new_code=Status.objects.Codes.COMPLETED,
-            assigned_by=processing_operator,
+            assigned_by=marked_by,
         )
-        QManager.free_operator_appeared(operator=processing_operator)
+        if marked_by.is_servicing:
+            QManager.free_operator_appeared(operator=marked_by)
 
-    def mark_missed(self):
+    def mark_missed(self, marked_by: Operator):
         '''Mark the ticket as missed by current operator'''
-        processing_operator = self.processing_operator
         Status.objects.create_additional(
             ticket=self,
             new_code=Status.objects.Codes.MISSED,
-            assigned_by=processing_operator,
+            assigned_by=marked_by,
         )
-        QManager.free_operator_appeared(operator=processing_operator)
+        if marked_by.is_servicing:
+            QManager.free_operator_appeared(operator=marked_by)
 
-    def redirect(self, redirect_to: Operator):
+    def redirect(self, redirect_by: Operator, redirect_to: Operator):
         '''Redirect the ticket to another operator'''
-        processing_operator = self.processing_operator
         Status.objects.create_additional(
             ticket=self,
             new_code=Status.objects.Codes.REDIRECTED,
-            assigned_by=processing_operator,
+            assigned_by=redirect_by,
             assigned_to=redirect_to
         )
         QManager.personal_ticket_appeared(
             ticket=self,
             assigned_to=redirect_to
         )
-        if processing_operator.is_free:
-            QManager.free_operator_appeared(operator=processing_operator)
+        ticket_redirected_to_themself = (redirect_by is redirect_to)
+        if not ticket_redirected_to_themself and redirect_by.is_free:
+            QManager.free_operator_appeared(operator=redirect_by)
 
 
 class QManager:
-    @staticmethod  # Personal - ticket redirected by someone to the operator
+    '''Events that occur during ticket processig.'''
+    @staticmethod
     def personal_ticket_appeared(ticket: Ticket, assigned_to: Operator):
+        '''Occurs after the ticket is redirected by someone to the operator'''
         if assigned_to.is_free:
             ticket.assign_to_operator(assigned_to)
 
-    @classmethod  # General - ticket just issued to a client
+    @classmethod
     def general_ticket_appeared(cls, ticket: Ticket):
+        '''Occurs after the ticket is issued (printed) to a client'''
         task = ticket.task
         free_operator = cls._get_next_free_operator(task)
         if free_operator:
@@ -176,8 +181,8 @@ class QManager:
 
     @classmethod
     def free_operator_appeared(cls, operator: Operator):
-        if not operator.is_servicing:
-            return
+        '''Occurs after the operator has started service
+        or has just completed, missed or redirected the current ticket.'''
         personal_ticket = cls._get_next_personal_ticket(operator)
         if personal_ticket:
             return personal_ticket.assign_to_operator(operator)
@@ -196,7 +201,7 @@ class QManager:
     @staticmethod
     def _get_next_primary_ticket(
                 operator: Operator, primary_task_id=None) -> Ticket:
-        '''primary_task is only used to test this method'''
+        '''primary_task_id is only used to test this method'''
 
         list_with_first_ticket = operator.get_primary_tickets(
             limit=1,

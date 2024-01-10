@@ -87,10 +87,10 @@ class TicketMarkCompletedView(
 
     def post(self, request, *args, **kwargs):
         ticket = MODEL.objects.get(id=self.kwargs['pk'])
-        assigned_by = ticket.processing_operator
-        ticket.mark_completed()
+        marked_by = ticket.processing_operator
+        ticket.mark_completed(marked_by=marked_by)
         return redirect(reverse_lazy(
-            'operator-personal', kwargs={'pk': assigned_by.id}))
+            'operator-personal', kwargs={'pk': marked_by.id}))
 
 
 class TicketMarkMissedView(
@@ -100,10 +100,10 @@ class TicketMarkMissedView(
 
     def post(self, request, *args, **kwargs):
         ticket = MODEL.objects.get(id=self.kwargs['pk'])
-        ticket.mark_missed()
-        assigned_by = ticket.status_set.last().assigned_by
+        marked_by = ticket.processing_operator
+        ticket.mark_missed(marked_by=marked_by)
         return redirect(reverse_lazy(
-            'operator-personal', kwargs={'pk': assigned_by.id}))
+            'operator-personal', kwargs={'pk': marked_by.id}))
 
 
 class TicketRedirectView(
@@ -124,8 +124,9 @@ class TicketRedirectView(
 
     def form_valid(self, form):
         ticket = self.object
+        redirect_by = ticket.processing_operator
         redirect_to = form.cleaned_data['redirect_to']
-        ticket.redirect(redirect_to=redirect_to)
+        ticket.redirect(redirect_by=redirect_by, redirect_to=redirect_to)
         return super().form_valid(form)
 
     def get_form_kwargs(self):
@@ -148,7 +149,7 @@ class TicketTakeAgainView(
             .filter(
                 code=Status.objects.Codes.PROCESSING
             ).last().assigned_to
-        ticket.redirect(redirect_to=last_operator)
+        ticket.redirect(redirect_by=last_operator, redirect_to=last_operator)
         return redirect(reverse_lazy(
             'operator-personal', kwargs={'pk': last_operator.id}))
 
@@ -162,15 +163,22 @@ class ItemDetailView(
     item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/detail.html"
 
+    def get_queryset(self):
+        '''An optimized query to get all data from DB in one step'''
+        return super().get_queryset()\
+            .prefetch_related(
+                'status_set__assigned_to',
+                'status_set__assigned_by')
+
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        redirecteble_statuses = (
+        REDIRECTABLE_STATUSES = (
             Status.objects.Codes.COMPLETED,
             Status.objects.Codes.MISSED
         )
-        last_status = self.get_object().status_set.last()
+        context = super().get_context_data(**kwargs)
+        last_status = self.object.status_set.last()
         if last_status:
             context['ticket_is_redirectable'] = (
-                last_status.code in redirecteble_statuses)
+                last_status.code in REDIRECTABLE_STATUSES)
             context['last_operator'] = last_status.assigned_by
         return context
