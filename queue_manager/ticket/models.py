@@ -68,8 +68,24 @@ class Ticket(models.Model):
         ]
 
     @property
+    def processing_operator(self):
+        '''The last processing operator for the ticket'''
+        last_processing_status_id = Subquery(
+            Status.objects
+            .filter(
+                ticket__id=self.id,
+                code=Status.objects.Codes.PROCESSING)
+            .order_by('-assigned_at')
+            .values('id')[:1])
+        processing_operator = Operator.objects\
+            .filter(assigned_to__id=last_processing_status_id)\
+            .last()
+        return processing_operator
+
+    @property
     def responsible(self):
-        '''The operator currenlly responsible for the ticket'''
+        '''The operator currenlly responsible for the ticket
+        (who processed it or to whom it was redirected)'''
         last_status = self.status_set.last
         if last_status:
             return last_status.responsible
@@ -108,34 +124,19 @@ class Ticket(models.Model):
             assigned_to=operator,
         )
 
-    def _get_processing_operator(self):
-        '''Returns the last processing operator for mark completed,
-        mark missed or redirect'''
-        last_processing_status_id = Subquery(
-            Status.objects
-            .filter(
-                ticket__id=self.id,
-                code=Status.objects.Codes.PROCESSING)
-            .order_by('-assigned_at')
-            .values('id')[:1])
-        processing_operator = Operator.objects\
-            .filter(assigned_to__id=last_processing_status_id)\
-            .last()
-        return processing_operator
-
     def mark_completed(self):
         '''Mark the ticket as complited by current operator'''
-        processing_operator = self._get_processing_operator()
+        processing_operator = self.processing_operator
         Status.objects.create_additional(
             ticket=self,
             new_code=Status.objects.Codes.COMPLETED,
-            assigned_by=self._get_processing_operator(),
+            assigned_by=processing_operator,
         )
         QManager.free_operator_appeared(operator=processing_operator)
 
     def mark_missed(self):
         '''Mark the ticket as missed by current operator'''
-        processing_operator = self._get_processing_operator()
+        processing_operator = self.processing_operator
         Status.objects.create_additional(
             ticket=self,
             new_code=Status.objects.Codes.MISSED,
@@ -145,7 +146,7 @@ class Ticket(models.Model):
 
     def redirect(self, redirect_to: Operator):
         '''Redirect the ticket to another operator'''
-        processing_operator = self._get_processing_operator()
+        processing_operator = self.processing_operator
         Status.objects.create_additional(
             ticket=self,
             new_code=Status.objects.Codes.REDIRECTED,

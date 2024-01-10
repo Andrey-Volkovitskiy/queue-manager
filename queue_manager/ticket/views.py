@@ -87,8 +87,8 @@ class TicketMarkCompletedView(
 
     def post(self, request, *args, **kwargs):
         ticket = MODEL.objects.get(id=self.kwargs['pk'])
+        assigned_by = ticket.processing_operator
         ticket.mark_completed()
-        assigned_by = ticket.status_set.last().assigned_by
         return redirect(reverse_lazy(
             'operator-personal', kwargs={'pk': assigned_by.id}))
 
