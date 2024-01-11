@@ -14,13 +14,14 @@ User.name = User.username
 
 class SupervisorManager(UserManager):
     def get_queryset(self):
-        return super().get_queryset().filter(
-            groups=(Group.objects.get(
-                name=DefaultDBData.groups['SUPERVISORS'])),
-            is_active=True)
+        return super().get_queryset()\
+            .filter(
+                groups__name=DefaultDBData.groups['SUPERVISORS'],
+                is_active=True)
 
 
 class Supervisor(User):
+    '''Manages operators, tasks and sessions'''
     class Meta:
         proxy = True
 
@@ -36,6 +37,7 @@ class OperatorManager(UserManager):
 
 
 class Operator(User):
+    '''Services tickets'''
     class Meta:
         proxy = True
         permissions = [(
@@ -47,24 +49,16 @@ class Operator(User):
 
     @property
     def is_servicing(self):
+        '''Is the operator currently sericing any task?'''
         return self.service_set.filter(priority__gt=0).exists()
 
     @property
-    def last_assigned_ticket(self):
-        from queue_manager.status.models import Status
-        last_processing_status = Status.objects.filter(
-            code=Status.objects.Codes.PROCESSING,
-            assigned_to=self
-            ).last()
-        if last_processing_status:
-            return last_processing_status.ticket
-
-    @property
     def current_ticket(self):
+        '''Returns ticket that is currently being processed by the operator'''
         from queue_manager.status.models import Status
         from queue_manager.ticket.models import Ticket
 
-        last_assigned_ticket = Subquery(
+        last_assigned_ticket_id = Subquery(
             Ticket.objects
             .filter(
                 status__assigned_to=self,
@@ -78,47 +72,49 @@ class Operator(User):
             .order_by('-assigned_at')
             .values('code')[:1])
 
-        last_status_assigned_to = Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('assigned_to')[:1])
-
         return Ticket.objects\
-            .filter(id=last_assigned_ticket)\
             .annotate(
                 last_status_code=last_status_code,
-                last_status_assigned_to=last_status_assigned_to)\
+                last_status_assigned_to=self._get_last_status_assigned_to())\
             .filter(
+                id=last_assigned_ticket_id,
                 last_status_code=Status.objects.Codes.PROCESSING,
                 last_status_assigned_to=self)\
             .last()
 
     @property
     def is_free(self):
+        '''Is the operator is available to get a new ticket for processing?'''
         if self.is_servicing and not self.current_ticket:
             return True
         return False
 
     @property
     def primary_task(self):
+        '''Returns a primary task
+        that is currently being serviced by the operator'''
         from queue_manager.task.models import Service
         return self.task_set\
-            .filter(
-                service__priority=Service.HIGHEST_PRIORITY)\
+            .filter(service__priority=Service.HIGHEST_PRIORITY)\
+            .only('name', 'letter_code')\
             .last()
 
     @property
     def secondary_tasks(self):
+        '''Returns secondary tasks
+        that are currently being serviced by the operator'''
         from queue_manager.task.models import Service
         return self.task_set\
             .filter(
                 service__priority__lt=Service.HIGHEST_PRIORITY,
                 service__priority__gt=Service.NOT_IN_SERVICE)\
+            .only('name', 'letter_code')\
             .order_by('letter_code')
 
     @property
     def count_tickets_completed(self):
+        '''Returns a number of tickets completed by the operator
+        during the current session'''
         from queue_manager.ticket.models import Ticket
         from queue_manager.session.models import Session
         from queue_manager.status.models import Status
@@ -129,12 +125,6 @@ class Operator(User):
             .order_by('id')
             .values('id')[:1])
 
-        last_status_code = Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('code')[:1])
-
         last_status_assigned_by = Subquery(
             Status.objects
             .filter(ticket=OuterRef('id'))
@@ -143,11 +133,9 @@ class Operator(User):
 
         return Ticket.objects\
             .filter(
-                session__id=current_session_id,
-                status__code=Status.objects.Codes.COMPLETED,
-                status__assigned_by=self)\
+                session__id=current_session_id,)\
             .annotate(
-                last_status_code=last_status_code,
+                last_status_code=self._get_last_status_code(),
                 last_status_assigned_by=last_status_assigned_by)\
             .filter(
                 last_status_code=Status.objects.Codes.COMPLETED,
@@ -155,80 +143,54 @@ class Operator(User):
             .count()
 
     def get_personal_tickets(self, limit=None):
-        '''Returns QuerySet with personal tickets assigned to the operator
+        '''Returns personal tickets assigned to the operator
 
         Arguments:
         limit - max numer of returned tickets'''
         from queue_manager.ticket.models import Ticket
         from queue_manager.status.models import Status
 
-        last_status_code = Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('code')[:1])
-
-        last_status_assigned_to = Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('assigned_to')[:1])
-
-        last_status_assigned_at = Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('assigned_at')[:1])
-
         return Ticket.objects\
             .filter(
                 status__code=Status.objects.Codes.REDIRECTED,
                 status__assigned_to=self)\
             .annotate(
-                last_status_code=last_status_code,
-                last_status_assigned_to=last_status_assigned_to)\
+                last_status_code=self._get_last_status_code(),
+                last_status_assigned_to=self._get_last_status_assigned_to())\
             .filter(
                 last_status_code=Status.objects.Codes.REDIRECTED,
                 last_status_assigned_to=self)\
-            .annotate(last_status_assigned_at=last_status_assigned_at)\
+            .annotate(
+                last_status_assigned_at=self._get_last_status_assigned_at())\
             .order_by('last_status_assigned_at')[: limit]
 
     def get_primary_tickets(self, limit=None, primary_task_id=None):
-        '''Returns QuerySet with primary tickets
-        which can be assigned to the operator
+        '''Returns primary tickets which can be assigned to the operator
 
         Arguments:
         limit - max numer of returned tickets
-        primary_task - only used to test this method'''
+        primary_task_id - only used to test this method'''
         from queue_manager.ticket.models import Ticket
         from queue_manager.task.models import Service
         from queue_manager.status.models import Status
 
-        last_status_code = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'code')[:1])
-
-        last_status_assigned_at = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'assigned_at')[:1])
-
-        if primary_task_id is None:  # TODO Mayby better to exclude IF
-            primary_task_id = Subquery(
-                Service.objects.filter(
+        prim_task_id = primary_task_id or Subquery(
+                Service.objects
+                .filter(
                     operator=self,
-                    priority=Service.HIGHEST_PRIORITY
-                ).values('task_id')[:1])
+                    priority=Service.HIGHEST_PRIORITY)
+                .values('task_id')[:1])
 
-        return Ticket.objects.filter(task__id=primary_task_id)\
+        return Ticket.objects\
+            .filter(task__id=prim_task_id)\
             .annotate(
-                last_status_code=last_status_code,
-                last_status_assigned_at=last_status_assigned_at)\
+                last_status_code=self._get_last_status_code(),
+                last_status_assigned_at=self._get_last_status_assigned_at())\
             .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\
             .order_by('last_status_assigned_at')[: limit]
 
     def get_secondary_tickets(self, limit=None, secondery_tasks_ids=None):
-        '''Returns QuerySet with secondary tickets
-        which can be assigned to the operator
+        '''Returns secondary tickets which can be assigned to the operator
 
         Arguments:
         limit - max numer of returned tickets
@@ -237,28 +199,51 @@ class Operator(User):
         from queue_manager.task.models import Service
         from queue_manager.status.models import Status
 
-        last_status_code = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'code')[:1])
-
-        last_status_assigned_at = Subquery(Status.objects.filter(
-            ticket=OuterRef('id')).order_by('-assigned_at').values(
-                'assigned_at')[:1])
-
-        if secondery_tasks_ids is None:
-            secondery_tasks_ids = Subquery(
-                Service.objects.filter(
+        scnd_tasks_ids = secondery_tasks_ids or Subquery(
+                Service.objects
+                .filter(
                     operator=self,
                     priority__lt=Service.HIGHEST_PRIORITY,
-                    priority__gt=Service.NOT_IN_SERVICE
-                ).values_list('task_id', flat=True))
+                    priority__gt=Service.NOT_IN_SERVICE)
+                .values_list('task_id', flat=True))
 
-        return Ticket.objects.filter(task__id__in=secondery_tasks_ids)\
+        return Ticket.objects\
+            .filter(task__id__in=scnd_tasks_ids)\
             .annotate(
-                last_status_code=last_status_code,
-                last_status_assigned_at=last_status_assigned_at)\
+                last_status_code=self._get_last_status_code(),
+                last_status_assigned_at=self._get_last_status_assigned_at())\
             .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\
             .order_by('last_status_assigned_at')[: limit]
+
+    def _get_last_status_code(self):
+        '''Returns subquery with last status "code" for the ticket.
+        Used to DRY.'''
+        from queue_manager.status.models import Status
+        return Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('code')[:1])
+
+    def _get_last_status_assigned_to(self):
+        '''Returns subquery with last status "assigned_to" for the ticket.
+        Used to DRY.'''
+        from queue_manager.status.models import Status
+        return Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('assigned_to')[:1])
+
+    def _get_last_status_assigned_at(self):
+        '''Returns subquery with last status "assigned_at" for the ticket.
+        Used to DRY.'''
+        from queue_manager.status.models import Status
+        return Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('assigned_at')[:1])
 
     def save(self, *args, **kwargs):
         '''Adds just created user to "operators" group

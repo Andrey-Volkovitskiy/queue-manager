@@ -1,5 +1,5 @@
 class DefaultDBData:
-    '''Data used to populate a new DB with users, groups and permissions'''
+    '''Data used to populate an empty DB with users, groups and permissions'''
 
     groups = {
         'SUPERVISORS': 'supervisors',
