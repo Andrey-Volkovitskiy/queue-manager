@@ -11,7 +11,7 @@ from django.db.models import Subquery
 
 
 class SupervisorEnterView(View):
-    '''Redirects the supervisor to they Personal dashboard page'''
+    '''Redirects a supervisor to they Personal dashboard page'''
     def get(self, request, *args, **kwargs):
         user_id = self.request.user.id
         is_supervisor = Supervisor.objects.filter(id=user_id).exists()
@@ -22,28 +22,26 @@ class SupervisorEnterView(View):
         return redirect(reverse_lazy('supervisor-no-permission'))
 
 
+class SupervisorNoPermissionView(TopNavMenuMixin, TemplateView):
+    template_name = 'supervisor/no_permission.html'
+
+
 class SupervPersonalPagePermissions(UserPassesTestMixin):
     '''Allows only the user to access his personal page'''
     def test_func(self):
-        subject_user = self.request.user
-        object_user = self.get_object()
-        if subject_user == object_user:
-            return True
-        else:
-            return False
-
-
-class SupervisorNoPermissionView(TopNavMenuMixin, TemplateView):
-    template_name = 'supervisor/no_permission.html'
+        subject_user_id = self.request.user.id
+        object_user_id = self.kwargs.get('pk')
+        return True if subject_user_id == object_user_id else False
 
 
 class SupervisorPersonalView(
         SupervPersonalPagePermissions,
         TopNavMenuMixin,
         DetailView):
+    '''Personal dashboard page for the supervisor'''
     model = Supervisor
     template_name = "supervisor/personal.html"
-    TICKETS_SHOWN = 20
+    TICKETS_SHOWN = 20  # Max number of last issued tickets shown on page
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

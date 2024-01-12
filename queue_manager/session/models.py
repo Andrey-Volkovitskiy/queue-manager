@@ -69,7 +69,8 @@ class SessionManager(models.Manager):
 
     def get_current_session(self):
         '''Returns active session (empty QS if there is no active session)'''
-        return self.filter(finished_at__isnull=True).only('id').first()
+        return self.filter(finished_at__isnull=True)\
+            .only('id', 'code').first()
 
     def start_new_session(self, started_by):
         '''Starts new avtive session (Must be used instead of create()).
@@ -140,33 +141,37 @@ class Session(models.Model):
 
     @property
     def is_active(self):
+        '''Is the session active
+        (only one active session can exists)'''
         return not bool(self.finished_at)
 
     @property
     def count_tickets_issued(self):
+        '''Returns number of tickets issued during the session'''
         return self.ticket_set.count()
 
     @property
     def count_tickets_completed(self):
-        last_status_code = Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('code')[:1])
+        '''Returns the number of completed tickets in the session'''
         return self.ticket_set\
-            .annotate(last_status_code=last_status_code)\
+            .annotate(last_status_code=self._get_last_status_code())\
             .filter(last_status_code=Status.objects.Codes.COMPLETED)\
             .count()
 
     @property
     def count_tickets_unprocessed(self):
-        last_status_code = Subquery(
+        '''Returns the number of unprocessed tickets in the session'''
+        return self.ticket_set\
+            .annotate(last_status_code=self._get_last_status_code())\
+            .filter(last_status_code__in=(
+                Status.objects.Codes.unprocessed_codes))\
+            .count()
+
+    def _get_last_status_code(self):
+        '''Returns subquery with last status "code" for the ticket.
+        Used to DRY.'''
+        return Subquery(
             Status.objects
             .filter(ticket=OuterRef('id'))
             .order_by('-assigned_at')
             .values('code')[:1])
-        return self.ticket_set\
-            .annotate(last_status_code=last_status_code)\
-            .filter(last_status_code__in=(
-                Status.objects.Codes.unprocessed_codes))\
-            .count()
