@@ -4,6 +4,7 @@ from django.core.validators import RegexValidator
 from queue_manager.session.models import Session
 from queue_manager.user.models import Operator
 from queue_manager.status.models import Status
+from django.db.models import Subquery, OuterRef, Func, F
 
 
 ITEM_NAME = 'task'
@@ -85,6 +86,21 @@ class Task(SoftDeletionModel):
                 last_status_code=Status.objects.Codes.COMPLETED)\
             .count()
 
+    @staticmethod
+    def subq_count_tickets_completed():
+        '''Returns subquery that counts complited tickets
+        for the task for current session'''
+        from queue_manager.ticket.models import Ticket
+        return Subquery(
+            Ticket.objects
+            .filter(task__id=OuterRef('id'))
+            .annotate(last_status_code=Ticket.subq_last_status_code())
+            .filter(
+                session__id=Session.objects.subq_current_session_id(),
+                last_status_code=Status.objects.Codes.COMPLETED)
+            .annotate(count=Func(F('id'), function='Count'))
+            .values('count'))
+
     @property
     def count_tickets_unprocessed(self):
         '''Counts unprocessed (U, P, R) tickets for the task
@@ -97,6 +113,22 @@ class Task(SoftDeletionModel):
                 last_status_code__in=(
                     Status.objects.Codes.unprocessed_codes))\
             .count()
+
+    @staticmethod
+    def subq_count_tickets_unprocessed():
+        '''Returns subquery that counts unprocessed (U, P, R) tickets
+        for the task for current session'''
+        from queue_manager.ticket.models import Ticket
+        return Subquery(
+            Ticket.objects
+            .filter(task__id=OuterRef('id'))
+            .annotate(last_status_code=Ticket.subq_last_status_code())
+            .filter(
+                session__id=Session.objects.subq_current_session_id(),
+                last_status_code__in=(
+                    Status.objects.Codes.unprocessed_codes))
+            .annotate(count=Func(F('id'), function='Count'))
+            .values('count'))
 
 
 class Service(models.Model):

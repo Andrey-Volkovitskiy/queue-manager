@@ -74,7 +74,7 @@
               </td>
 
               <td class="text-center">
-                {% with task.count_tickets_unprocessed as num_tickets_unprocessed %}
+                {% with task.count_tickets_unproc as num_tickets_unprocessed %}
                   {% if num_tickets_unprocessed %}
                     {% if not task.primary_served_by and not task.secondary_served_by %}
                       <span class="text-danger fw-bold">
@@ -88,7 +88,7 @@
               </td>
 
               <td class="text-center">
-                {% with task.count_tickets_completed as num_tickets_completed %}
+                {% with task.count_tickets_compl as num_tickets_completed %}
                   {% if num_tickets_completed %}
                     {{ num_tickets_completed }}
                   {% endif %}

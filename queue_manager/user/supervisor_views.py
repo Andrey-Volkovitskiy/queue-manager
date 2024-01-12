@@ -50,7 +50,6 @@ class SupervisorPersonalView(
         context['current_session'] = Session.objects.get_current_session()
 
         # Tasks
-
         prim_served_by = Operator.objects\
             .filter(service__priority=Service.HIGHEST_PRIORITY)\
             .distinct()\
@@ -75,6 +74,9 @@ class SupervisorPersonalView(
                     'can_be_served_by',
                     queryset=scnd_served_by,
                     to_attr='scnd_served_by'))\
+            .annotate(
+                count_tickets_unproc=Task.subq_count_tickets_unprocessed(),
+                count_tickets_compl=Task.subq_count_tickets_completed())\
             .order_by('letter_code')
 
         # Operators
