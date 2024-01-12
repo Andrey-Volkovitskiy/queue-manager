@@ -12,7 +12,7 @@ from queue_manager.mixins import TopNavMenuMixin
 from queue_manager.ticket import forms
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.db.models import Subquery, Prefetch
+from django.db.models import Prefetch
 
 # to get TicketCreateView go to client.PrintTicketView
 # to get TicketDetailedView go to client.PrintedTicketDetailView
@@ -63,13 +63,8 @@ class ItemListView(
 
     def get_queryset(self):
         '''Returns all tickets for the last session'''
-        last_session = Subquery(
-            Session.objects
-            .order_by('-id')
-            .values('id')[:1])
-
         return MODEL.objects\
-            .filter(session=last_session)\
+            .filter(session=Session.objects.subq_last_session_id())\
             .prefetch_related(
                 Prefetch(
                     'status_set',

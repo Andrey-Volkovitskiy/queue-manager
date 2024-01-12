@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from queue_manager.status.models import Status
 from datetime import datetime, timezone
-from django.db.models import OuterRef, Subquery
+from django.db.models import Subquery
 
 ITEM_NAME = 'session'
 
@@ -71,6 +71,21 @@ class SessionManager(models.Manager):
         '''Returns active session (empty QS if there is no active session)'''
         return self.filter(finished_at__isnull=True)\
             .only('id', 'code').first()
+
+    def subq_current_session_id(self):
+        '''Returns subquery with current session id.'''
+        return Subquery(
+            self
+            .filter(finished_at__isnull=True)
+            .order_by('-started_at')
+            .values('id')[:1])
+
+    def subq_last_session_id(self):
+        '''Returns subquery with last session id.'''
+        return Subquery(
+            self
+            .order_by('-started_at')
+            .values('id')[:1])
 
     def start_new_session(self, started_by):
         '''Starts new avtive session (Must be used instead of create()).
@@ -153,25 +168,18 @@ class Session(models.Model):
     @property
     def count_tickets_completed(self):
         '''Returns the number of completed tickets in the session'''
+        from queue_manager.ticket.models import Ticket
         return self.ticket_set\
-            .annotate(last_status_code=self._get_last_status_code())\
+            .annotate(last_status_code=Ticket.subq_last_status_code())\
             .filter(last_status_code=Status.objects.Codes.COMPLETED)\
             .count()
 
     @property
     def count_tickets_unprocessed(self):
         '''Returns the number of unprocessed tickets in the session'''
+        from queue_manager.ticket.models import Ticket
         return self.ticket_set\
-            .annotate(last_status_code=self._get_last_status_code())\
+            .annotate(last_status_code=Ticket.subq_last_status_code())\
             .filter(last_status_code__in=(
                 Status.objects.Codes.unprocessed_codes))\
             .count()
-
-    def _get_last_status_code(self):
-        '''Returns subquery with last status "code" for the ticket.
-        Used to DRY.'''
-        return Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('code')[:1])

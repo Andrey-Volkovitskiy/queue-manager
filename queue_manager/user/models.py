@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group, UserManager
-from django.db.models import OuterRef, Subquery
+from django.db.models import Subquery
 from queue_manager.default_db_data import DefaultDBData
 import sys
 
@@ -66,16 +66,10 @@ class Operator(User):
             .order_by('-status__assigned_at')
             .values('id')[:1])
 
-        last_status_code = Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('code')[:1])
-
         return Ticket.objects\
             .annotate(
-                last_status_code=last_status_code,
-                last_status_assigned_to=self._get_last_status_assigned_to())\
+                last_status_code=Ticket.subq_last_status_code(),
+                last_status_assigned_to=Ticket.subq_last_status_assigned_to())\
             .filter(
                 id=last_assigned_ticket_id,
                 last_status_code=Status.objects.Codes.PROCESSING,
@@ -119,24 +113,12 @@ class Operator(User):
         from queue_manager.session.models import Session
         from queue_manager.status.models import Status
 
-        current_session_id = Subquery(
-            Session.objects
-            .filter(finished_at__isnull=True)
-            .order_by('id')
-            .values('id')[:1])
-
-        last_status_assigned_by = Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('assigned_by')[:1])
-
         return Ticket.objects\
             .filter(
-                session__id=current_session_id,)\
+                session__id=Session.objects.subq_current_session_id(),)\
             .annotate(
-                last_status_code=self._get_last_status_code(),
-                last_status_assigned_by=last_status_assigned_by)\
+                last_status_code=Ticket.subq_last_status_code(),
+                last_status_assigned_by=Ticket.subq_last_status_assigned_by())\
             .filter(
                 last_status_code=Status.objects.Codes.COMPLETED,
                 last_status_assigned_by=self)\
@@ -155,13 +137,13 @@ class Operator(User):
                 status__code=Status.objects.Codes.REDIRECTED,
                 status__assigned_to=self)\
             .annotate(
-                last_status_code=self._get_last_status_code(),
-                last_status_assigned_to=self._get_last_status_assigned_to())\
+                last_status_code=Ticket.subq_last_status_code(),
+                last_status_assigned_to=Ticket.subq_last_status_assigned_to())\
             .filter(
                 last_status_code=Status.objects.Codes.REDIRECTED,
                 last_status_assigned_to=self)\
             .annotate(
-                last_status_assigned_at=self._get_last_status_assigned_at())\
+                last_status_assigned_at=Ticket.subq_last_status_assigned_at())\
             .order_by('last_status_assigned_at')[: limit]
 
     def get_primary_tickets(self, limit=None, primary_task_id=None):
@@ -184,8 +166,8 @@ class Operator(User):
         return Ticket.objects\
             .filter(task__id=prim_task_id)\
             .annotate(
-                last_status_code=self._get_last_status_code(),
-                last_status_assigned_at=self._get_last_status_assigned_at())\
+                last_status_code=Ticket.subq_last_status_code(),
+                last_status_assigned_at=Ticket.subq_last_status_assigned_at())\
             .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\
             .order_by('last_status_assigned_at')[: limit]
 
@@ -210,40 +192,10 @@ class Operator(User):
         return Ticket.objects\
             .filter(task__id__in=scnd_tasks_ids)\
             .annotate(
-                last_status_code=self._get_last_status_code(),
-                last_status_assigned_at=self._get_last_status_assigned_at())\
+                last_status_code=Ticket.subq_last_status_code(),
+                last_status_assigned_at=Ticket.subq_last_status_assigned_at())\
             .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\
             .order_by('last_status_assigned_at')[: limit]
-
-    def _get_last_status_code(self):
-        '''Returns subquery with last status "code" for the ticket.
-        Used to DRY.'''
-        from queue_manager.status.models import Status
-        return Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('code')[:1])
-
-    def _get_last_status_assigned_to(self):
-        '''Returns subquery with last status "assigned_to" for the ticket.
-        Used to DRY.'''
-        from queue_manager.status.models import Status
-        return Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('assigned_to')[:1])
-
-    def _get_last_status_assigned_at(self):
-        '''Returns subquery with last status "assigned_at" for the ticket.
-        Used to DRY.'''
-        from queue_manager.status.models import Status
-        return Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('assigned_at')[:1])
 
     def save(self, *args, **kwargs):
         '''Adds just created user to "operators" group

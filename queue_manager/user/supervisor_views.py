@@ -4,10 +4,10 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import UserPassesTestMixin
 from queue_manager.mixins import TopNavMenuMixin
 from queue_manager.session.models import Session
-from queue_manager.task.models import Task
+from queue_manager.task.models import Task, Service
 from queue_manager.ticket.models import Ticket
 from queue_manager.user.models import Supervisor, Operator
-from django.db.models import Subquery
+from django.db.models import Prefetch
 
 
 class SupervisorEnterView(View):
@@ -45,18 +45,44 @@ class SupervisorPersonalView(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+
+        # Session
         context['current_session'] = Session.objects.get_current_session()
+
+        # Tasks
+
+        prim_served_by = Operator.objects\
+            .filter(service__priority=Service.HIGHEST_PRIORITY)\
+            .distinct()\
+            .order_by('first_name', 'last_name')
+
+        scnd_served_by = Operator.objects\
+            .filter(
+                service__priority__lt=Service.HIGHEST_PRIORITY,
+                service__priority__gt=Service.NOT_IN_SERVICE)\
+            .distinct()\
+            .order_by('first_name', 'last_name')
+
         context['tasks'] = Task.objects\
-            .filter(deleted_at__isnull=True).order_by('letter_code')
+            .all()\
+            .prefetch_related(
+                'can_be_served_by',
+                Prefetch(
+                    'can_be_served_by',
+                    queryset=prim_served_by,
+                    to_attr='prim_served_by'),
+                Prefetch(
+                    'can_be_served_by',
+                    queryset=scnd_served_by,
+                    to_attr='scnd_served_by'))\
+            .order_by('letter_code')
+
+        # Operators
         context['servicing_operators'] = Operator.objects\
             .filter(service__priority__gt=0)\
             .distinct().order_by('first_name', 'last_name')
 
-        last_session = Subquery(
-            Session.objects
-            .order_by('-id')
-            .values('id')[:1])
         context['last_tickets'] = Ticket.objects\
-            .filter(session=last_session)\
+            .filter(session=Session.objects.subq_last_session_id())\
             .order_by('-id')[0: self.TICKETS_SHOWN]
         return context

@@ -4,7 +4,6 @@ from django.core.validators import RegexValidator
 from queue_manager.session.models import Session
 from queue_manager.user.models import Operator
 from queue_manager.status.models import Status
-from django.db.models import OuterRef, Subquery
 
 
 ITEM_NAME = 'task'
@@ -78,39 +77,23 @@ class Task(SoftDeletionModel):
     @property
     def count_tickets_completed(self):
         '''Counts complited tickets for the task for current session'''
-        current_session_id = Subquery(
-            Session.objects
-            .filter(finished_at__isnull=True)
-            .order_by('-started_at')
-            .values('id')[:1])
-        last_status_code = Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('code')[:1])
+        from queue_manager.ticket.models import Ticket
         return self.ticket_set\
-            .annotate(last_status_code=last_status_code)\
+            .annotate(last_status_code=Ticket.subq_last_status_code())\
             .filter(
-                session__id=current_session_id,
+                session__id=Session.objects.subq_current_session_id(),
                 last_status_code=Status.objects.Codes.COMPLETED)\
             .count()
 
     @property
     def count_tickets_unprocessed(self):
-        current_session_id = Subquery(
-            Session.objects
-            .filter(finished_at__isnull=True)
-            .order_by('-started_at')
-            .values('id')[:1])
-        last_status_code = Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('code')[:1])
+        '''Counts unprocessed (U, P, R) tickets for the task
+        for current session'''
+        from queue_manager.ticket.models import Ticket
         return self.ticket_set\
-            .annotate(last_status_code=last_status_code)\
+            .annotate(last_status_code=Ticket.subq_last_status_code())\
             .filter(
-                session__id=current_session_id,
+                session__id=Session.objects.subq_current_session_id(),
                 last_status_code__in=(
                     Status.objects.Codes.unprocessed_codes))\
             .count()

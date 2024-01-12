@@ -95,24 +95,12 @@ class Ticket(models.Model):
     @property
     def num_tickets_ahead(self):
         '''The number of unassidned tickets in front the ticket'''
-        current_session_id = Subquery(
-            Session.objects
-            .filter(finished_at__isnull=True)
-            .order_by('id')
-            .values('id')[:1])
-
-        last_status_code = Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-id')
-            .values('code')[:1])
-
         return self._meta.model.objects\
             .filter(
-                session_id=current_session_id,
+                session_id=Session.objects.subq_current_session_id(),
                 task__id=self.task_id,
                 id__lt=self.id,)\
-            .annotate(last_status_code=last_status_code)\
+            .annotate(last_status_code=Ticket.subq_last_status_code())\
             .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\
             .count()
 
@@ -161,6 +149,42 @@ class Ticket(models.Model):
         ticket_redirected_to_themself = (redirect_by is redirect_to)
         if not ticket_redirected_to_themself and redirect_by.is_free:
             QManager.free_operator_appeared(operator=redirect_by)
+
+    @staticmethod
+    def subq_last_status_code():
+        '''Returns subquery with last status "code" for the ticket'''
+        return Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('code')[:1])
+
+    @staticmethod
+    def subq_last_status_assigned_to():
+        '''Returns subquery with last status "assigned_to" for the ticket'''
+        return Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('assigned_to')[:1])
+
+    @staticmethod
+    def subq_last_status_assigned_at():
+        '''Returns subquery with last status "assigned_at" for the ticket'''
+        return Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('assigned_at')[:1])
+
+    @staticmethod
+    def subq_last_status_assigned_by():
+        '''Returns subquery with last status "assigned_by" for the ticket'''
+        return Subquery(
+            Status.objects
+            .filter(ticket=OuterRef('id'))
+            .order_by('-assigned_at')
+            .values('assigned_by')[:1])
 
 
 class QManager:
@@ -226,7 +250,7 @@ class QManager:
         - currently is_servicing the task
         - don't currently have ticket in processing'''
 
-        last_assigned_ticket = Subquery(
+        last_assigned_ticket_id = Subquery(
             Ticket.objects
             .filter(
                 status__assigned_to=OuterRef(OuterRef('id')),
@@ -234,23 +258,11 @@ class QManager:
             .order_by('-status__assigned_at')
             .values('id')[:1])
 
-        last_status_code = Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('code')[:1])
-
-        last_status_assigned_to = Subquery(
-            Status.objects
-            .filter(ticket=OuterRef('id'))
-            .order_by('-assigned_at')
-            .values('assigned_to')[:1])
-
         current_ticket = Ticket.objects\
-            .filter(id=last_assigned_ticket)\
+            .filter(id=last_assigned_ticket_id)\
             .annotate(
-                last_status_code=last_status_code,
-                last_status_assigned_to=last_status_assigned_to)\
+                last_status_code=Ticket.subq_last_status_code(),
+                last_status_assigned_to=Ticket.subq_last_status_assigned_to())\
             .filter(
                 last_status_code=Status.objects.Codes.PROCESSING,
                 last_status_assigned_to=OuterRef('id'))

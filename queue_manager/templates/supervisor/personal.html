@@ -56,14 +56,14 @@
               <td class="fw-bold">{{ task.letter_code }}</td>
 
               <td>
-                {% if task.primary_served_by or task.secondary_served_by %}
+                {% if task.prim_served_by or task.scnd_served_by %}
                   <ul class="list-unstyled mb-0">
-                    {% for primary_serv_by in task.primary_served_by %}
-                      <li class="text-primary">{{ primary_serv_by.get_full_name }} <span class="text-black-50">(prim.)</span></li>
+                    {% for primary_serv_by in task.prim_served_by %}
+                      <li class="text-primary">{{ primary_serv_by }} <span class="text-black-50">(prim.)</span></li>
                     {% endfor %}
 
-                    {% for secondary_serv_by in task.secondary_served_by %}
-                      <li class="text-success">{{ secondary_serv_by.get_full_name }} <span class="text-black-50">(scnd.)</span></li>
+                    {% for secondary_serv_by in task.scnd_served_by %}
+                      <li class="text-success">{{ secondary_serv_by }} <span class="text-black-50">(scnd.)</span></li>
                     {% endfor %}
                   </ul>
                 {% else %}
