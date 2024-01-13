@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group, UserManager
-from django.db.models import Subquery
+from django.db.models import Subquery, OuterRef
 from queue_manager.default_db_data import DefaultDBData
 import sys
 
@@ -75,6 +75,31 @@ class Operator(User):
                 last_status_code=Status.objects.Codes.PROCESSING,
                 last_status_assigned_to=self)\
             .last()
+
+    @staticmethod
+    def subq_current_ticket_code():
+        '''Returns subquery with current ticket code for the operator'''
+        from queue_manager.status.models import Status
+        from queue_manager.ticket.models import Ticket
+        last_assigned_ticket_id = Subquery(
+            Ticket.objects
+            .filter(
+                status__assigned_to=OuterRef(OuterRef('id')),
+                status__code=Status.objects.Codes.PROCESSING)
+            .order_by('-status__assigned_at')
+            .values('id')[:1])
+
+        return Subquery(
+            Ticket.objects
+            .annotate(
+                last_status_code=Ticket.subq_last_status_code(),
+                last_status_assigned_to=Ticket.subq_last_status_assigned_to())
+            .filter(
+                id=last_assigned_ticket_id,
+                last_status_code=Status.objects.Codes.PROCESSING,
+                last_status_assigned_to=OuterRef('id'))
+            .order_by()
+            .values('code')[:1])
 
     @property
     def is_free(self):

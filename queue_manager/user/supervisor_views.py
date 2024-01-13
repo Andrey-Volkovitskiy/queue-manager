@@ -82,8 +82,13 @@ class SupervisorPersonalView(
         # Operators
         context['servicing_operators'] = Operator.objects\
             .filter(service__priority__gt=0)\
-            .distinct().order_by('first_name', 'last_name')
+            .distinct()\
+            .order_by('first_name', 'last_name')\
+            .annotate(
+                curr_ticket_code=Operator.subq_current_ticket_code()
+            )
 
+        # Tickets
         context['last_tickets'] = Ticket.objects\
             .filter(session=Session.objects.subq_last_session_id())\
             .order_by('-id')[0: self.TICKETS_SHOWN]
