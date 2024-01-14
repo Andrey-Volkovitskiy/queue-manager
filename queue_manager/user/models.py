@@ -1,5 +1,5 @@
 from django.contrib.auth.models import User, Group, UserManager
-from django.db.models import Subquery, OuterRef
+from django.db.models import Subquery, OuterRef, Func, F
 from queue_manager.default_db_data import DefaultDBData
 import sys
 
@@ -148,6 +148,27 @@ class Operator(User):
                 last_status_code=Status.objects.Codes.COMPLETED,
                 last_status_assigned_by=self)\
             .count()
+
+    @staticmethod
+    def subq_count_tickets_completed():
+        '''Returns a subquery with the number of tickets
+        completed by the operator during the current session'''
+        from queue_manager.ticket.models import Ticket
+        from queue_manager.session.models import Session
+        from queue_manager.status.models import Status
+
+        return Subquery(
+            Ticket.objects
+            .filter(
+                session__id=Session.objects.subq_current_session_id(),)
+            .annotate(
+                last_status_code=Ticket.subq_last_status_code(),
+                last_status_assigned_by=Ticket.subq_last_status_assigned_by())
+            .filter(
+                last_status_code=Status.objects.Codes.COMPLETED,
+                last_status_assigned_by=OuterRef('id'))
+            .annotate(count=Func(F('id'), function='Count'))
+            .values('count'))
 
     def get_personal_tickets(self, limit=None):
         '''Returns personal tickets assigned to the operator

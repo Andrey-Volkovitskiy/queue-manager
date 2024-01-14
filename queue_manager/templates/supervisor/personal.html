@@ -132,10 +132,10 @@
 
               <td class="text-center">
                <ul class="list-unstyled mb-0">
-                  <li class="text-primary d-inline me-2">{{ operator.primary_task.letter_code }} <span class="text-black-50">(prim.)</span></li>
-                  {% if operator.secondary_tasks %}
-                    <li class="text-secondary d-inline">
-                      {% for scnd_task in operator.secondary_tasks %}
+                  <li class="text-primary d-inline me-2">{{ operator.prim_served_tasks.0.letter_code }} <span class="text-black-50">(prim.)</span></li>
+                  {% if operator.scnd_served_tasks %}
+                    <li class="text-success d-inline">
+                      {% for scnd_task in operator.scnd_served_tasks %}
                         {{ scnd_task.letter_code }}{% if not forloop.last %}, {% endif %}
                       {% endfor %}
                       <span class="text-black-50">(scnd.)</span>
@@ -145,8 +145,8 @@
               </td>
 
               <td class="text-center">
-                {% if operator.count_tickets_completed %}
-                  {{ operator.count_tickets_completed }}
+                {% if operator.count_tickets_compl %}
+                  {{ operator.count_tickets_compl }}
                 {% endif %}
               </td>
             </tr>
@@ -165,7 +165,7 @@
     <ul class="list-unstyled mb-0 card-columns" style="column-count: 4">
       {% for ticket in last_tickets %}
         <li class="text-black-50">
-          {{ forloop.counter }} - <a class="link-{{ ticket.status_set.last.colour }}" href="{% url 'ticket-detail' ticket.id %}">{{ ticket.code }}</a>
+          {{ forloop.counter }} - <a class="link-{{ ticket.last_status.0.colour }}" href="{% url 'ticket-detail' ticket.id %}">{{ ticket.code }}</a>
         </li>
       {% endfor %}
     </ul>

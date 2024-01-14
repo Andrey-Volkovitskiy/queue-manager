@@ -4,6 +4,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.mixins import UserPassesTestMixin
 from queue_manager.mixins import TopNavMenuMixin
 from queue_manager.session.models import Session
+from queue_manager.status.models import Status
 from queue_manager.task.models import Task, Service
 from queue_manager.ticket.models import Ticket
 from queue_manager.user.models import Supervisor, Operator
@@ -80,16 +81,41 @@ class SupervisorPersonalView(
             .order_by('letter_code')
 
         # Operators
+        prim_served_tasks = Task.objects\
+            .filter(service__priority=Service.HIGHEST_PRIORITY)\
+            .distinct()
+
+        scnd_served_tasks = Task.objects\
+            .filter(
+                service__priority__lt=Service.HIGHEST_PRIORITY,
+                service__priority__gt=Service.NOT_IN_SERVICE)\
+            .distinct()\
+            .order_by('letter_code')
+
         context['servicing_operators'] = Operator.objects\
             .filter(service__priority__gt=0)\
             .distinct()\
             .order_by('first_name', 'last_name')\
             .annotate(
-                curr_ticket_code=Operator.subq_current_ticket_code()
-            )
+                curr_ticket_code=Operator.subq_current_ticket_code(),
+                count_tickets_compl=Operator.subq_count_tickets_completed())\
+            .prefetch_related(
+                Prefetch(
+                    'task_set',
+                    queryset=prim_served_tasks,
+                    to_attr='prim_served_tasks'),
+                Prefetch(
+                    'task_set',
+                    queryset=scnd_served_tasks,
+                    to_attr='scnd_served_tasks'))\
 
         # Tickets
         context['last_tickets'] = Ticket.objects\
             .filter(session=Session.objects.subq_last_session_id())\
+            .prefetch_related(
+                Prefetch(
+                    'status_set',
+                    queryset=Status.objects.order_by('-assigned_at')[:1],
+                    to_attr='last_status'),)\
             .order_by('-id')[0: self.TICKETS_SHOWN]
         return context
