@@ -68,9 +68,9 @@ class OperatorPersonalView(
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        operator = self.get_object()
+        operator = self.object
 
-        # Current serviced tasks
+        # Currently serviced tasks
         active_services = operator.service_set.filter(
             priority__gt=0)
         context['is_servicing'] = bool(active_services)
@@ -103,6 +103,8 @@ class OperatorPersonalView(
                 code=Status.objects.Codes.COMPLETED,
                 assigned_by=operator,
                 ticket__session=last_session)\
+            .select_related('ticket')\
+            .only('ticket__code', 'code')\
             .order_by('-assigned_at')[:self.PROCESSED_STATUSES_LIMIT]
 
         context['missed_statuses'] = Status.objects\
@@ -110,6 +112,8 @@ class OperatorPersonalView(
                 code=Status.objects.Codes.MISSED,
                 assigned_by=operator,
                 ticket__session=last_session)\
+            .select_related('ticket')\
+            .only('ticket__code', 'code')\
             .order_by('-assigned_at')[:self.PROCESSED_STATUSES_LIMIT]
 
         context['redirected_statuses'] = Status.objects\
@@ -117,6 +121,8 @@ class OperatorPersonalView(
                 code=Status.objects.Codes.REDIRECTED,
                 assigned_by=operator,
                 ticket__session=last_session)\
+            .select_related('ticket')\
+            .only('ticket__code', 'code')\
             .order_by('-assigned_at')[:self.PROCESSED_STATUSES_LIMIT]
 
         return context
