@@ -19,6 +19,7 @@ from queue_manager.mixins import ContextMixinWithItemName
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
+from django.db.models import Prefetch
 
 ITEM_NAME = 'operator'
 # TODO %s vs code injections
@@ -47,9 +48,8 @@ class OperatorPersonalPagePermissions(UserPassesTestMixin):
     Or user with "pretend_operator" permission can access it.'''
     def test_func(self):
         subject_user = self.request.user
-        object_user_id = int(self.kwargs['pk'])
-        object_user = MODEL.objects.get(id=object_user_id)
-        if subject_user == object_user or (
+        object_user_id = self.kwargs.get('pk')
+        if subject_user.id == object_user_id or (
                 subject_user.has_perm('user.pretend_operator')):
             return True
         else:
@@ -60,8 +60,9 @@ class OperatorPersonalView(
         OperatorPersonalPagePermissions,
         TopNavMenuMixin,
         DetailView):
-    QUEUE_LEN_LIMIT = 6
-    PROCESSED_STATUSES_LIMIT = 9
+    '''Personal dashboard page for an operator'''
+    QUEUE_LEN_LIMIT = 6  # Max number tickets to be processed shown
+    PROCESSED_STATUSES_LIMIT = 9  # Max number of processed tickets (statuses)
     model = MODEL
     template_name = "operator/personal.html"
 
@@ -130,6 +131,7 @@ class OperatorSelectView(
         ContextMixinWithItemName,
         TopNavMenuMixin,
         ListView):
+    '''Gives to a supervisor ability to select desired Operator dashboard'''
     model = MODEL
     item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/select.html"
@@ -141,6 +143,7 @@ class OperatorStartServiceView(
         OperatorPersonalPagePermissions,
         TopNavMenuMixin,
         UpdateView):
+    '''The operator starts to serve seleced tasks'''
     model = MODEL
     form_class = forms.OperatorStartServiceForm
     template_name = "operator/service_start.html"
@@ -153,6 +156,7 @@ class OperatorStartServiceView(
 class OperatorStopServiceView(
         OperatorPersonalPagePermissions,
         View):
+    '''The operator stops to serve all tasks'''
     http_method_names = ["post", ]
 
     def post(self, request, *args, **kwargs):
@@ -172,11 +176,37 @@ class ItemListView(
         ContextMixinWithItemName,
         TopNavMenuMixin,
         ListView):
+    '''Show list of operators'''
     model = MODEL
     item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/list.html"
-    ordering = ['first_name', 'last_name']
     permission_required = f'user.view_{ITEM_NAME}'
+
+    def get_queryset(self):
+        prim_served_tasks = Task.objects\
+            .filter(service__priority=Service.HIGHEST_PRIORITY)\
+            .distinct()
+
+        scnd_served_tasks = Task.objects\
+            .filter(
+                service__priority__lt=Service.HIGHEST_PRIORITY,
+                service__priority__gt=Service.NOT_IN_SERVICE)\
+            .distinct()\
+            .order_by('letter_code')
+
+        return self.model.objects\
+            .all()\
+            .prefetch_related(
+                'task_set',
+                Prefetch(
+                    'task_set',
+                    queryset=prim_served_tasks,
+                    to_attr='prim_served_tasks'),
+                Prefetch(
+                    'task_set',
+                    queryset=scnd_served_tasks,
+                    to_attr='scnd_served_tasks'))\
+            .order_by('first_name', 'last_name')
 
 
 class ItemCreateView(
@@ -185,6 +215,7 @@ class ItemCreateView(
         SuccessMessageMixin,
         TopNavMenuMixin,
         CreateView):
+    '''Create a new operator'''
     form_class = forms.OperatorCreateForm
     item_name = ITEM_NAME
     template_name = f"{ITEM_NAME}/create.html"
@@ -199,6 +230,7 @@ class ItemUpdateView(
         SuccessMessageMixin,
         TopNavMenuMixin,
         UpdateView):
+    '''Update an operator'''
     model = MODEL
     form_class = forms.OperatorUpdateForm
     item_name = ITEM_NAME
@@ -214,6 +246,7 @@ class UpdatePassView(
         SuccessMessageMixin,
         TopNavMenuMixin,
         UpdateView):
+    '''Update a password for an operator'''
     model = MODEL
     form_class = forms.OperatorChangePasswordForm
     item_name = ITEM_NAME
@@ -229,6 +262,7 @@ class ItemSoftDeleteView(
         SuccessMessageMixin,
         TopNavMenuMixin,
         DeleteView):
+    '''Delete an operator'''
     model = MODEL
     fields = []
     item_name = ITEM_NAME

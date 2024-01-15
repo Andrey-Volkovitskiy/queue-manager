@@ -70,6 +70,7 @@ class OperatorChangePasswordForm(SetPasswordForm):
 
 
 class OperatorStartServiceForm(forms.ModelForm):
+    '''Operator selects prim. and secondary tasks that will be served.'''
     class Meta:
         model = Operator
         fields = [
@@ -90,8 +91,8 @@ class OperatorStartServiceForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        available_tasks = self.instance.task_set.all(
-            ).order_by('letter_code')
+        available_tasks = self.instance.task_set\
+            .all().order_by('letter_code')
         self.fields['primary_task'].queryset = available_tasks
         self.fields['secondary_tasks'].queryset = available_tasks
 

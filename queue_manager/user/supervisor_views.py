@@ -39,7 +39,7 @@ class SupervisorPersonalView(
         SupervPersonalPagePermissions,
         TopNavMenuMixin,
         DetailView):
-    '''Personal dashboard page for the supervisor'''
+    '''Personal dashboard page for a supervisor'''
     model = Supervisor
     template_name = "supervisor/personal.html"
     TICKETS_SHOWN = 20  # Max number of last issued tickets shown on page

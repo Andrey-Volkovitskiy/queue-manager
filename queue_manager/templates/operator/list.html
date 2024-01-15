@@ -39,12 +39,12 @@
           </td>
 
           <td>
-            {% if object.primary_task %}
+            {% if object.prim_served_tasks %}
               <ul class="list-unstyled mb-0">
-                <li class="text-primary me-2">{{ object.primary_task.letter_code }} <span class="text-black-50">(prim.)</span></li>
-                {% if object.secondary_tasks %}
-                  <li class="text-secondary">
-                    {% for scnd_task in object.secondary_tasks %}
+                <li class="text-primary me-2">{{ object.prim_served_tasks.0.letter_code }} <span class="text-black-50">(prim.)</span></li>
+                {% if object.scnd_served_tasks %}
+                  <li class="text-success">
+                    {% for scnd_task in object.scnd_served_tasks %}
                       {{ scnd_task.letter_code }}{% if not forloop.last %}, {% endif %}
                     {% endfor %}
                     <span class="text-black-50">(scnd.)</span>

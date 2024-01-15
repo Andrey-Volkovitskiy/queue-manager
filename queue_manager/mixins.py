@@ -49,12 +49,11 @@ class TopNavMenuMixin(ContextMixin):
                     request_by_supervisor = self.request.user.groups.filter(
                             name=DefaultDBData.groups['SUPERVISORS']).exists()
                     if request_by_supervisor:
-                        pretend_id = int(path[1])
+                        pretend_operator = self.object
                         menu_items.append((
-                            Operator.objects.get(id=pretend_id)
-                                    .get_full_name(),
+                            pretend_operator.get_full_name(),
                             reverse_lazy('operator-personal',
-                                         kwargs={'pk': pretend_id})))
+                                         kwargs={'pk': pretend_operator.id})))
 
             elif path[0] == 'ticket':
                 pretend_operator_id = self.request.GET.get('operator')
