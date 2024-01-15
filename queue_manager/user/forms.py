@@ -112,5 +112,7 @@ class OperatorStartServiceForm(forms.ModelForm):
             priority=Service.LOWEST_PRIORITY
         )
 
-        QManager.free_operator_appeared(operator=instance)
+        if not instance.current_ticket:
+            QManager.free_operator_appeared(operator=instance)
+
         return instance
