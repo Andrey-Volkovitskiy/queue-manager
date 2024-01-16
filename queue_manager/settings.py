@@ -154,7 +154,7 @@ LOGIN_URL = 'login'
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / "staticfiles"
-WHITENOISE_ROOT = STATIC_ROOT
+WHITENOISE_MANIFEST_STRICT = False
 
 STORAGES = {
     "staticfiles": {
