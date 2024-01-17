@@ -22,8 +22,6 @@ from django.contrib import messages
 from django.db.models import Prefetch
 
 ITEM_NAME = 'operator'
-# TODO %s vs code injections
-# TODO Add icon and static files distribution
 
 
 class OperatorEnterView(View):

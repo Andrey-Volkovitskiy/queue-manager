@@ -69,7 +69,7 @@ jobs:
       - name: Publish code coverage
         uses: paambaati/codeclimate-action@v3.2.0
         env:
-          CC_TEST_REPORTER_ID: c3ed617db6a00bc88834ce14d56bb94bce112c406a71e75e2584354ea2a0bf1e
+          CC_TEST_REPORTER_ID: dec0b2979515c9a8966f78886eb9601d7d6d84c5fd529dc57a7ab0dc50b4798e
 
 
       - name: Notify finish deploy to Rollbar
