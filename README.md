@@ -29,7 +29,7 @@ This project was built using these tools:
 | [Django](https://www.djangoproject.com/)         | Web framework  |
 | [Django ORM](https://docs.djangoproject.com/en/4.2/topics/db/)         | Database-abstraction API  |
 | [PostgreSQL](https://www.postgresql.org)         | Database management system  |
-| [Bootstrap 5](https://getbootstrap.com/)         | CSS framework  |
+| [Bootstrap](https://getbootstrap.com/)         | CSS framework  |
 | [Docker](https://www.docker.com)       | Container-based platform for building apps  |
 | [Poetry](https://poetry.eustace.io/)         | Python dependency manager  |
 | [Pytest](https://docs.pytest.org/)               | Testing framework |

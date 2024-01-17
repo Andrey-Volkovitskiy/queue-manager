@@ -12,8 +12,11 @@ migrate:
 start:
 	poetry run gunicorn queue_manager.wsgi
 
+colletstatic:
+	$(MANAGE) collectstatic --noinput
+
 railway-start:
-	python manage.py migrate && gunicorn queue_manager.wsgi
+	python manage.py migrate && python collectstatic --noinput && gunicorn queue_manager.wsgi
 
 db-container:
 	docker compose up -d
