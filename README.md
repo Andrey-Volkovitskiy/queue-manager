@@ -39,6 +39,7 @@ This project was built using these tools:
 | [Code Climate](https://codeclimate.com/)               | Clean Code verification system |
 | [GitHub Actions](https://github.com/features/actions)               | Continuous Integration (CI) |
 | [Railway](https://railway.app)               | Deployment platform |
+| [WhiteNoise](https://whitenoise.readthedocs.io/)               | Static file delivery service |
 | [Rollbar](https://rollbar.com/)               | Error logging & tracking service |
 
 
