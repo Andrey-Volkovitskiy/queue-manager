@@ -16,7 +16,7 @@ colletstatic:
 	$(MANAGE) collectstatic --noinput
 
 railway-start:
-	python manage.py migrate && python collectstatic --noinput && gunicorn queue_manager.wsgi
+	python manage.py migrate && python manage.py collectstatic --noinput && gunicorn queue_manager.wsgi
 
 db-container:
 	docker compose up -d
