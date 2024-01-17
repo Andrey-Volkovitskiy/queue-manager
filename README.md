@@ -2,6 +2,7 @@
 
 **A pet project to practice developing a real-life web app from scratch.**
 
+*The queue manager that helps operators serve bank clients in order of appearance.*
 
 Deployed at: https://queue-man.up.railway.app/
 
