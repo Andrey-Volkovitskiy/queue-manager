@@ -56,12 +56,18 @@ The application stores data using PostgresSQL (connected via DATABASE_URL).
 (more service commands can be found in Makefile)
 
 ---
+
 *ER diagram*
-![er diagram](https://github.com/Andrey-Volkovitskiy/queue-manager/blob/main/staticfiles/readme/er_diagram.jpg?raw=true)
+![er diagram](https://github.com/Andrey-Volkovitskiy/queue-manager/blob/main/staticfiles/readme/er_diagram.jpeg?raw=true)
 
 ---
 
-*Examle of a multi-line database query*
+*Ticket lifecycle*
+![er diagram](https://github.com/Andrey-Volkovitskiy/queue-manager/blob/main/staticfiles/readme/ticket_lifecycle.jpeg?raw=true)
+
+---
+
+*Example of a multi-line database query*
 ![Multi-line DB query](https://github.com/Andrey-Volkovitskiy/queue-manager/blob/main/staticfiles/readme/comlpex_query.jpg?raw=true)
 
 ---
