@@ -1,0 +1,16 @@
+{
+  "version": "2",
+  "exclude_patterns": [
+        "**/migrations/",
+        // "**/tests/",
+        "**/staticfiles/"
+      ],
+  // "checks": {
+  //   "similar-code": {
+  //     "enabled": false,
+  //     "config": {
+  //       "threshold": null
+  //     }
+  //   }
+  // }
+}
