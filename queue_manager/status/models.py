@@ -1,3 +1,4 @@
+from collections import namedtuple
 from django.db import models
 from django.contrib.auth.models import User
 from queue_manager.user.models import Operator
@@ -20,89 +21,97 @@ class StatusManager(models.Manager):
         without "assigned_to" or "assigned_by" argument'''
         pass
 
-    class Codes():
-        '''Possible ticket statuses'''
-        UNASSIGNED = 'U'
-        PROCESSING = 'P'
-        COMPLETED = 'C'
-        REDIRECTED = 'R'
-        MISSED = 'M'
-
-        unprocessed_codes = (
-            UNASSIGNED,
-            PROCESSING,
-            REDIRECTED
-        )
-
     def create_initial(self, ticket):
         '''Creates the initial status when creating a ticket'''
         return self.create(
             ticket=ticket,
-            code=self.Codes.UNASSIGNED
-        )
+            code=Status.UNASSIGNED.code)
 
-    def create_additional(self, ticket, new_code: Codes,  # noqa: C901
+    def create_additional(self, ticket, new_code,     # noqa C901
                           assigned_by=None, assigned_to=None):
-        '''Creates a new status for the ticket
-        and implements status flow logic'''
+        '''Creates 2nd / 3rd / ... statuses for the ticket
+        and implements status lifecycle logic'''
 
-        def _check_args(*args):
-            for arg in args:
-                if arg is None:
+        def _check_attrs_exist(attributes_dict, mandatory_attrs):
+            for mandatory_attr in mandatory_attrs:
+                try:
+                    if attributes_dict[mandatory_attr] is None:
+                        raise self.NotEnoughArguments
+                except KeyError:
                     raise self.NotEnoughArguments
 
-        def _create_new_status():
-            return self.create(
-                    ticket=ticket,
-                    code=new_code,
-                    assigned_by=assigned_by,
-                    assigned_to=assigned_to
-                )
-
+        attributes_dict = locals()
         last_code = self.filter(ticket=ticket).last().code
+        current_status_option = Status.get_status_option_by_code(last_code)
 
-        if last_code == self.Codes.UNASSIGNED:
-            if new_code in (self.Codes.PROCESSING, ):
-                _check_args((assigned_to, ))
-                return _create_new_status()
-            else:
-                raise self.StatusFlowViolated
-
-        elif last_code == self.Codes.PROCESSING:
-            if new_code in (self.Codes.COMPLETED, self.Codes.MISSED,
-                            self.Codes.REDIRECTED):
-                _check_args((assigned_by, ))
-                return _create_new_status()
-            else:
-                raise self.StatusFlowViolated
-
-        elif last_code == self.Codes.COMPLETED:
-            if new_code in (self.Codes.REDIRECTED, ):
-                _check_args(assigned_by, assigned_to)
-                return _create_new_status()
-            else:
-                raise self.StatusFlowViolated
-
-        elif last_code == self.Codes.REDIRECTED:
-            if new_code in (self.Codes.PROCESSING, ):
-                _check_args((assigned_to, ))
-                return _create_new_status()
-            else:
-                raise self.StatusFlowViolated
-
-        elif last_code == self.Codes.MISSED:
-            if new_code in (self.Codes.REDIRECTED, ):
-                _check_args(assigned_by, assigned_to)
-                return _create_new_status()
-            else:
-                raise self.StatusFlowViolated
-
-        else:
+        if not current_status_option or (
+                new_code not in current_status_option.next_allowed_codes):
             raise self.StatusFlowViolated
+
+        new_status_option = Status.get_status_option_by_code(new_code)
+        _check_attrs_exist(attributes_dict,
+                           new_status_option.mandatory_attributes)
+
+        return self.create(
+                ticket=ticket,
+                code=new_code,
+                assigned_by=assigned_by,
+                assigned_to=assigned_to)
 
 
 class Status(models.Model):
     '''The current state of the ticket described by its latest status.'''
+
+    # STATUS OPTIONS
+    StatusOption = namedtuple('StatusOption', [
+        'code',
+        'name',
+        'next_allowed_codes',  # according to status lifecycle
+        'mandatory_attributes',  # assigned_to or assigned_by
+        'colour'  # for Bootstrap templates
+    ])
+    UNASSIGNED = StatusOption(
+        code='U',
+        name='Unassigned',
+        next_allowed_codes=('P', ),
+        mandatory_attributes=(),
+        colour='secondary'
+    )
+    PROCESSING = StatusOption(
+        code='P',
+        name='Processing',
+        next_allowed_codes=('C', 'M', 'R'),
+        mandatory_attributes=('assigned_to', ),
+        colour='success'
+    )
+    COMPLETED = StatusOption(
+        code='C',
+        name='Completed',
+        next_allowed_codes=('R', ),
+        mandatory_attributes=('assigned_by', ),
+        colour='primary'
+    )
+    REDIRECTED = StatusOption(
+        code='R',
+        name='Redirected',
+        next_allowed_codes=('P', ),
+        mandatory_attributes=('assigned_to', 'assigned_by'),
+        colour='danger'
+    )
+    MISSED = StatusOption(
+        code='M',
+        name='Missed',
+        next_allowed_codes=('R', ),
+        mandatory_attributes=('assigned_by', ),
+        colour='warning'
+    )
+
+    ALL_STATUS_OPTIONS = (
+        UNASSIGNED, PROCESSING, COMPLETED, REDIRECTED, MISSED)
+
+    UNPROCESSED_CODES = (UNASSIGNED.code, PROCESSING.code, REDIRECTED.code)
+
+    # FIELDS
     ticket = models.ForeignKey(
         'ticket.Ticket',
         on_delete=models.PROTECT,
@@ -110,6 +119,7 @@ class Status(models.Model):
     )
     code = models.CharField(
         max_length=1,
+        choices=((o.code, o.name) for o in ALL_STATUS_OPTIONS),
         verbose_name='Status code'
     )
     assigned_at = models.DateTimeField(
@@ -136,31 +146,28 @@ class Status(models.Model):
     def responsible(self):
         '''The operator currenlly responsihble for the status'''
         if self.code in (
-                StatusManager.Codes.PROCESSING,
-                StatusManager.Codes.REDIRECTED):
+                Status.PROCESSING.code,
+                Status.REDIRECTED.code):
             return self.assigned_to
         elif self.code in (
-                StatusManager.Codes.MISSED,
-                StatusManager.Codes.COMPLETED):
+                Status.MISSED.code,
+                Status.COMPLETED.code):
             return self.assigned_by
 
     @property
     def name(self):
-        '''The status name based on code'''
-        dic = StatusManager.Codes.__dict__
-        name = {key for key in dic if dic[key] == self.code}.pop()
-        return name.capitalize()
+        '''Returns status name'''
+        status_option = self.get_status_option_by_code(self.code)
+        return status_option.name
 
     @property
     def colour(self):
-        '''The status colour for Bootstrap template based on code'''
-        if self.code == StatusManager.Codes.UNASSIGNED:
-            return 'secondary'
-        elif self.code == StatusManager.Codes.PROCESSING:
-            return 'success'
-        elif self.code == StatusManager.Codes.COMPLETED:
-            return 'primary'
-        elif self.code == StatusManager.Codes.REDIRECTED:
-            return 'danger'
-        elif self.code == StatusManager.Codes.MISSED:
-            return 'warning'
+        '''Returns status colour for Bootstrap templates'''
+        status_option = self.get_status_option_by_code(self.code)
+        return status_option.colour
+
+    @staticmethod
+    def get_status_option_by_code(status_code):
+        for status_option in Status.ALL_STATUS_OPTIONS:
+            if status_option.code == status_code:
+                return status_option

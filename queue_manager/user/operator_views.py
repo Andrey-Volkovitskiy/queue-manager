@@ -98,7 +98,7 @@ class OperatorPersonalView(
 
         context['completed_statuses'] = Status.objects\
             .filter(
-                code=Status.objects.Codes.COMPLETED,
+                code=Status.COMPLETED.code,
                 assigned_by=operator,
                 ticket__session=last_session)\
             .select_related('ticket')\
@@ -107,7 +107,7 @@ class OperatorPersonalView(
 
         context['missed_statuses'] = Status.objects\
             .filter(
-                code=Status.objects.Codes.MISSED,
+                code=Status.MISSED.code,
                 assigned_by=operator,
                 ticket__session=last_session)\
             .select_related('ticket')\
@@ -116,7 +116,7 @@ class OperatorPersonalView(
 
         context['redirected_statuses'] = Status.objects\
             .filter(
-                code=Status.objects.Codes.REDIRECTED,
+                code=Status.REDIRECTED.code,
                 assigned_by=operator,
                 ticket__session=last_session)\
             .select_related('ticket')\

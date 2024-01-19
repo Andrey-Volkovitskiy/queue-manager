@@ -62,7 +62,7 @@ class Operator(User):
             Ticket.objects
             .filter(
                 status__assigned_to=self,
-                status__code=Status.objects.Codes.PROCESSING)
+                status__code=Status.PROCESSING.code)
             .order_by('-status__assigned_at')
             .values('id')[:1])
 
@@ -72,7 +72,7 @@ class Operator(User):
                 last_status_assigned_to=Ticket.subq_last_status_assigned_to())\
             .filter(
                 id=last_assigned_ticket_id,
-                last_status_code=Status.objects.Codes.PROCESSING,
+                last_status_code=Status.PROCESSING.code,
                 last_status_assigned_to=self)\
             .last()
 
@@ -85,7 +85,7 @@ class Operator(User):
             Ticket.objects
             .filter(
                 status__assigned_to=OuterRef(OuterRef('id')),
-                status__code=Status.objects.Codes.PROCESSING)
+                status__code=Status.PROCESSING.code)
             .order_by('-status__assigned_at')
             .values('id')[:1])
 
@@ -96,7 +96,7 @@ class Operator(User):
                 last_status_assigned_to=Ticket.subq_last_status_assigned_to())
             .filter(
                 id=last_assigned_ticket_id,
-                last_status_code=Status.objects.Codes.PROCESSING,
+                last_status_code=Status.PROCESSING.code,
                 last_status_assigned_to=OuterRef('id'))
             .order_by()
             .values('code')[:1])
@@ -145,7 +145,7 @@ class Operator(User):
                 last_status_code=Ticket.subq_last_status_code(),
                 last_status_assigned_by=Ticket.subq_last_status_assigned_by())\
             .filter(
-                last_status_code=Status.objects.Codes.COMPLETED,
+                last_status_code=Status.COMPLETED.code,
                 last_status_assigned_by=self)\
             .count()
 
@@ -165,7 +165,7 @@ class Operator(User):
                 last_status_code=Ticket.subq_last_status_code(),
                 last_status_assigned_by=Ticket.subq_last_status_assigned_by())
             .filter(
-                last_status_code=Status.objects.Codes.COMPLETED,
+                last_status_code=Status.COMPLETED.code,
                 last_status_assigned_by=OuterRef('id'))
             .annotate(count=Func(F('id'), function='Count'))
             .values('count'))
@@ -180,13 +180,13 @@ class Operator(User):
 
         return Ticket.objects\
             .filter(
-                status__code=Status.objects.Codes.REDIRECTED,
+                status__code=Status.REDIRECTED.code,
                 status__assigned_to=self)\
             .annotate(
                 last_status_code=Ticket.subq_last_status_code(),
                 last_status_assigned_to=Ticket.subq_last_status_assigned_to())\
             .filter(
-                last_status_code=Status.objects.Codes.REDIRECTED,
+                last_status_code=Status.REDIRECTED.code,
                 last_status_assigned_to=self)\
             .annotate(
                 last_status_assigned_at=Ticket.subq_last_status_assigned_at())\
@@ -214,7 +214,7 @@ class Operator(User):
             .annotate(
                 last_status_code=Ticket.subq_last_status_code(),
                 last_status_assigned_at=Ticket.subq_last_status_assigned_at())\
-            .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\
+            .filter(last_status_code=Status.UNASSIGNED.code)\
             .order_by('last_status_assigned_at')[: limit]
 
     def get_secondary_tickets(self, limit=None, secondery_tasks_ids=None):
@@ -240,7 +240,7 @@ class Operator(User):
             .annotate(
                 last_status_code=Ticket.subq_last_status_code(),
                 last_status_assigned_at=Ticket.subq_last_status_assigned_at())\
-            .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\
+            .filter(last_status_code=Status.UNASSIGNED.code)\
             .order_by('last_status_assigned_at')[: limit]
 
     def save(self, *args, **kwargs):

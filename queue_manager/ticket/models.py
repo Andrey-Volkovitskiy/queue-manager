@@ -76,7 +76,7 @@ class Ticket(models.Model):
             Status.objects
             .filter(
                 ticket__id=self.id,
-                code=Status.objects.Codes.PROCESSING)
+                code=Status.PROCESSING.code)
             .order_by('-assigned_at')
             .values('id')[:1])
         processing_operator = Operator.objects\
@@ -101,7 +101,7 @@ class Ticket(models.Model):
                 task__id=self.task_id,
                 id__lt=self.id,)\
             .annotate(last_status_code=Ticket.subq_last_status_code())\
-            .filter(last_status_code=Status.objects.Codes.UNASSIGNED)\
+            .filter(last_status_code=Status.UNASSIGNED.code)\
             .count()
 
     def __str__(self):
@@ -110,7 +110,7 @@ class Ticket(models.Model):
     def assign_to_operator(self, operator):
         Status.objects.create_additional(
             ticket=self,
-            new_code=Status.objects.Codes.PROCESSING,
+            new_code=Status.PROCESSING.code,
             assigned_to=operator,
         )
 
@@ -118,7 +118,7 @@ class Ticket(models.Model):
         '''Mark the ticket as complited by current operator'''
         Status.objects.create_additional(
             ticket=self,
-            new_code=Status.objects.Codes.COMPLETED,
+            new_code=Status.COMPLETED.code,
             assigned_by=marked_by,
         )
         if marked_by.is_servicing:
@@ -128,7 +128,7 @@ class Ticket(models.Model):
         '''Mark the ticket as missed by current operator'''
         Status.objects.create_additional(
             ticket=self,
-            new_code=Status.objects.Codes.MISSED,
+            new_code=Status.MISSED.code,
             assigned_by=marked_by,
         )
         if marked_by.is_servicing:
@@ -138,7 +138,7 @@ class Ticket(models.Model):
         '''Redirect the ticket to another operator'''
         Status.objects.create_additional(
             ticket=self,
-            new_code=Status.objects.Codes.REDIRECTED,
+            new_code=Status.REDIRECTED.code,
             assigned_by=redirect_by,
             assigned_to=redirect_to
         )
@@ -254,7 +254,7 @@ class QManager:
             Ticket.objects
             .filter(
                 status__assigned_to=OuterRef(OuterRef('id')),
-                status__code=Status.objects.Codes.PROCESSING)
+                status__code=Status.PROCESSING.code)
             .order_by('-status__assigned_at')
             .values('id')[:1])
 
@@ -264,7 +264,7 @@ class QManager:
                 last_status_code=Ticket.subq_last_status_code(),
                 last_status_assigned_to=Ticket.subq_last_status_assigned_to())\
             .filter(
-                last_status_code=Status.objects.Codes.PROCESSING,
+                last_status_code=Status.PROCESSING.code,
                 last_status_assigned_to=OuterRef('id'))
 
         free_operators = task.can_be_served_by\

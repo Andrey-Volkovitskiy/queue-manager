@@ -68,7 +68,7 @@ class ScreenView(TopNavMenuMixin, ListView):
         return Status.objects\
             .filter(
                 ticket__session__id=Session.objects.subq_last_session_id(),
-                code=Status.objects.Codes.PROCESSING)\
+                code=Status.PROCESSING.code)\
             .select_related('ticket', 'assigned_to')\
             .order_by('-assigned_at')[:self.VISIBLE_TICKETS_QUAN]
 

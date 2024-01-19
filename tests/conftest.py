@@ -50,12 +50,13 @@ def add_personal_ticket(task, assigned_to):
     Status.objects.create_initial(ticket=ticket)
     Status.objects.create_additional(
         ticket=ticket,
-        new_code=Status.objects.Codes.PROCESSING,
+        new_code=Status.PROCESSING.code,
         assigned_to=redirecting_operator,)
     Status.objects.create_additional(
         ticket=ticket,
-        new_code=Status.objects.Codes.REDIRECTED,
-        assigned_to=assigned_to)
+        new_code=Status.REDIRECTED.code,
+        assigned_to=assigned_to,
+        assigned_by=redirecting_operator)
     return ticket
 
 
@@ -87,11 +88,11 @@ def add_completed_ticket(task):
     Status.objects.create_initial(ticket=ticket)
     Status.objects.create_additional(
         ticket=ticket,
-        new_code=Status.objects.Codes.PROCESSING,
+        new_code=Status.PROCESSING.code,
         assigned_to=compliting_operator,)
     Status.objects.create_additional(
         ticket=ticket,
-        new_code=Status.objects.Codes.COMPLETED,
+        new_code=Status.COMPLETED.code,
         assigned_by=compliting_operator)
     return ticket
 
@@ -109,9 +110,9 @@ def complete_tickets(tickets, completed_by):
         Status.objects.create_initial(ticket=ticket)
         Status.objects.create_additional(
             ticket=ticket,
-            new_code=Status.objects.Codes.PROCESSING,
+            new_code=Status.PROCESSING.code,
             assigned_to=completed_by,)
         Status.objects.create_additional(
             ticket=ticket,
-            new_code=Status.objects.Codes.COMPLETED,
+            new_code=Status.COMPLETED.code,
             assigned_by=completed_by)

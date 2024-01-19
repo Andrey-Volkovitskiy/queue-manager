@@ -77,12 +77,12 @@ def test_get_next_personal_ticket_with_old_R_status():
     )
     Status.objects.create_additional(
         ticket=ticket1,
-        new_code=Status.objects.Codes.PROCESSING,
+        new_code=Status.PROCESSING.code,
         assigned_to=tested_operator,)
     Status.objects.create_additional(
         ticket=ticket1,
-        new_code=Status.objects.Codes.COMPLETED,
-        assigned_to=tested_operator,)
+        new_code=Status.COMPLETED.code,
+        assigned_by=tested_operator,)
 
     ticket2 = conftest.add_personal_ticket(
         task=taskA,

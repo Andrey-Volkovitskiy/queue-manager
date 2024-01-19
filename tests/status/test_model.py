@@ -144,8 +144,8 @@ def test_additional_status_C_to_R_success():
     Status.objects.create_additional(
         ticket=ticket,
         new_code='C',
-        assigned_by=None,
-        assigned_to=user
+        assigned_by=user,
+        assigned_to=None
     )
 
     item_creation_time = datetime.now(timezone.utc)
@@ -178,8 +178,8 @@ def test_additional_status_C_with_wrong_codes():
     Status.objects.create_additional(
         ticket=ticket,
         new_code='C',
-        assigned_by=None,
-        assigned_to=user
+        assigned_by=user,
+        assigned_to=None
     )
 
     for wrong_code in WRONG_CODES:
@@ -206,8 +206,8 @@ def test_additional_status_M_to_R_success():
     Status.objects.create_additional(
         ticket=ticket,
         new_code='M',
-        assigned_by=None,
-        assigned_to=user
+        assigned_by=user,
+        assigned_to=None
     )
 
     item_creation_time = datetime.now(timezone.utc)
@@ -240,8 +240,8 @@ def test_additional_status_M_with_wrong_codes():
     Status.objects.create_additional(
         ticket=ticket,
         new_code='M',
-        assigned_by=None,
-        assigned_to=user
+        assigned_by=user,
+        assigned_to=None
     )
 
     for wrong_code in WRONG_CODES:

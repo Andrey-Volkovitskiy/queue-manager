@@ -142,7 +142,7 @@ class TicketTakeAgainView(
         ticket = MODEL.objects.get(id=self.kwargs['pk'])
         last_operator = ticket.status_set\
             .filter(
-                code=Status.objects.Codes.PROCESSING
+                code=Status.PROCESSING.code
             ).last().assigned_to
         ticket.redirect(redirect_by=last_operator, redirect_to=last_operator)
         return redirect(reverse_lazy(
@@ -167,8 +167,8 @@ class ItemDetailView(
 
     def get_context_data(self, **kwargs):
         REDIRECTABLE_STATUSES = (
-            Status.objects.Codes.COMPLETED,
-            Status.objects.Codes.MISSED
+            Status.COMPLETED.code,
+            Status.MISSED.code
         )
         context = super().get_context_data(**kwargs)
         last_status = self.object.status_set.last()

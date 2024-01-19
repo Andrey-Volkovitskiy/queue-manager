@@ -36,7 +36,7 @@ def setup_db():
     Status.objects.create_initial(ticket=ticket_in_processing)
     Status.objects.create_additional(
         ticket=ticket_in_processing,
-        new_code=Status.objects.Codes.PROCESSING,
+        new_code=Status.PROCESSING.code,
         assigned_to=operB,)
 
     # OperC: is_free, has a processed ticket, priority=1
@@ -55,11 +55,11 @@ def setup_db():
     Status.objects.create_initial(ticket=ticket_processed)
     Status.objects.create_additional(
         ticket=ticket_processed,
-        new_code=Status.objects.Codes.PROCESSING,
+        new_code=Status.PROCESSING.code,
         assigned_to=operC)
     Status.objects.create_additional(
         ticket=ticket_processed,
-        new_code=Status.objects.Codes.COMPLETED,
+        new_code=Status.COMPLETED.code,
         assigned_by=operC,
         assigned_to=operC)
 
@@ -95,14 +95,14 @@ def test_general_ticket_appeared_success(client, get_supervisors):
     # Check 1st ticket assignment
     first_ticket = Ticket.objects.create_ticket(taskC)
     last_status = first_ticket.status_set.last()
-    assert last_status.code == Status.objects.Codes.PROCESSING
+    assert last_status.code == Status.PROCESSING.code
     first_assigned_to_operator = last_status.assigned_to
     assert first_assigned_to_operator.id in expected_free_operators_ids
 
     # Check 2nd ticket assignment
     second_ticket = Ticket.objects.create_ticket(taskC)
     last_status = second_ticket.status_set.last()
-    assert last_status.code == Status.objects.Codes.PROCESSING
+    assert last_status.code == Status.PROCESSING.code
     second_assigned_to_operator = last_status.assigned_to
     expected_second_operator_id = (set(expected_free_operators_ids) - set((
         first_assigned_to_operator.id, ))).pop()
@@ -115,7 +115,7 @@ def test_general_ticket_appeared_success(client, get_supervisors):
         (f'/operator/{second_assigned_to_operator.id}/', 302),
     ]
     last_status = second_ticket.status_set.last()
-    assert last_status.code == Status.objects.Codes.COMPLETED
+    assert last_status.code == Status.COMPLETED.code
 
     # Check TicketCompletedView with incorrect Operator
     client.logout()
@@ -135,7 +135,7 @@ def test_general_ticket_appeared_success(client, get_supervisors):
         (f'/operator/{first_assigned_to_operator.id}/', 302)
     ]
     last_status = first_ticket.status_set.last()
-    assert last_status.code == Status.objects.Codes.COMPLETED
+    assert last_status.code == Status.COMPLETED.code
 
 
 @pytest.mark.django_db
@@ -186,18 +186,18 @@ def test_redirect_ticket_success(client, get_supervisors):
             'assigned_at')
     redirect_status = next_statuses[0]
     second_assigment_status = next_statuses[1]
-    assert redirect_status.code == Status.objects.Codes.REDIRECTED
+    assert redirect_status.code == Status.REDIRECTED.code
     assert redirect_status.assigned_by == initial_operator
     assert redirect_status.assigned_to.id == redirected_to_id
 
     # Was the ticket Assigned to another operator?
-    assert second_assigment_status.code == Status.objects.Codes.PROCESSING
+    assert second_assigment_status.code == Status.PROCESSING.code
     assert second_assigment_status.assigned_to.id == redirected_to_id
 
     # Can the initial operator get new general tickets?
     new_ticket = Ticket.objects.create_ticket(taskC)
     last_ststus_of_new_ticket = new_ticket.status_set.last()
-    assert last_ststus_of_new_ticket.code == Status.objects.Codes.PROCESSING
+    assert last_ststus_of_new_ticket.code == Status.PROCESSING.code
     assert last_ststus_of_new_ticket.assigned_to == initial_operator
 
 
@@ -220,5 +220,5 @@ def test_mark_ticket_missed_success(client, get_supervisors):
     missed_url = f'/ticket/{ticket.id}/mark_missed/'
     response = client.post(missed_url, follow=True)
     last_status = ticket.status_set.last()
-    assert last_status.code == Status.objects.Codes.MISSED
+    assert last_status.code == Status.MISSED.code
     assert last_status.assigned_by == initial_operator

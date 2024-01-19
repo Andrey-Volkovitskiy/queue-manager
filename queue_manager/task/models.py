@@ -83,7 +83,7 @@ class Task(SoftDeletionModel):
             .annotate(last_status_code=Ticket.subq_last_status_code())\
             .filter(
                 session__id=Session.objects.subq_current_session_id(),
-                last_status_code=Status.objects.Codes.COMPLETED)\
+                last_status_code=Status.COMPLETED.code)\
             .count()
 
     @staticmethod
@@ -97,7 +97,7 @@ class Task(SoftDeletionModel):
             .annotate(last_status_code=Ticket.subq_last_status_code())
             .filter(
                 session__id=Session.objects.subq_current_session_id(),
-                last_status_code=Status.objects.Codes.COMPLETED)
+                last_status_code=Status.COMPLETED.code)
             .annotate(count=Func(F('id'), function='Count'))
             .values('count'))
 
@@ -110,8 +110,7 @@ class Task(SoftDeletionModel):
             .annotate(last_status_code=Ticket.subq_last_status_code())\
             .filter(
                 session__id=Session.objects.subq_current_session_id(),
-                last_status_code__in=(
-                    Status.objects.Codes.unprocessed_codes))\
+                last_status_code__in=(Status.UNPROCESSED_CODES))\
             .count()
 
     @staticmethod
@@ -125,8 +124,7 @@ class Task(SoftDeletionModel):
             .annotate(last_status_code=Ticket.subq_last_status_code())
             .filter(
                 session__id=Session.objects.subq_current_session_id(),
-                last_status_code__in=(
-                    Status.objects.Codes.unprocessed_codes))
+                last_status_code__in=(Status.UNPROCESSED_CODES))
             .annotate(count=Func(F('id'), function='Count'))
             .values('count'))
 

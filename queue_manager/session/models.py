@@ -169,13 +169,13 @@ class Session(models.Model):
     def count_tickets_completed(self):
         '''Returns the number of completed tickets in the session'''
         return self.count_tickets_with_last_status_code_in(
-            Status.objects.Codes.COMPLETED)
+            Status.COMPLETED.code)
 
     @property
     def count_tickets_unprocessed(self):
         '''Returns the number of unprocessed tickets in the session'''
         return self.count_tickets_with_last_status_code_in(
-            Status.objects.Codes.unprocessed_codes)
+            Status.UNPROCESSED_CODES)
 
     def count_tickets_with_last_status_code_in(self, last_status_codes):
         '''Returns the number of tickets in the session
