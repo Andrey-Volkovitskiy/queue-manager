@@ -11,14 +11,19 @@ class StatusManager(models.Manager):
     class StatusErrors(Exception):
         pass
 
-    class StatusFlowViolated(StatusErrors):
+    class NotEnoughArguments(StatusErrors):
+        '''Raised when attempt is made to add new status
+        without "assigned_to" or "assigned_by" argument'''
+        pass
+
+    class StatusLifecycleViolated(StatusErrors):
         '''Raised when attempt is made to change the ticket status
         not according to status change flow'''
         pass
 
-    class NotEnoughArguments(StatusErrors):
-        '''Raised when attempt is made to add new status
-        without "assigned_to" or "assigned_by" argument'''
+    class StatusDuplication(StatusLifecycleViolated):
+        '''Raised when attempt is made to change the ticket status
+        to the same status (for examle 'C' to 'C')'''
         pass
 
     def create_initial(self, ticket):
@@ -41,12 +46,15 @@ class StatusManager(models.Manager):
                     raise self.NotEnoughArguments
 
         attributes_dict = locals()
-        last_code = self.filter(ticket=ticket).last().code
-        current_status_option = Status.get_status_option_by_code(last_code)
 
+        last_code = self.filter(ticket=ticket).last().code
+        if new_code == last_code:
+            raise self.StatusDuplication
+
+        current_status_option = Status.get_status_option_by_code(last_code)
         if not current_status_option or (
                 new_code not in current_status_option.next_allowed_codes):
-            raise self.StatusFlowViolated
+            raise self.StatusLifecycleViolated
 
         new_status_option = Status.get_status_option_by_code(new_code)
         _check_attrs_exist(attributes_dict,

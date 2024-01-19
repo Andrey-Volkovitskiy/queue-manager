@@ -83,9 +83,14 @@ class TicketMarkCompletedView(
     def post(self, request, *args, **kwargs):
         ticket = MODEL.objects.get(id=self.kwargs['pk'])
         marked_by = ticket.processing_operator
-        ticket.mark_completed(marked_by=marked_by)
-        return redirect(reverse_lazy(
-            'operator-personal', kwargs={'pk': marked_by.id}))
+        try:
+            ticket.mark_completed(marked_by=marked_by)
+            return redirect(reverse_lazy(
+                'operator-personal', kwargs={'pk': marked_by.id}))
+        except Status.objects.StatusDuplication:
+            # Solves the problem with two quick ckils on MarkCompl
+            return redirect(reverse_lazy(
+                'operator-personal', kwargs={'pk': marked_by.id}))
 
 
 class TicketMarkMissedView(
@@ -96,9 +101,14 @@ class TicketMarkMissedView(
     def post(self, request, *args, **kwargs):
         ticket = MODEL.objects.get(id=self.kwargs['pk'])
         marked_by = ticket.processing_operator
-        ticket.mark_missed(marked_by=marked_by)
-        return redirect(reverse_lazy(
-            'operator-personal', kwargs={'pk': marked_by.id}))
+        try:
+            ticket.mark_missed(marked_by=marked_by)
+            return redirect(reverse_lazy(
+                'operator-personal', kwargs={'pk': marked_by.id}))
+        except Status.objects.StatusDuplication:
+            # Solves the problem with two quick ckils on MarkMissed
+            return redirect(reverse_lazy(
+                'operator-personal', kwargs={'pk': marked_by.id}))
 
 
 class TicketRedirectView(

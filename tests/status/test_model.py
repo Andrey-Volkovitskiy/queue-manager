@@ -44,7 +44,7 @@ def test_additional_status_U_with_wrong_codes():
     ticket = Ticket.objects.create_ticket(task=task)
 
     for wrong_code in WRONG_CODES:
-        with pytest.raises(Status.objects.StatusFlowViolated):
+        with pytest.raises(Status.objects.StatusLifecycleViolated):
             Status.objects.create_additional(
                 ticket=ticket,
                 new_code=wrong_code,
@@ -121,7 +121,7 @@ def test_additional_status_P_with_wrong_codes():
     )
 
     for wrong_code in WRONG_CODES:
-        with pytest.raises(Status.objects.StatusFlowViolated):
+        with pytest.raises(Status.objects.StatusLifecycleViolated):
             Status.objects.create_additional(
                 ticket=ticket,
                 new_code=wrong_code,
@@ -183,7 +183,7 @@ def test_additional_status_C_with_wrong_codes():
     )
 
     for wrong_code in WRONG_CODES:
-        with pytest.raises(Status.objects.StatusFlowViolated):
+        with pytest.raises(Status.objects.StatusLifecycleViolated):
             Status.objects.create_additional(
                 ticket=ticket,
                 new_code=wrong_code,
@@ -245,7 +245,7 @@ def test_additional_status_M_with_wrong_codes():
     )
 
     for wrong_code in WRONG_CODES:
-        with pytest.raises(Status.objects.StatusFlowViolated):
+        with pytest.raises(Status.objects.StatusLifecycleViolated):
             Status.objects.create_additional(
                 ticket=ticket,
                 new_code=wrong_code,
@@ -319,7 +319,7 @@ def test_additional_status_R_with_wrong_codes():
     )
 
     for wrong_code in WRONG_CODES:
-        with pytest.raises(Status.objects.StatusFlowViolated):
+        with pytest.raises(Status.objects.StatusLifecycleViolated):
             Status.objects.create_additional(
                 ticket=ticket,
                 new_code=wrong_code,
