@@ -10,7 +10,6 @@ from django.views.generic import (ListView,
                                   View,)
 from django.shortcuts import redirect
 from django.http import HttpResponseRedirect
-from queue_manager.session.models import Session
 from queue_manager.user.models import Operator as MODEL
 from queue_manager.task.models import Service, Task
 from queue_manager.status.models import Status
@@ -61,6 +60,7 @@ class OperatorPersonalView(
     '''Personal dashboard page for an operator'''
     QUEUE_LEN_LIMIT = 6  # Max number tickets to be processed shown
     PROCESSED_STATUSES_LIMIT = 9  # Max number of processed tickets (statuses)
+    PROCESSED_TICKETS_LIMIT = 9  # Max number of processed tickets
     model = MODEL
     template_name = "operator/personal.html"
 
@@ -93,35 +93,19 @@ class OperatorPersonalView(
             .get_secondary_tickets(limit=self.QUEUE_LEN_LIMIT)
 
         # Processed tickets
-        last_session = Session.objects.last()
-        context['processed_statuses_limit'] = self.PROCESSED_STATUSES_LIMIT
+        context['processed_tickets_limit'] = self.PROCESSED_TICKETS_LIMIT
 
-        context['completed_statuses'] = Status.objects\
-            .filter(
-                code=Status.COMPLETED.code,
-                assigned_by=operator,
-                ticket__session=last_session)\
-            .select_related('ticket')\
-            .only('ticket__code', 'code')\
-            .order_by('-assigned_at')[:self.PROCESSED_STATUSES_LIMIT]
+        context['completed_tickets'] = operator.get_tickets_with_status(
+            status_code=Status.COMPLETED.code,
+            limit=self.PROCESSED_TICKETS_LIMIT)
 
-        context['missed_statuses'] = Status.objects\
-            .filter(
-                code=Status.MISSED.code,
-                assigned_by=operator,
-                ticket__session=last_session)\
-            .select_related('ticket')\
-            .only('ticket__code', 'code')\
-            .order_by('-assigned_at')[:self.PROCESSED_STATUSES_LIMIT]
+        context['missed_tickets'] = operator.get_tickets_with_status(
+            status_code=Status.MISSED.code,
+            limit=self.PROCESSED_TICKETS_LIMIT)
 
-        context['redirected_statuses'] = Status.objects\
-            .filter(
-                code=Status.REDIRECTED.code,
-                assigned_by=operator,
-                ticket__session=last_session)\
-            .select_related('ticket')\
-            .only('ticket__code', 'code')\
-            .order_by('-assigned_at')[:self.PROCESSED_STATUSES_LIMIT]
+        context['redirected_tickets'] = operator.get_tickets_with_status(
+            status_code=Status.REDIRECTED.code,
+            limit=self.PROCESSED_TICKETS_LIMIT)
 
         return context
 

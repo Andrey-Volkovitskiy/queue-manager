@@ -134,19 +134,19 @@
       <div class="col">
         <h6 class="text-success">Completed:</h6>
         <ul class="list-unstyled text-success">
-          {% for status in completed_statuses %}
-            {% if completed_statuses and completed_statuses|length == processed_statuses_limit and forloop.last %}
+          {% for ticket in completed_tickets %}
+            {% if completed_tickets|length == processed_tickets_limit and forloop.last %}
               <li>...</li>
             {% else %}
               <li>
-                <a href="{% url 'ticket-detail' status.ticket.id %}?operator={{object.id}}" class="link-success">
-                  {{ status.ticket.code }}
+                <a href="{% url 'ticket-detail' ticket.id %}?operator={{object.id}}" class="link-success">
+                  {{ ticket.code }}
                 </a>
               </li>
             {% endif %}
           {% endfor %}
 
-          {% if not completed_statuses %}
+          {% if not completed_tickets %}
             <li class="text-black-50">-</li>
           {% endif %}
         </ul>
@@ -155,19 +155,19 @@
       <div class="col">
         <h6 class="text-warning">Missed:</h6>
         <ul class="list-unstyled text-warning">
-          {% for status in missed_statuses %}
-            {% if missed_statuses and missed_statuses|length == processed_statuses_limit and forloop.last %}
+          {% for ticket in missed_tickets %}
+            {% if missed_tickets|length == processed_tickets_limit and forloop.last %}
               <li>...</li>
             {% else %}
             <li>
-              <a href="{% url 'ticket-detail' status.ticket.id %}?operator={{object.id}}" class="link-warning">
-                {{ status.ticket.code }}
+              <a href="{% url 'ticket-detail' ticket.id %}?operator={{object.id}}" class="link-warning">
+                {{ ticket.code }}
               </a>
             </li>
             {% endif %}
           {% endfor %}
 
-          {% if not missed_statuses %}
+          {% if not missed_tickets %}
             <li class="text-black-50">-</li>
           {% endif %}
         </ul>
@@ -176,19 +176,19 @@
       <div class="col">
         <h6 class="text-danger">Redirected:</h6>
         <ul class="list-unstyled text-danger">
-          {% for status in redirected_statuses %}
-            {% if redirected_statuses and redirected_statuses|length == processed_statuses_limit and forloop.last %}
+          {% for ticket in redirected_tickets %}
+            {% if redirected_tickets|length == processed_tickets_limit and forloop.last %}
               <li>...</li>
             {% else %}
             <li>
-              <a href="{% url 'ticket-detail' status.ticket.id %}?operator={{object.id}}" class="link-danger">
-                {{ status.ticket.code }}
+              <a href="{% url 'ticket-detail' ticket.id %}?operator={{object.id}}" class="link-danger">
+                {{ ticket.code }}
               </a>
             </li>
             {% endif %}
           {% endfor %}
 
-          {% if not redirected_statuses %}
+          {% if not redirected_tickets %}
             <li class="text-black-50">-</li>
           {% endif %}
         </ul>

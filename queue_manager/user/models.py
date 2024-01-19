@@ -170,6 +170,28 @@ class Operator(User):
             .annotate(count=Func(F('id'), function='Count'))
             .values('count'))
 
+    def get_tickets_with_status(self, status_code, limit=None):
+        '''Returns tickets with specific last status
+        assigned by the operator.
+
+        Arguments:
+        status_code - filter criteria
+        limit - max numer of returned tickets'''
+        from queue_manager.ticket.models import Ticket
+        from queue_manager.session.models import Session
+
+        return Ticket.objects\
+            .filter(session=Session.objects.subq_last_session_id())\
+            .annotate(
+                last_status_code=Ticket.subq_last_status_code(),
+                last_status_assigned_by=Ticket.subq_last_status_assigned_by(),
+                last_status_assigned_at=Ticket.subq_last_status_assigned_at())\
+            .filter(
+                last_status_assigned_by=self,
+                last_status_code=status_code)\
+            .order_by(
+                '-last_status_assigned_at')[:limit]
+
     def get_personal_tickets(self, limit=None):
         '''Returns personal tickets assigned to the operator
 
