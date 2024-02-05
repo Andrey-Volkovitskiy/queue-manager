@@ -44,9 +44,9 @@
         <thead>
           <tr>
             <th>Code</th>
-            <th>Currently serviced by</th>
             <th class="text-center">Tickets in queue/process.</th>
             <th class="text-center">Tickets completed</th>
+            <th>Currently serviced by</th>
           </tr>
         </thead>
 
@@ -54,6 +54,28 @@
           {% for task in tasks %}
             <tr>
               <td class="fw-bold">{{ task.letter_code }}</td>
+
+              <td class="text-center">
+                {% with task.count_tickets_unproc as num_tickets_unprocessed %}
+                  {% if num_tickets_unprocessed %}
+                    {% if not task.primary_served_by and not task.secondary_served_by %}
+                      <span class="text-danger fw-bold">
+                        = {{ num_tickets_unprocessed }} =
+                      </span>
+                    {% else %}
+                      {{ num_tickets_unprocessed }}
+                    {% endif %}
+                  {% endif %}
+                {% endwith %}
+              </td>
+
+              <td class="text-center text-black-50">
+                {% with task.count_tickets_compl as num_tickets_completed %}
+                  {% if num_tickets_completed %}
+                    {{ num_tickets_completed }}
+                  {% endif %}
+                {% endwith %}
+              </td>
 
               <td>
                 {% if task.prim_served_by or task.scnd_served_by %}
@@ -73,27 +95,6 @@
                 {% endif %}
               </td>
 
-              <td class="text-center">
-                {% with task.count_tickets_unproc as num_tickets_unprocessed %}
-                  {% if num_tickets_unprocessed %}
-                    {% if not task.primary_served_by and not task.secondary_served_by %}
-                      <span class="text-danger fw-bold">
-                        = {{ num_tickets_unprocessed }} =
-                      </span>
-                    {% else %}
-                      {{ num_tickets_unprocessed }}
-                    {% endif %}
-                  {% endif %}
-                {% endwith %}
-              </td>
-
-              <td class="text-center">
-                {% with task.count_tickets_compl as num_tickets_completed %}
-                  {% if num_tickets_completed %}
-                    {{ num_tickets_completed }}
-                  {% endif %}
-                {% endwith %}
-              </td>
             </tr>
           {% endfor %}
         </tbody>
