@@ -12,17 +12,25 @@ NUM_OF_DIGITS_IN_TICKET_CODE = 3
 
 
 class TicketManager(models.Manager):
-    def _get_new_ticket_code(self, session: Session, task: Task):
-        last_ticket = Ticket.objects\
-            .filter(session=session, task=task)\
-            .order_by('code')\
-            .only('code')\
-            .last()
-        if last_ticket is None:
-            new_ticket_number = 1
-        else:
-            last_ticket_number = int(last_ticket.code[1:])
-            new_ticket_number = last_ticket_number + 1
+    def _get_new_ticket_code(self, session: Session, task: Task,
+                             last_ticket_number: int = None):
+        '''Returns the code for next ticket for the task
+        (for ex. if last ticket is "B003" it returns "B004" )
+
+        If last_ticket_number passed then the function returns the result
+        much faster (without DB query).'''
+        if last_ticket_number is None:
+            last_ticket = Ticket.objects\
+                .filter(session=session, task=task)\
+                .order_by('code')\
+                .only('code')\
+                .last()
+            if last_ticket is None:
+                last_ticket_number = 0
+            else:
+                last_ticket_number = int(last_ticket.code[1:])
+
+        new_ticket_number = last_ticket_number + 1
         return task.letter_code + format(
             new_ticket_number, f'0{NUM_OF_DIGITS_IN_TICKET_CODE}d')
 
