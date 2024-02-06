@@ -249,6 +249,7 @@ class Operator(User):
         from queue_manager.ticket.models import Ticket
         from queue_manager.task.models import Service
         from queue_manager.status.models import Status
+        from queue_manager.session.models import Session
 
         scnd_tasks_ids = secondery_tasks_ids or Subquery(
                 Service.objects
@@ -259,7 +260,9 @@ class Operator(User):
                 .values_list('task_id', flat=True))
 
         return Ticket.objects\
-            .filter(task__id__in=scnd_tasks_ids)\
+            .filter(
+                task__id__in=scnd_tasks_ids,
+                session=Session.objects.subq_last_session_id())\
             .annotate(
                 last_status_code=Ticket.subq_last_status_code(),
                 last_status_assigned_at=Ticket.subq_last_status_assigned_at())\
