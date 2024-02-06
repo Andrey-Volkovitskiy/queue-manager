@@ -78,7 +78,7 @@ The application stores data using PostgresSQL (connected via DATABASE_URL).
 ---
 
 *Speed up queries using indexes*
-![Django Debug Toolbar](https://github.com/Andrey-Volkovitskiy/queue-manager/blob/main/staticfiles/readme/indexes.jpg?raw=true)
+![Indexing](https://github.com/Andrey-Volkovitskiy/queue-manager/blob/main/staticfiles/readme/indexing.jpg?raw=true)
 
 ---
 *Error tracking (Rollbar)*
