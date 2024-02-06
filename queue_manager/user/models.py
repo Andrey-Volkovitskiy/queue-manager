@@ -81,11 +81,13 @@ class Operator(User):
         '''Returns subquery with current ticket code for the operator'''
         from queue_manager.status.models import Status
         from queue_manager.ticket.models import Ticket
+        from queue_manager.session.models import Session
         last_assigned_ticket_id = Subquery(
             Ticket.objects
             .filter(
                 status__assigned_to=OuterRef(OuterRef('id')),
-                status__code=Status.PROCESSING.code)
+                status__code=Status.PROCESSING.code,
+                session__id=Session.objects.subq_current_session_id())
             .order_by('-status__assigned_at')
             .values('id')[:1])
 
@@ -159,14 +161,13 @@ class Operator(User):
 
         return Subquery(
             Ticket.objects
-            .filter(
-                session__id=Session.objects.subq_current_session_id(),)
             .annotate(
                 last_status_code=Ticket.subq_last_status_code(),
                 last_status_assigned_by=Ticket.subq_last_status_assigned_by())
             .filter(
+                session__id=Session.objects.subq_current_session_id(),
                 last_status_code=Status.COMPLETED.code,
-                last_status_assigned_by=OuterRef('id'))
+                last_status_assigned_by=OuterRef('id'),)
             .annotate(count=Func(F('id'), function='Count'))
             .values('count'))
 
