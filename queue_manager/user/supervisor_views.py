@@ -83,14 +83,16 @@ class SupervisorPersonalView(
         # Operators
         prim_served_tasks = Task.objects\
             .filter(service__priority=Service.HIGHEST_PRIORITY)\
-            .distinct()
+            .distinct()\
+            .only('letter_code')
 
         scnd_served_tasks = Task.objects\
             .filter(
                 service__priority__lt=Service.HIGHEST_PRIORITY,
                 service__priority__gt=Service.NOT_IN_SERVICE)\
             .distinct()\
-            .order_by('letter_code')
+            .order_by('letter_code')\
+            .only('letter_code')
 
         context['servicing_operators'] = Operator.objects\
             .filter(service__priority__gt=0)\
@@ -108,6 +110,7 @@ class SupervisorPersonalView(
                     'task_set',
                     queryset=scnd_served_tasks,
                     to_attr='scnd_served_tasks'))\
+            .only('first_name', 'last_name')
 
         # Tickets
         context['last_tickets'] = Ticket.objects\

@@ -54,7 +54,7 @@ def add_completed_tickets(qty, task_letter):
         session = Session.objects.get_current_session()
     task = Task.objects.get(letter_code=task_letter)
     ticket_new_code = Ticket.objects._get_new_ticket_code(
-        session=SESSION_ID,
+        session=session,
         task=task
     )
     last_ticket_number = int(ticket_new_code[1:]) - 1

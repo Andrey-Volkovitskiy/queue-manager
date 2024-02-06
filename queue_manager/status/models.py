@@ -150,6 +150,12 @@ class Status(models.Model):
     )
     objects = StatusManager()
 
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['ticket', '-assigned_at', 'code'],
+                name='ticket_assignedat_code_idx')]
+
     @property
     def responsible(self):
         '''The operator currenlly responsihble for the status'''
