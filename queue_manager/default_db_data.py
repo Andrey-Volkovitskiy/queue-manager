@@ -86,3 +86,40 @@ def add_completed_tickets(qty, task_letter):
 
         if i % 1000 == 0:
             print(f'{i} tickets created')
+
+
+def add_finished_sessions(qty):
+    '''Adds to DB some quantity of finished sessions.
+
+    Arguments:
+        qty - the quantity of tickets to insert'''
+    from queue_manager.session.models import Session
+    from queue_manager.user.models import Supervisor
+    from datetime import datetime, timedelta, timezone
+
+    BY_SUPERVISOR_ID = 2
+    CTRATED_AT = '09-19-2022 14:55:26'
+    INCREMENT_TIME = timedelta(microseconds=5)
+    CODE_PREFIX = 'auto-'
+    MAX_PREV_CODE = 'auto-101'
+
+    time = datetime.strptime(CTRATED_AT, '%m-%d-%Y  %H:%M:%S')\
+        .replace(tzinfo=timezone.utc)
+    supervisor = Supervisor.objects.get(id=BY_SUPERVISOR_ID)
+
+    prev_code = int(MAX_PREV_CODE[len(CODE_PREFIX):])
+
+    if Session.objects.get_current_session():
+        Session.objects.finish_current_session(supervisor)
+
+    for i in range(qty):
+        session = Session.objects.create(
+            code=f"{CODE_PREFIX}{prev_code + 1 + i}",
+            started_by=supervisor)
+
+        session.finished_by = supervisor
+        session.started_at = time
+        time += INCREMENT_TIME
+        session.finished_at = time
+        time += INCREMENT_TIME
+        session.save()

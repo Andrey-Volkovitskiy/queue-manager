@@ -86,6 +86,8 @@ class Print10TicketsView(View):
     http_method_names = ["post", ]
 
     def post(self, *args, **kwargs):
+        if not Session.objects.get_current_session():
+            return redirect(reverse_lazy('printer-no-active-session'))
         all_tasks = Task.objects.all()
         for _ in range(10):
             random_task = random.choice(all_tasks)

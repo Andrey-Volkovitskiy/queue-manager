@@ -23,7 +23,9 @@ class SessionManager(models.Manager):
         pass
 
     def _get_last_session_code(self):
-        last_session = self.last()
+        last_session = self\
+            .order_by('-started_at')\
+            .first()
         if last_session:
             return last_session.code
 
@@ -77,7 +79,6 @@ class SessionManager(models.Manager):
         return Subquery(
             self
             .filter(finished_at__isnull=True)
-            .order_by('-started_at')
             .values('id')[:1])
 
     def subq_last_session_id(self):
@@ -153,6 +154,13 @@ class Session(models.Model):
         verbose_name='Finished by'
     )
     objects = SessionManager()
+
+    class Meta:
+        indexes = [
+            models.Index(
+                fields=['-started_at', 'id'], name='started_at_idx'),
+            models.Index(
+                fields=['finished_at', 'id'], name='finished_at_idx')]
 
     @property
     def is_active(self):

@@ -115,6 +115,7 @@ class SupervisorPersonalView(
         # Tickets
         context['last_tickets'] = Ticket.objects\
             .filter(session=Session.objects.subq_last_session_id())\
+            .only('code')\
             .prefetch_related(
                 Prefetch(
                     'status_set',
