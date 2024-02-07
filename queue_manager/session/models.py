@@ -1,8 +1,8 @@
 from django.db import models
+from django.db.models import Subquery, Q
 from django.contrib.auth.models import User
 from queue_manager.status.models import Status
 from datetime import datetime, timezone
-from django.db.models import Subquery
 
 ITEM_NAME = 'session'
 
@@ -158,9 +158,14 @@ class Session(models.Model):
     class Meta:
         indexes = [
             models.Index(
-                fields=['-started_at', 'id'], name='started_at_idx'),
+                fields=['-started_at'],
+                include=['id'],
+                name='started_at_idx'),
             models.Index(
-                fields=['finished_at', 'id'], name='finished_at_idx')]
+                fields=['finished_at'],
+                include=['id', 'code'],
+                condition=Q(finished_at__isnull=True),
+                name='finished_at_idx')]
 
     @property
     def is_active(self):
