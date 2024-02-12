@@ -12,6 +12,7 @@ Deployed at: https://queue-man.up.railway.app/
 - The app covered with 141 tests (unit & end-to-end)
 - Used complex (20+ lines) database queries through Django ORM
 - Reduced the quantity of DB queries per page load by 4 times using DjangoDebugToolbar, select/prefetch_related()
+- Analyzed PostgreSQL query plans and accelerated them using composite indexes
 - The code refactored to follow DRY, KISS
 
 
