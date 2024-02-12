@@ -31,5 +31,6 @@ urlpatterns = [
     path('error/', views.intendent_error),  # Rollbarr debug page
     path('debug/', views.Debug.as_view()),  # Permission debug page
     path('__debug__/', include('debug_toolbar.urls')),
+    path('tz_detect/', include('tz_detect.urls')),
     path('admin/', admin.site.urls),
 ]
