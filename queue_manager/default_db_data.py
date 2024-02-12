@@ -90,6 +90,7 @@ def add_completed_tickets(qty, task_letter):
 
 def add_finished_sessions(qty):
     '''Adds to DB some quantity of finished sessions.
+    Used for test purpuses.
 
     Arguments:
         qty - the quantity of tickets to insert'''
@@ -98,12 +99,12 @@ def add_finished_sessions(qty):
     from datetime import datetime, timedelta, timezone
 
     BY_SUPERVISOR_ID = 2
-    CTRATED_AT = '09-19-2022 14:55:26'
+    CTRATED_AT = '2022-09-21 14:55:26'
     INCREMENT_TIME = timedelta(microseconds=5)
     CODE_PREFIX = 'auto-'
-    MAX_PREV_CODE = 'auto-101'
+    MAX_PREV_CODE = 'auto-2001'
 
-    time = datetime.strptime(CTRATED_AT, '%m-%d-%Y  %H:%M:%S')\
+    time = datetime.fromisoformat(CTRATED_AT)\
         .replace(tzinfo=timezone.utc)
     supervisor = Supervisor.objects.get(id=BY_SUPERVISOR_ID)
 
