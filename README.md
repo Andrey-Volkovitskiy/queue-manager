@@ -20,7 +20,7 @@ Deployed at: https://queue-man.up.railway.app/
 ### Tests and code quality assessment:
 [![Pytest (with postgres)](https://github.com/Andrey-Volkovitskiy/queue-manager/actions/workflows/pytest_with_postgres.yml/badge.svg)](https://github.com/Andrey-Volkovitskiy/queue-manager/actions/workflows/pytest_with_postgres.yml)    [![Linter (Flake8)](https://github.com/Andrey-Volkovitskiy/queue-manager/actions/workflows/flake8_linter.yml/badge.svg)](https://github.com/Andrey-Volkovitskiy/queue-manager/actions/workflows/flake8_linter.yml)
 
-[![Maintainability](https://api.codeclimate.com/v1/badges/44bb226bc3cac3d7dfbd/maintainability)](https://codeclimate.com/github/Andrey-Volkovitskiy/queue-manager/maintainability)    [![Test Coverage](https://api.codeclimate.com/v1/badges/44bb226bc3cac3d7dfbd/test_coverage)](https://codeclimate.com/github/Andrey-Volkovitskiy/queue-manager/test_coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/44bb226bc3cac3d7dfbd/maintainability)](https://codeclimate.com/github/Andrey-Volkovitskiy/queue-manager/maintainability)    ![Test Coverage](staticfiles/readme/test_coverage_badge.svg)
 
 
 ---

@@ -1,6 +1,9 @@
 name: Pytest (with postgres)
 on: push
 
+permissions:
+  contents: write
+
 jobs:
   runner-job:
     runs-on: ubuntu-latest
@@ -65,6 +68,21 @@ jobs:
           SECRET_KEY: ${{ secrets.SECRET_KEY }}
           DATABASE_URL: postgresql://postgres:${{ secrets.SECRET_KEY }}@localhost:5432/postgres
           PROJECT_ENV: GitHub_Workflow_Tests
+
+      - name: Install coverage badge generator
+        run: |
+          pip install "genbadge[coverage]"
+
+      - name: Generate coverage badge
+        run: |
+          genbadge coverage -i coverage.xml -o staticfiles/readme/test_coverage_badge.svg
+
+      - name: Commit coverage badge
+        if: github.ref == 'refs/heads/main' && github.actor != 'github-actions[bot]'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update coverage badge [skip ci]"
+          file_pattern: staticfiles/readme/test_coverage_badge.svg
 
       - name: Upload coverage report artifact
         uses: actions/upload-artifact@v4
