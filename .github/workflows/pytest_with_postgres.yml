@@ -66,20 +66,11 @@ jobs:
           DATABASE_URL: postgresql://postgres:${{ secrets.SECRET_KEY }}@localhost:5432/postgres
           PROJECT_ENV: GitHub_Workflow_Tests
 
-      - name: Download Code Climate test reporter
-        run: |
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-0.11.1-linux-amd64 -o cc-test-reporter
-          chmod +x cc-test-reporter
-
-      - name: Publish code coverage
-        run: |
-          mkdir -p coverage
-          ./cc-test-reporter format-coverage coverage.xml --input-type coverage.py --output coverage/codeclimate.json
-          ./cc-test-reporter upload-coverage --input coverage/codeclimate.json
-        env:
-          CC_TEST_REPORTER_ID: dec0b2979515c9a8966f78886eb9601d7d6d84c5fd529dc57a7ab0dc50b4798e
-          GIT_BRANCH: ${{ github.ref_name }}
-          GIT_COMMIT_SHA: ${{ github.sha }}
+      - name: Upload coverage report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
 
 
       - name: Notify finish deploy to Rollbar
