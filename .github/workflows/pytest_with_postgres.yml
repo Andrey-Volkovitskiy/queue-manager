@@ -67,9 +67,12 @@ jobs:
           PROJECT_ENV: GitHub_Workflow_Tests
 
       - name: Publish code coverage
-        uses: paambaati/codeclimate-action@v3.2.0
+        uses: paambaati/codeclimate-action@v9.0.0
         env:
           CC_TEST_REPORTER_ID: dec0b2979515c9a8966f78886eb9601d7d6d84c5fd529dc57a7ab0dc50b4798e
+        with:
+          coverageLocations: |
+            ${{ github.workspace }}/coverage.xml:coverage.py
 
 
       - name: Notify finish deploy to Rollbar
